@@ -1,5 +1,13 @@
-import HomePage from './pages/HomePage';
+import AuthPage from './pages/AuthPage';
+import DashboardPage from './pages/DashboardPage';
+import JobsPage from './pages/JobsPage';
 
 export default function App() {
-  return <HomePage />;
+  return (
+    <>
+      <AuthPage />
+      <JobsPage />
+      <DashboardPage />
+    </>
+  );
 }
