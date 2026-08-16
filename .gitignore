@@ -4,3 +4,13 @@ FILE_2_KE_HOACH_8_TUAN.pdf
 QUY_TAC_LAM_DO_AN.md
 CAU_TRUC_CHUAN.md
 CAU_TRUC_CODE.md
+BAO_CAO_TUAN_NAY.md
+
+# Frontend generated files
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Personal / report files
+*.pdf
+*.log
