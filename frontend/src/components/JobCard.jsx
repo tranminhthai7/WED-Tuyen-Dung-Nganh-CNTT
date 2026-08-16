@@ -1,46 +1,64 @@
 import { ArrowRight, BriefcaseBusiness, Clock3, Heart, MapPin } from 'lucide-react';
+import { useState } from 'react';
 
-export default function JobCard({ job }) {
+export default function JobCard({ job, compact = false }) {
+  const [saved, setSaved] = useState(false);
+
   return (
     <article className="job-card">
       <div className="job-card-top">
         <div className="job-company-wrapper">
           <div className={`company-logo ${job.tone}`}>{job.logo}</div>
-          <div>
-            <div className="job-company">{job.company}</div>
-            <span className="job-posted">{job.posted}</span>
+          <div className="job-company-meta">
+            <h3>{job.title}</h3>
+            <p>{job.company}</p>
           </div>
         </div>
 
-        <button className="favorite" type="button" aria-label="Lưu việc làm">
-          <Heart size={16} />
+        <button
+          type="button"
+          onClick={() => setSaved((prev) => !prev)}
+          className={`save-button ${saved ? 'is-saved' : ''}`}
+          aria-label={saved ? `Bỏ lưu ${job.title}` : `Lưu ${job.title}`}
+        >
+          <Heart fill={saved ? 'currentColor' : 'none'} size={16} />
         </button>
       </div>
 
-      <h3>{job.title}</h3>
-
-      <div className="job-detail">
+      <div className="job-meta">
         <span>
-          <MapPin size={15} /> {job.location}
+          <MapPin size={14} />
+          {job.location}
         </span>
         <span>
-          <BriefcaseBusiness size={15} /> {job.mode} · {job.salary}
+          <BriefcaseBusiness size={14} />
+          {job.salary}
         </span>
         <span>
-          <Clock3 size={15} /> {job.experience}
+          <Clock3 size={14} />
+          {job.posted}
         </span>
       </div>
 
-      <div className="job-tags">
-        {job.skills.map((skill) => (
-          <span key={skill}>{skill}</span>
-        ))}
-      </div>
+      {!compact && (
+        <>
+          <div className="tag-row">
+            {job.skills.map((skill) => (
+              <span key={skill}>{skill}</span>
+            ))}
+          </div>
 
-      <div className="job-footer">
-        <span>{job.type}</span>
-        <span className="job-link">Xem chi tiết <ArrowRight size={15} /></span>
-      </div>
+          <div className="job-footer">
+            <span>
+              {job.mode} · {job.experience}
+            </span>
+            <span className="job-link">
+              Xem chi tiết
+              <ArrowRight size={15} />
+            </span>
+          </div>
+        </>
+      )}
     </article>
   );
 }
