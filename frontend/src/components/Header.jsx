@@ -11,16 +11,16 @@ export default function Header() {
         <span className="brand-dot">.</span>
       </div>
 
-      <nav className="main-nav">
+      <nav className="main-nav" aria-label="Điều hướng chính">
         {navItems.map((item) => (
           <a href="#" key={item}>{item}</a>
         ))}
       </nav>
 
       <div className="header-actions">
-        <button className="ghost-link">Đăng tuyển</button>
-        <button className="ghost-link">Đăng nhập</button>
-        <button className="primary-button">
+        <button className="ghost-link employer-link" type="button">Đăng tuyển</button>
+        <button className="ghost-link" type="button">Đăng nhập</button>
+        <button className="primary-button" type="button">
           Tạo tài khoản
           <ArrowRight size={16} />
         </button>

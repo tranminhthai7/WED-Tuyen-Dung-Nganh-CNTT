@@ -18,12 +18,13 @@ html {
 body {
   margin: 0;
   min-width: 320px;
-  background: #eef2ef;
+  background: #f5f7f7;
   color: #0f172a;
 }
 
 button,
-input {
+input,
+select {
   font: inherit;
 }
 
@@ -39,6 +40,43 @@ img {
 
 button {
   cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+}
+
+button:hover {
+  transform: translateY(-1px);
+}
+
+.app-shell {
+  min-height: 100vh;
+}
+
+.app-switcher {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 18px 18px 0;
+}
+
+.switch-button {
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  background: rgba(255, 255, 255, 0.82);
+  color: #0f172a;
+  border-radius: 999px;
+  padding: 10px 16px;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.switch-button.active {
+  background: linear-gradient(135deg, #0f172a, #1d4ed8);
+  color: white;
+  box-shadow: 0 12px 24px rgba(29, 78, 216, 0.18);
 }
 
 .page-shell {
@@ -47,17 +85,58 @@ button {
   padding: 24px 18px 40px;
 }
 
+.landing-shell {
+  display: flex;
+  min-height: 100vh;
+  background: #dfeee3;
+}
+
+.side-panel {
+  width: 250px;
+  background: rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(15, 23, 42, 0.08);
+  padding: 24px 18px 18px;
+  color: #0f172a;
+}
+
+.side-title {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 900;
+  letter-spacing: -0.06em;
+}
+
+.side-list {
+  margin: 20px 0 0;
+  padding-left: 18px;
+  color: #334155;
+  line-height: 1.8;
+  font-size: 0.92rem;
+}
+
+.side-footer {
+  margin-top: 28px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(15, 23, 42, 0.08);
+  color: #475569;
+  font-size: 0.8rem;
+}
+
+.main-panel {
+  flex: 1;
+  padding: 12px 20px 24px;
+}
+
 .topbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(15, 23, 42, 0.06);
-  border-radius: 18px;
-  padding: 14px 22px;
-  backdrop-filter: blur(10px);
-  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.04);
+  background: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-radius: 16px;
+  padding: 12px 18px;
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.03);
 }
 
 .brand-group {
@@ -97,6 +176,27 @@ button {
   color: #374151;
 }
 
+.main-nav a {
+  position: relative;
+  padding: 6px 0;
+  font-weight: 600;
+}
+
+.main-nav a::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  bottom: -4px;
+  width: 0;
+  height: 2px;
+  background: #0f172a;
+  transition: width 0.2s ease;
+}
+
+.main-nav a:hover::after {
+  width: 100%;
+}
+
 .header-actions {
   display: flex;
   align-items: center;
@@ -121,17 +221,24 @@ button {
   font-weight: 600;
 }
 
+.employer-link {
+  background: rgba(30, 64, 175, 0.06);
+  color: #1d4ed8;
+  border: 1px solid rgba(29, 78, 216, 0.08);
+}
+
 .primary-button,
 .search-button,
 .mini-button,
 .submit-button {
-  background: #0f172a;
+  background: linear-gradient(135deg, #0f172a 0%, #1d4ed8 100%);
   color: white;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   font-weight: 700;
+  box-shadow: 0 14px 24px rgba(29, 78, 216, 0.2);
 }
 
 .primary-button {
@@ -142,15 +249,20 @@ button {
   margin-top: 24px;
 }
 
+.home-page {
+  display: block;
+}
+
 .hero {
   display: grid;
-  grid-template-columns: 1.4fr 0.8fr;
-  gap: 28px;
-  background: linear-gradient(180deg, #d7efef 0%, #d9e9e5 100%);
-  border-radius: 28px;
-  padding: 48px 34px 24px;
-  min-height: 560px;
+  grid-template-columns: 1.2fr 0.8fr;
+  gap: 26px;
+  background: linear-gradient(180deg, #dfeee3 0%, #dfeee3 100%);
+  border-radius: 24px;
+  padding: 30px 26px 20px;
+  min-height: 420px;
   overflow: hidden;
+  border: 1px solid rgba(15, 23, 42, 0.04);
 }
 
 .hero-copy {
@@ -159,10 +271,11 @@ button {
 
 .eyebrow,
 .eyebrow-small {
-  margin: 0 0 18px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  margin: 0 0 16px;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
   color: #0f172a;
 }
 
@@ -170,31 +283,38 @@ button {
 .page-header h1,
 .dashboard-header h1 {
   margin: 0;
-  font-size: clamp(2.5rem, 5vw, 5rem);
-  line-height: 0.96;
+  font-size: clamp(2.4rem, 4vw, 5rem);
+  line-height: 0.98;
   letter-spacing: -0.07em;
   font-weight: 900;
 }
 
-.hero-copy h1 span {
+.hero-copy h1 {
+  max-width: 620px;
+  color: #111827;
+}
+
+.hero-copy h1 .hero-highlight {
   display: block;
-  margin-top: 12px;
+  margin-top: 8px;
+  color: #111827;
 }
 
 .subtitle {
   max-width: 560px;
-  margin-top: 22px;
+  margin-top: 20px;
   color: rgba(15, 23, 42, 0.75);
-  font-size: 1.1rem;
+  font-size: 1.08rem;
   line-height: 1.7;
 }
 
-.search-box {
+.search-box,
+.search-panel {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 28px;
-  max-width: 640px;
+  margin-top: 24px;
+  max-width: 760px;
 }
 
 .search-field,
@@ -203,10 +323,11 @@ button {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.76);
   border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 16px;
-  padding: 14px 18px;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.02);
 }
 
 .search-field,
@@ -214,19 +335,20 @@ button {
   flex: 1;
 }
 
-.search-icon {
-  color: #475569;
-}
-
 .search-field input,
 .mini-field input,
-.input-field input {
+.input-field input,
+.search-field select {
   border: none;
   background: transparent;
   outline: none;
   width: 100%;
   font-size: 1rem;
   color: #0f172a;
+}
+
+.search-field select {
+  appearance: none;
 }
 
 .search-field input::placeholder,
@@ -237,45 +359,100 @@ button {
 
 .search-button {
   padding: 16px 24px;
-  min-width: 150px;
+  min-width: 160px;
+  white-space: nowrap;
 }
 
-.tag-row {
+.role-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
-  margin-top: 18px;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 20px;
+  font-size: 0.76rem;
+  color: #475569;
+}
+
+.role-row a {
+  color: #1d4ed8;
+  font-weight: 600;
 }
 
 .tag,
 .pill-group span,
 .job-tags span,
-.badge {
+.badge,
+.trust-item {
   display: inline-flex;
   align-items: center;
   padding: 8px 12px;
   border-radius: 999px;
-  background: rgba(255, 255, 255, 0.5);
+  background: rgba(255, 255, 255, 0.62);
   border: 1px solid rgba(15, 23, 42, 0.06);
   color: #334155;
   font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.trust-strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+  margin-top: 24px;
+  padding: 18px 8px 0;
+}
+
+.trust-item-box {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(15, 23, 42, 0.05);
+  border-left: 3px solid #d8b566;
+  border-radius: 18px;
+  padding: 18px 20px;
+  box-shadow: 0 12px 25px rgba(15, 23, 42, 0.03);
+}
+
+.trust-item-box strong,
+.trust-item-box span {
+  display: block;
+}
+
+.trust-item-box strong {
+  font-size: 0.92rem;
+  margin-bottom: 6px;
+}
+
+.trust-item-box span {
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: #475569;
 }
 
 .signal-card {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: linear-gradient(180deg, #0f4c5f 0%, #0d3a4f 100%);
-  border-radius: 26px;
-  padding: 26px 24px 18px;
+  background: linear-gradient(180deg, #0f4f5e 0%, #0d4a57 100%);
+  border-radius: 18px;
+  padding: 20px 22px 18px;
   color: white;
-  min-height: 430px;
-  box-shadow: 0 24px 40px rgba(5, 63, 76, 0.18);
+  min-height: 260px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.15);
+}
+
+.note-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px;
+  font-weight: 700;
+  color: white;
+  opacity: 0.95;
 }
 
 .signal-top {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
   font-size: 0.84rem;
   letter-spacing: 0.04em;
@@ -295,10 +472,10 @@ button {
 
 .signal-body {
   margin-top: 18px;
-  font-size: clamp(1.7rem, 2.4vw, 2.7rem);
-  line-height: 1.18;
+  font-size: clamp(1.5rem, 2vw, 2.3rem);
+  line-height: 1.2;
   font-weight: 800;
-  letter-spacing: -0.06em;
+  letter-spacing: -0.05em;
 }
 
 .signal-numbers {
@@ -328,15 +505,31 @@ button {
 
 .feature-section {
   margin-top: 32px;
-  padding: 18px 6px 6px;
+  padding: 18px 6px 10px;
 }
 
 .section-heading {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   font-size: 1rem;
-  margin-bottom: 18px;
+  margin-bottom: 22px;
+}
+
+.section-heading h2 {
+  margin: 0;
+  font-size: clamp(2rem, 3vw, 3.2rem);
+  letter-spacing: -0.06em;
+  line-height: 1.05;
+}
+
+.text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #1d4ed8;
+  font-weight: 700;
 }
 
 .heading-left {
@@ -401,9 +594,13 @@ button {
 .jobs-grid,
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 18px;
-  margin-top: 28px;
+  margin-top: 18px;
+}
+
+.job-card {
+  min-height: 210px;
 }
 
 .job-card,
@@ -411,7 +608,7 @@ button {
 .table-card,
 .auth-card,
 .stat-panel {
-  background: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.82);
   border: 1px solid rgba(15, 23, 42, 0.06);
   border-radius: 22px;
   box-shadow: 0 12px 26px rgba(15, 23, 42, 0.04);
@@ -420,6 +617,55 @@ button {
 .job-card,
 .jobs-card {
   padding: 22px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.job-card:hover,
+.jobs-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 32px rgba(15, 23, 42, 0.08);
+}
+
+.company-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.company-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.8);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.03);
+}
+
+.company-logo {
+  display: grid;
+  place-items: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  font-weight: 800;
+}
+
+.company-card h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.company-card p {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.company-arrow {
+  margin-left: auto;
+  color: #475569;
 }
 
 .job-meta,
