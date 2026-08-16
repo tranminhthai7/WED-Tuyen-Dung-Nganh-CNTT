@@ -1,11 +1,14 @@
 const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const healthRoutes = require('./routes/health.routes');
 
 const app = express();
 
+app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
-});
+app.use('/api', healthRoutes);
 
 module.exports = app;
