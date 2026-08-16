@@ -489,7 +489,9 @@ button {
 
 .auth-page,
 .jobs-page,
-.dashboard-page {
+.dashboard-page,
+.employer-page,
+.admin-page {
   padding: 28px 18px 40px;
   max-width: 1200px;
   margin: 0 auto;
@@ -621,8 +623,14 @@ button {
   display: block;
 }
 
-.stats-grid {
+.stats-grid,
+.admin-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.admin-grid {
+  display: grid;
+  gap: 18px;
 }
 
 .stat-panel {
