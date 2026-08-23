@@ -1,10 +1,12 @@
-import { ArrowRight, BriefcaseBusiness, CheckCircle2, ChevronDown, MapPin, Search, Sparkles, UsersRound } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowRight, BriefcaseBusiness, ChevronDown, MapPin, Search, Sparkles, UsersRound } from 'lucide-react';
 import Header from '../components/Header';
 import JobCard from '../components/JobCard';
+import { fetchJobs } from '../services/jobsApi';
 
 const roles = ['Frontend', 'Backend', 'Product & Design', 'Data & AI', 'QA & Automation', 'DevOps & Cloud'];
 
-const jobs = [
+const fallbackJobs = [
   {
     title: 'Senior Frontend Engineer',
     company: 'Grab',
@@ -62,6 +64,47 @@ const companies = [
 ];
 
 export default function HomePage({ onNavigateAuth }) {
+  const [jobs, setJobs] = useState(fallbackJobs);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadJobs = async () => {
+      try {
+        const apiJobs = await fetchJobs();
+
+        if (!active || !apiJobs.length) {
+          return;
+        }
+
+        setJobs(
+          apiJobs.map((job) => ({
+            title: job.title,
+            company: job.company,
+            logo: job.logo,
+            tone: job.tone,
+            location: job.location,
+            salary: job.salary,
+            mode: job.mode,
+            experience: job.experience,
+            skills: job.tags,
+            posted: job.posted,
+          })),
+        );
+      } catch {
+        if (active) {
+          setJobs(fallbackJobs);
+        }
+      }
+    };
+
+    loadJobs();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   return (
     <div className="page-shell">
       <Header onNavigateAuth={onNavigateAuth} onNavigateHome={() => window.location.hash = ''} />
@@ -163,10 +206,10 @@ export default function HomePage({ onNavigateAuth }) {
               <p className="eyebrow">Cơ hội mới mỗi ngày</p>
               <h2>Việc làm đáng xem</h2>
             </div>
-              <button type="button" className="text-link text-link-button" onClick={onNavigateAuth}>
+            <button type="button" className="text-link text-link-button" onClick={onNavigateAuth}>
               Xem tất cả
               <ArrowRight size={16} />
-              </button>
+            </button>
           </div>
 
           <div className="job-grid">
