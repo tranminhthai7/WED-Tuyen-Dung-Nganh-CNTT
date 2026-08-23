@@ -666,6 +666,27 @@ img {
   color: white;
 }
 
+.auth-alert {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.auth-alert.success {
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+}
+
+.auth-alert.error {
+  background: rgba(239, 68, 68, 0.12);
+  color: #b91c1c;
+}
+
 .hidden-mobile {
   display: inline-flex;
 }
