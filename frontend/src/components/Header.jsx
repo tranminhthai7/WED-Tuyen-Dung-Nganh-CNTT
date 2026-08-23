@@ -2,15 +2,15 @@ import { ArrowRight, ArrowUpRight, Menu, Search, UserRound } from 'lucide-react'
 
 const navItems = ['Tìm việc', 'Công ty', 'Cẩm nang nghề nghiệp'];
 
-export default function Header() {
+export default function Header({ onNavigateAuth, onNavigateHome }) {
   return (
     <header className="site-header">
       <div className="site-header-inner">
-        <div className="brand-mark" aria-label="itmatch home">
+        <button type="button" className="brand-mark brand-button" aria-label="itmatch home" onClick={onNavigateHome}>
           <span className="brand-symbol">i</span>
           <span>itmatch</span>
           <span className="brand-dot">.</span>
-        </div>
+        </button>
 
         <nav className="main-nav" aria-label="Điều hướng chính">
           {navItems.map((item) => (
@@ -30,11 +30,11 @@ export default function Header() {
             <ArrowUpRight size={16} />
           </button>
 
-          <button type="button" className="login-link">
+          <button type="button" className="login-link" onClick={onNavigateAuth}>
             Đăng nhập
           </button>
 
-          <button type="button" className="primary-button hidden-mobile">
+          <button type="button" className="primary-button hidden-mobile" onClick={onNavigateAuth}>
             Tạo tài khoản
           </button>
 

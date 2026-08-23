@@ -103,6 +103,12 @@ img {
   margin-right: 4px;
 }
 
+.brand-button {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
 .brand-dot {
   color: var(--foreground);
 }
@@ -433,6 +439,12 @@ img {
   color: var(--primary);
 }
 
+.text-link-button {
+  padding: 0;
+  border: none;
+  background: none;
+}
+
 .job-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -635,6 +647,13 @@ img {
 
 .audience-card:hover {
   transform: translateY(-2px);
+}
+
+.audience-button {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
 }
 
 .audience-card .eyebrow {

@@ -61,10 +61,10 @@ const companies = [
   { name: 'NashTech', logo: 'N', tone: 'tone-violet' },
 ];
 
-export default function HomePage() {
+export default function HomePage({ onNavigateAuth }) {
   return (
     <div className="page-shell">
-      <Header />
+      <Header onNavigateAuth={onNavigateAuth} onNavigateHome={() => window.location.hash = ''} />
 
       <main>
         <section className="hero-section">
@@ -163,10 +163,10 @@ export default function HomePage() {
               <p className="eyebrow">Cơ hội mới mỗi ngày</p>
               <h2>Việc làm đáng xem</h2>
             </div>
-            <a href="#" className="text-link">
+              <button type="button" className="text-link text-link-button" onClick={onNavigateAuth}>
               Xem tất cả
               <ArrowRight size={16} />
-            </a>
+              </button>
           </div>
 
           <div className="job-grid">
@@ -182,10 +182,10 @@ export default function HomePage() {
               <p className="eyebrow">Nơi bạn sẽ muốn làm việc</p>
               <h2>Các đội ngũ đang xây dựng</h2>
             </div>
-            <a href="#" className="text-link">
+            <button type="button" className="text-link text-link-button" onClick={onNavigateAuth}>
               Khám phá công ty
               <ArrowRight size={16} />
-            </a>
+            </button>
           </div>
 
           <div className="company-grid">
@@ -206,7 +206,7 @@ export default function HomePage() {
 
         <section className="audience-section">
           <div className="audience-grid">
-            <a href="#" className="audience-card candidate-card">
+            <button type="button" className="audience-card candidate-card audience-button" onClick={onNavigateAuth}>
               <UsersRound size={28} />
               <div>
                 <p className="eyebrow">Dành cho ứng viên</p>
@@ -214,9 +214,9 @@ export default function HomePage() {
                 <p>Hoàn thiện hồ sơ, theo dõi ứng tuyển và nhận gợi ý phù hợp hơn.</p>
               </div>
               <ArrowRight size={18} />
-            </a>
+            </button>
 
-            <a href="#" className="audience-card employer-card">
+            <button type="button" className="audience-card employer-card audience-button" onClick={onNavigateAuth}>
               <BriefcaseBusiness size={28} />
               <div>
                 <p className="eyebrow">Dành cho nhà tuyển dụng</p>
@@ -224,7 +224,7 @@ export default function HomePage() {
                 <p>Quản lý tin tuyển dụng và pipeline ứng viên trong một không gian gọn gàng.</p>
               </div>
               <ArrowRight size={18} />
-            </a>
+            </button>
           </div>
         </section>
       </main>

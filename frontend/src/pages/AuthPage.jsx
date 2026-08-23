@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { ArrowRight, CheckCircle2, Lock, Mail, UserRound } from 'lucide-react';
 import { loginAccount, registerAccount } from '../services/authApi';
 
-export default function AuthPage() {
+export default function AuthPage({ onNavigateHome }) {
   const [isRegister, setIsRegister] = useState(false);
   const [formData, setFormData] = useState({ name: '', email: '', password: '' });
   const [status, setStatus] = useState({ kind: 'idle', message: '' });
@@ -53,10 +53,10 @@ export default function AuthPage() {
     <div className="auth-page">
       <div className="auth-card">
         <div className="auth-panel left-panel">
-          <div className="brand-inline">
+          <button type="button" className="brand-inline brand-button brand-inline-button" onClick={onNavigateHome}>
             <div className="brand-mark">i</div>
             <span>itmatch</span>
-          </div>
+          </button>
 
           <h1>Tham gia cộng đồng công nghệ</h1>
           <p>
