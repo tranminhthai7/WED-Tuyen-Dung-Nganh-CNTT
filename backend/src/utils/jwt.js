@@ -1,9 +1,11 @@
 const jwt = require('jsonwebtoken');
 
 const generateToken = (user) => {
+  const userId = user._id ? user._id.toString() : user.id;
+
   return jwt.sign(
     {
-      id: user._id,
+      id: userId,
       email: user.email,
       role: user.role,
     },
