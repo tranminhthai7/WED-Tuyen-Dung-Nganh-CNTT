@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const userSchema = new mongoose.Schema(
+const companySchema = new mongoose.Schema(
   {
     name: {
       type: String,
@@ -17,48 +17,38 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      minlength: 6,
     },
-    role: {
-      type: String,
-      enum: ['candidate', 'employer', 'admin'],
-      default: 'candidate',
-    },
-    avatar: {
+    logo: {
       type: String,
       default: '',
     },
-    phone: {
+    website: {
       type: String,
       default: '',
     },
-    skills: {
+    industry: {
+      type: String,
+      default: '',
+    },
+    size: {
+      type: String,
+      default: '',
+    },
+    address: {
+      type: String,
+      default: '',
+    },
+    description: {
+      type: String,
+      default: '',
+    },
+    techStack: {
       type: [String],
       default: [],
     },
-    cvUrl: {
-      type: String,
-      default: '',
-    },
-    experience: {
-      type: String,
-      default: '',
-    },
-    education: {
-      type: String,
-      default: '',
-    },
-    bio: {
-      type: String,
-      default: '',
-    },
-    github: {
-      type: String,
-      default: '',
-    },
-    linkedin: {
-      type: String,
-      default: '',
+    isVerified: {
+      type: Boolean,
+      default: false,
     },
     isActive: {
       type: Boolean,
@@ -68,4 +58,4 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model('User', userSchema);
+module.exports = mongoose.model('Company', companySchema);

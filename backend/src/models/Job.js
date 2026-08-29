@@ -2,6 +2,10 @@ const mongoose = require('mongoose');
 
 const jobSchema = new mongoose.Schema(
   {
+    companyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', // Users with role 'employer'
+    },
     slug: {
       type: String,
       required: true,
@@ -26,6 +30,14 @@ const jobSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    description: {
+      type: String,
+      default: '',
+    },
+    requirements: {
+      type: [String],
+      default: [],
+    },
     location: {
       type: String,
       required: true,
@@ -38,6 +50,30 @@ const jobSchema = new mongoose.Schema(
     mode: {
       type: String,
       default: '',
+    },
+    type: {
+      type: String,
+      default: 'Full-time',
+    },
+    level: {
+      type: String,
+      default: 'Junior',
+    },
+    quantity: {
+      type: Number,
+      default: 1,
+    },
+    deadline: {
+      type: Date,
+    },
+    status: {
+      type: String,
+      enum: ['pending', 'active', 'closed', 'rejected'],
+      default: 'active',
+    },
+    views: {
+      type: Number,
+      default: 0,
     },
     experience: {
       type: String,
