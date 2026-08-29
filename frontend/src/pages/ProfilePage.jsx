@@ -2,7 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { CheckCircle2, UserRound, Phone, FileText, Briefcase, GraduationCap, Github, Linkedin, Sparkles, AlertCircle } from 'lucide-react';
 import Header from '../components/Header';
-import { getProfile, updateProfile } from '../services/authApi';
+import { getProfile, updateProfile, uploadAvatar, uploadCv } from '../services/authApi';
 import { fetchSkills } from '../services/jobsApi';
 import useAuthStore from '../store/authStore';
 
@@ -22,6 +22,8 @@ export default function ProfilePage() {
 
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [saveStatus, setSaveStatus] = useState({ kind: 'idle', message: '' });
+  const [upAvatar, setUpAvatar] = useState(false);
+  const [upCv, setUpCv] = useState(false);
 
   // Fetch full profile details (to get latest DB state)
   const { data: profileData, isLoading: profileLoading } = useQuery({
@@ -90,6 +92,17 @@ export default function ProfilePage() {
       ...formData,
       skills: selectedSkills,
     });
+  };
+
+  const handleAvatarFile = async (e) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    setUpAvatar(true);
+    try { const r = await uploadAvatar(file); setFormData(p => ({ ...p, avatar: r.url })); updateUser(r.user); setSaveStatus({ kind: 'success', message: 'Upload avatar thành công!' }); } catch (err) { setSaveStatus({ kind: 'error', message: err.message }); } finally { setUpAvatar(false); }
+  };
+  const handleCvFile = async (e) => {
+    const file = e.target.files?.[0]; if (!file) return;
+    setUpCv(true);
+    try { const r = await uploadCv(file); setFormData(p => ({ ...p, cvUrl: r.url })); updateUser(r.user); setSaveStatus({ kind: 'success', message: 'Upload CV thành công!' }); } catch (err) { setSaveStatus({ kind: 'error', message: err.message }); } finally { setUpCv(false); }
   };
 
   if (profileLoading) {
@@ -173,18 +186,20 @@ export default function ProfilePage() {
               </label>
 
               <label className="flex flex-col gap-1.5">
-                <span className="text-xs font-bold text-gray-700">Đường dẫn file CV (PDF)</span>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
-                  <FileText size={18} className="text-gray-400" />
-                  <input
-                    name="cvUrl"
-                    type="url"
-                    value={formData.cvUrl}
-                    onChange={handleChange}
-                    placeholder="https://cloudinary.com/user-cv.pdf"
-                    className="w-full bg-transparent outline-none text-sm text-gray-800"
-                  />
+                <span className="text-xs font-bold text-gray-700">Avatar</span>
+                <div className="flex items-center gap-3">
+                  {formData.avatar ? <img src={formData.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover border" /> : <div className="w-12 h-12 rounded-full bg-gray-100 border flex items-center justify-center text-gray-400 text-xs">No img</div>}
+                  <label className="text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">{upAvatar ? 'Đang tải...' : 'Chọn ảnh'}<input type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} disabled={upAvatar} /></label>
                 </div>
+              </label>
+
+              <label className="flex flex-col gap-1.5">
+                <span className="text-xs font-bold text-gray-700">CV (PDF)</span>
+                <div className="flex items-center gap-2">
+                  <label className="text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">{upCv ? 'Đang tải...' : 'Upload CV'}<input type="file" accept=".pdf" className="hidden" onChange={handleCvFile} disabled={upCv} /></label>
+                  {formData.cvUrl && <a href={formData.cvUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline truncate max-w-[180px]">Xem CV</a>}
+                </div>
+                <input name="cvUrl" type="url" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf (hoặc upload file)" className="mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800" />
               </label>
             </div>
 
