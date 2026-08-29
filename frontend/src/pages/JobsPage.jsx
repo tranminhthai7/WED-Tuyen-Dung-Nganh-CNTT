@@ -14,6 +14,8 @@ export default function JobsPage() {
   const [filterLevel, setFilterLevel] = useState('Tất cả');
   const [filterSalary, setFilterSalary] = useState('Tất cả');
   const [showExpired, setShowExpired] = useState(false);
+  const PAGE_SIZE = 6;
+  const [page, setPage] = useState(1);
 
   // Sync state with URL params
   useEffect(() => {
@@ -57,6 +59,12 @@ export default function JobsPage() {
 
     return matchQuery && matchLoc && matchMode && matchLevel && matchSalary && notExpired;
   });
+
+  // Pagination
+  useEffect(() => { setPage(1); }, [q, loc, filterMode, filterLevel, filterSalary, showExpired]);
+  const totalPages = Math.max(1, Math.ceil(filteredJobs.length / PAGE_SIZE));
+  const paginatedJobs = filteredJobs.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+  useEffect(() => { if (page > totalPages) setPage(totalPages); }, [totalPages, page]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
@@ -134,11 +142,23 @@ export default function JobsPage() {
             </p>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 gap-6">
-            {filteredJobs.map((job) => (
-              <JobCard key={job.id || job.slug} job={job} />
-            ))}
-          </div>
+          <>
+            <div className="grid md:grid-cols-2 gap-6">
+              {paginatedJobs.map((job) => (
+                <JobCard key={job.id || job.slug} job={job} />
+              ))}
+            </div>
+            {totalPages > 1 && (
+              <div className="mt-8 flex items-center justify-center gap-2">
+                <button disabled={page <= 1} onClick={() => setPage(p => Math.max(1, p - 1))} className="px-3 py-1.5 rounded-xl text-xs font-bold border bg-white border-gray-300 text-gray-700 disabled:opacity-40">‹ Trước</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(n => (
+                  <button key={n} onClick={() => setPage(n)} className={`min-w-[36px] px-2 py-1.5 rounded-xl text-xs font-bold border ${n === page ? 'bg-blue-600 border-blue-600 text-white shadow' : 'bg-white border-gray-300 text-gray-700'}`}>{n}</button>
+                ))}
+                <button disabled={page >= totalPages} onClick={() => setPage(p => Math.min(totalPages, p + 1))} className="px-3 py-1.5 rounded-xl text-xs font-bold border bg-white border-gray-300 text-gray-700 disabled:opacity-40">Sau ›</button>
+              </div>
+            )}
+            <p className="mt-3 text-center text-xs text-gray-400">Trang {page}/{totalPages} · {filteredJobs.length} tin</p>
+          </>
         )}
       </main>
 
