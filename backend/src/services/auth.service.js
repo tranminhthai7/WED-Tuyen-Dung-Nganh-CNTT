@@ -14,6 +14,15 @@ const normalizeUser = (user) => ({
   name: user.name,
   email: user.email,
   role: user.role,
+  avatar: user.avatar || '',
+  phone: user.phone || '',
+  skills: user.skills || [],
+  cvUrl: user.cvUrl || '',
+  experience: user.experience || '',
+  education: user.education || '',
+  bio: user.bio || '',
+  github: user.github || '',
+  linkedin: user.linkedin || '',
 });
 
 const registerUser = async ({ name, email, password, role }) => {
@@ -64,6 +73,15 @@ const registerUser = async ({ name, email, password, role }) => {
     email: normalizedEmail,
     password: hashedPassword,
     role: nextRole,
+    avatar: '',
+    phone: '',
+    skills: [],
+    cvUrl: '',
+    experience: '',
+    education: '',
+    bio: '',
+    github: '',
+    linkedin: '',
   };
 
   demoUsers.push(newUser);
@@ -131,7 +149,82 @@ const loginUser = async ({ email, password }) => {
   };
 };
 
+const getUserProfile = async (userId) => {
+  if (isDatabaseReady()) {
+    const user = await User.findById(userId);
+    if (!user) {
+      const error = new Error('Không tìm thấy người dùng');
+      error.statusCode = 404;
+      throw error;
+    }
+    return normalizeUser(user);
+  }
+
+  const user = demoUsers.find((item) => item.id === userId);
+  if (!user) {
+    const error = new Error('Không tìm thấy người dùng');
+    error.statusCode = 404;
+    throw error;
+  }
+  return normalizeUser(user);
+};
+
+const updateUserProfile = async (userId, data) => {
+  const allowedUpdates = [
+    'name',
+    'avatar',
+    'phone',
+    'skills',
+    'cvUrl',
+    'experience',
+    'education',
+    'bio',
+    'github',
+    'linkedin',
+  ];
+
+  const updateObj = {};
+  allowedUpdates.forEach((key) => {
+    if (data[key] !== undefined) {
+      updateObj[key] = data[key];
+    }
+  });
+
+  if (isDatabaseReady()) {
+    const user = await User.findByIdAndUpdate(userId, updateObj, { new: true });
+    if (!user) {
+      const error = new Error('Không tìm thấy người dùng');
+      error.statusCode = 404;
+      throw error;
+    }
+    return {
+      message: 'Cập nhật hồ sơ thành công',
+      user: normalizeUser(user),
+    };
+  }
+
+  const userIndex = demoUsers.findIndex((item) => item.id === userId);
+  if (userIndex === -1) {
+    const error = new Error('Không tìm thấy người dùng');
+    error.statusCode = 404;
+    throw error;
+  }
+
+  demoUsers[userIndex] = {
+    ...demoUsers[userIndex],
+    ...updateObj,
+  };
+
+  return {
+    message: 'Cập nhật hồ sơ thành công',
+    user: normalizeUser(demoUsers[userIndex]),
+  };
+};
+
 module.exports = {
   registerUser,
   loginUser,
+  getUserProfile,
+  updateUserProfile,
+  demoUsers, // export to be used in database seeds or other services
 };
