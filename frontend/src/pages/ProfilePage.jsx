@@ -188,15 +188,15 @@ export default function ProfilePage() {
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">Avatar</span>
                 <div className="flex items-center gap-4">
-                  {formData.avatar ? <img src={formData.avatar} alt="avatar" className="w-28 h-28 rounded-2xl object-cover border-2 border-gray-100 shadow-sm" /> : <div className="w-28 h-28 rounded-2xl bg-gray-100 border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400 text-xs">No img</div>}
-                  <label className="text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">{upAvatar ? 'Đang tải...' : 'Chọn ảnh'}<input type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} disabled={upAvatar} /></label>
+                  {formData.avatar ? <img src={formData.avatar} alt="avatar" className="w-28 h-28 rounded-full object-cover border-2 border-gray-100 shadow-sm" /> : <div className="w-28 h-28 rounded-full bg-gray-100 border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400 text-xs">No img</div>}
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 text-gray-700">{upAvatar ? 'Đang tải...' : 'Chọn ảnh'}<input type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} disabled={upAvatar} /></label>
                 </div>
               </label>
 
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">CV (PDF)</span>
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">{upCv ? 'Đang tải...' : 'Upload CV'}<input type="file" accept=".pdf" className="hidden" onChange={handleCvFile} disabled={upCv} /></label>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 text-gray-700">{upCv ? 'Đang tải...' : 'Upload CV'}<input type="file" accept=".pdf" className="hidden" onChange={handleCvFile} disabled={upCv} /></label>
                   {formData.cvUrl && <a href={formData.cvUrl} target="_blank" rel="noreferrer" className="text-xs text-blue-600 underline truncate max-w-[180px]">Xem CV</a>}
                 </div>
                 <input name="cvUrl" type="url" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf (hoặc upload file)" className="mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800" />
