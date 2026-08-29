@@ -195,13 +195,11 @@ export default function ProfilePage() {
 
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">CV (PDF)</span>
-                {(() => { const inlineUrl = formData.cvUrl?.includes('/raw/upload/') && !formData.cvUrl.includes('fl_attachment') ? formData.cvUrl.replace('/raw/upload/', '/raw/upload/fl_attachment:false/') : formData.cvUrl; return (
-                <>
                 <div className="flex items-center gap-2 flex-wrap">
                   <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-300 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 text-gray-700">{upCv ? 'Đang tải...' : 'Upload CV'}<input type="file" accept=".pdf" className="hidden" onChange={handleCvFile} disabled={upCv} /></label>
                   {formData.cvUrl && (
                     <>
-                      <a href={inlineUrl} target="_blank" rel="noreferrer" className="text-xs font-bold px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">Mở tab mới ↗</a>
+                      <a href={formData.cvUrl?.includes('/raw/upload/') && !formData.cvUrl.includes('fl_attachment') ? formData.cvUrl.replace('/raw/upload/', '/raw/upload/fl_attachment:false/') : formData.cvUrl} target="_blank" rel="noreferrer" className="text-xs font-bold px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">Mở tab mới ↗</a>
                       <a href={formData.cvUrl} download className="text-xs text-gray-600 underline">Tải về</a>
                     </>
                   )}
@@ -209,10 +207,9 @@ export default function ProfilePage() {
                 <input name="cvUrl" type="url" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf (hoặc bấm Upload CV để chọn file)" className="mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800" />
                 {formData.cvUrl && formData.cvUrl.startsWith('http') && (
                   <div className="mt-2 border border-gray-200 rounded-xl overflow-hidden bg-white">
-                    <iframe title="CV preview" src={inlineUrl} className="w-full h-[600px] border-0" />
+                    <iframe title="CV preview" src={formData.cvUrl?.includes('/raw/upload/') && !formData.cvUrl.includes('fl_attachment') ? formData.cvUrl.replace('/raw/upload/', '/raw/upload/fl_attachment:false/') : formData.cvUrl} className="w-full h-[600px] border-0" />
                   </div>
                 )}
-                </>); })()}
               </label>
             </div>
 
