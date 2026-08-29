@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 require('dotenv').config();
 
 const healthRoutes = require('./routes/health.routes');
@@ -11,6 +12,7 @@ const dashboardRoutes = require('./routes/dashboard.routes');
 
 const app = express();
 
+app.use(helmet());
 app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
 app.use(express.json());
 
