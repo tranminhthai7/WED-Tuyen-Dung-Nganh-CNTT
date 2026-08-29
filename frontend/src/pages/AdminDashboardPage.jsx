@@ -66,7 +66,7 @@ export default function AdminDashboardPage() {
                       <div><b className="text-sm text-gray-900">{c.name}</b><p className="text-xs text-gray-400">{c.ownerId?.email || ''} · {c.isVerified ? 'Đã duyệt' : 'Chờ duyệt'}</p></div>
                     </div>
                     <div className="flex gap-2">
-                      {!c.isVerified ? <button onClick={() => mVerify.mutate({ id: c._id, v: true })} className="px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1"><Check size={14} />Duyệt</button> : <button onClick={() => mVerify.mutate({ id: c._id, v: false })} className="px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs font-bold">Hủy duyệt</button>}
+                      {!c.isVerified ? <button onClick={() => mVerify.mutate({ id: c._id, v: true })} className="px-3 py-1.5 bg-emerald-600 text-white rounded-xl text-xs font-bold flex items-center gap-1"><Check size={14} />Duyệt</button> : <button onClick={() => mVerify.mutate({ id: c._id, v: false })} className="px-3 py-1.5 bg-white border border-gray-300 rounded-xl shadow-sm text-xs font-bold">Hủy duyệt</button>}
                     </div>
                   </div>
                 ))}

@@ -82,8 +82,8 @@ export default function JobsPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2 mb-6">
           <span className="text-xs font-bold text-gray-400">Lọc thêm:</span>
-          <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700"><option>Tất cả</option><option>Intern</option><option>Fresher</option><option>Junior</option><option>Middle</option><option>Senior</option></select>
-          <select value={filterSalary} onChange={e => setFilterSalary(e.target.value)} className="px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700"><option value="Tất cả">Mọi mức lương</option><option value="<1000">&lt; 1000 USD</option><option value="1000-2000">1000–2000 USD</option><option value=">2000">&gt; 2000 USD</option></select>
+          <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="px-3 py-1.5 bg-white border border-gray-300 rounded-xl shadow-sm text-xs font-semibold text-gray-700"><option>Tất cả</option><option>Intern</option><option>Fresher</option><option>Junior</option><option>Middle</option><option>Senior</option></select>
+          <select value={filterSalary} onChange={e => setFilterSalary(e.target.value)} className="px-3 py-1.5 bg-white border border-gray-300 rounded-xl shadow-sm text-xs font-semibold text-gray-700"><option value="Tất cả">Mọi mức lương</option><option value="<1000">&lt; 1000 USD</option><option value="1000-2000">1000–2000 USD</option><option value=">2000">&gt; 2000 USD</option></select>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 cursor-pointer"><input type="checkbox" checked={showExpired} onChange={e => setShowExpired(e.target.checked)} /> Hiện tin hết hạn</label>
           <span className="text-xs text-gray-400">· {filteredJobs.length} tin</span>
         </div>
