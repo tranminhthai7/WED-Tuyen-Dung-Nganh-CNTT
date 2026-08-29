@@ -11,6 +11,9 @@ export default function JobsPage() {
   const [q, setQ] = useState(searchParams.get('q') || '');
   const [loc, setLoc] = useState(searchParams.get('loc') || 'Tất cả địa điểm');
   const [filterMode, setFilterMode] = useState('Tất cả');
+  const [filterLevel, setFilterLevel] = useState('Tất cả');
+  const [filterSalary, setFilterSalary] = useState('Tất cả');
+  const [showExpired, setShowExpired] = useState(false);
 
   // Sync state with URL params
   useEffect(() => {
@@ -36,14 +39,23 @@ export default function JobsPage() {
     const matchQuery = q
       ? job.title.toLowerCase().includes(q.toLowerCase()) ||
         job.company.toLowerCase().includes(q.toLowerCase()) ||
-        job.tags.some((t) => t.toLowerCase().includes(q.toLowerCase()))
+        (job.tags || []).some((t) => t.toLowerCase().includes(q.toLowerCase()))
       : true;
 
     const matchLoc = loc && loc !== 'Tất cả địa điểm' ? job.location === loc : true;
 
     const matchMode = filterMode === 'Tất cả' ? true : job.mode === filterMode;
+    const matchLevel = filterLevel === 'Tất cả' ? true : (job.level || 'Junior') === filterLevel;
+    const matchSalary = filterSalary === 'Tất cả' ? true : (() => {
+      const s = (job.salary || '').toLowerCase();
+      if (filterSalary === '<1000') return s.includes('500') || s.includes('800');
+      if (filterSalary === '1000-2000') return s.includes('1,200') || s.includes('1,800') || s.includes('2,000');
+      if (filterSalary === '>2000') return s.includes('2,500') || s.includes('3,500') || s.includes('4,000');
+      return true;
+    })();
+    const notExpired = showExpired ? true : (!job.deadline || new Date(job.deadline) >= new Date(new Date().setHours(0,0,0,0)));
 
-    return matchQuery && matchLoc && matchMode;
+    return matchQuery && matchLoc && matchMode && matchLevel && matchSalary && notExpired;
   });
 
   return (
@@ -67,6 +79,13 @@ export default function JobsPage() {
               </button>
             ))}
           </div>
+        </div>
+        <div className="flex flex-wrap items-center gap-2 mb-6">
+          <span className="text-xs font-bold text-gray-400">Lọc thêm:</span>
+          <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700"><option>Tất cả</option><option>Intern</option><option>Fresher</option><option>Junior</option><option>Middle</option><option>Senior</option></select>
+          <select value={filterSalary} onChange={e => setFilterSalary(e.target.value)} className="px-3 py-1.5 bg-white border border-gray-200 rounded-xl text-xs font-semibold text-gray-700"><option value="Tất cả">Mọi mức lương</option><option value="<1000">&lt; 1000 USD</option><option value="1000-2000">1000–2000 USD</option><option value=">2000">&gt; 2000 USD</option></select>
+          <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 cursor-pointer"><input type="checkbox" checked={showExpired} onChange={e => setShowExpired(e.target.checked)} /> Hiện tin hết hạn</label>
+          <span className="text-xs text-gray-400">· {filteredJobs.length} tin</span>
         </div>
 
         {/* Search Row */}
