@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Skill = require('../models/Skill');
 const mongoose = require('mongoose');
+const { authenticate, requireRole } = require('../middlewares/auth.middleware');
 
 const defaultSkills = [
   // Frontend
@@ -86,6 +87,32 @@ router.get('/', async (req, res) => {
       error: error.message,
     });
   }
+});
+
+router.post('/', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    const { name, category } = req.body;
+    if (!name) return res.status(400).json({ message: 'Thiếu tên kỹ năng' });
+    if (!isDatabaseReady()) return res.json({ message: 'Demo: đã thêm (giả lập)', skill: { _id: `skill-${Date.now()}`, name, category: category || 'Other' } });
+    const s = await Skill.create({ name: name.trim(), category: category || 'Other' });
+    return res.status(201).json({ message: 'Đã thêm kỹ năng', skill: s });
+  } catch (e) { return res.status(e.code === 11000 ? 409 : 500).json({ message: e.code === 11000 ? 'Kỹ năng đã tồn tại' : e.message }); }
+});
+router.put('/:id', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    if (!isDatabaseReady()) return res.json({ message: 'Demo: đã sửa' });
+    const s = await Skill.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    if (!s) return res.status(404).json({ message: 'Không tìm thấy' });
+    return res.json({ message: 'Đã cập nhật', skill: s });
+  } catch (e) { return res.status(500).json({ message: e.message }); }
+});
+router.delete('/:id', authenticate, requireRole('admin'), async (req, res) => {
+  try {
+    if (!isDatabaseReady()) return res.json({ message: 'Demo: đã xóa' });
+    const s = await Skill.findByIdAndDelete(req.params.id);
+    if (!s) return res.status(404).json({ message: 'Không tìm thấy' });
+    return res.json({ message: 'Đã xóa kỹ năng' });
+  } catch (e) { return res.status(500).json({ message: e.message }); }
 });
 
 module.exports = router;
