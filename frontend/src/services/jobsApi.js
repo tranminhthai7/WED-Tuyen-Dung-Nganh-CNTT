@@ -87,3 +87,29 @@ export async function fetchDashboardStats() {
   const data = await apiRequest('/api/dashboard/stats');
   return data.stats;
 }
+// Company API
+export async function fetchMyCompany() {
+  const data = await apiRequest('/api/companies/my');
+  return data.company;
+}
+export async function updateMyCompany(payload) {
+  return apiRequest('/api/companies/my', 'PUT', payload);
+}
+export async function uploadCompanyLogo(file) {
+  const token = localStorage.getItem('itmatch_token');
+  const fd = new FormData(); fd.append('logo', file);
+  const res = await fetch(`${API_BASE_URL}/api/companies/my/logo`, { method: 'POST', headers: { Authorization: `Bearer ${token}` }, body: fd });
+  const data = await res.json(); if (!res.ok) throw new Error(data.message); return data;
+}
+export async function fetchAdminCompanies() {
+  const data = await apiRequest('/api/companies/admin/list'); return data.companies || [];
+}
+export async function verifyCompany(id, isVerified) {
+  return apiRequest(`/api/companies/admin/${id}/verify`, 'PATCH', { isVerified });
+}
+export async function fetchPendingJobs() {
+  const data = await apiRequest('/api/companies/admin/jobs/pending'); return data.jobs || [];
+}
+export async function moderateJob(id, status) {
+  return apiRequest(`/api/companies/admin/jobs/${id}/moderate`, 'PATCH', { status });
+}
