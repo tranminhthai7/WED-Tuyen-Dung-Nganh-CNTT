@@ -43,8 +43,8 @@ select {
   font: inherit;
 }
 
-button {
-  cursor: pointer;
+button { cursor: pointer; }
+button:not([class*="bg-"]) {
   border: none;
   background: none;
 }

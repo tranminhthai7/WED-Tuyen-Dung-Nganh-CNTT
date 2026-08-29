@@ -73,7 +73,7 @@ export default function JobsPage() {
               <button
                 key={mode}
                 onClick={() => setFilterMode(mode)}
-                className={`px-3 py-1.5 rounded-xl text-xs font-bold border transition-all ${filterMode === mode ? 'bg-blue-600 border-blue-600 text-white shadow-sm' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50 hover:border-gray-400'}`}
+                className={`px-3.5 py-1.5 rounded-xl text-xs font-black border-2 transition-all ${filterMode === mode ? 'bg-blue-600 border-blue-600 text-white shadow-md' : 'bg-slate-100 border-slate-300 text-slate-800 hover:bg-white hover:border-slate-400 shadow-sm'}`}
               >
                 {mode}
               </button>
