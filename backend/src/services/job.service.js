@@ -166,7 +166,7 @@ const createJob = async (jobData, employerId, employerName) => {
     deadline: deadline ? new Date(deadline) : undefined,
     level: level || 'Junior',
     quantity: quantity || 1,
-    status: 'active',
+    status: 'pending',
     posted: 'Vừa xong',
     applicants: 0,
   };
