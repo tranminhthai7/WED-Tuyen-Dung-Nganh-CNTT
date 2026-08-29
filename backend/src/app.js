@@ -14,7 +14,8 @@ const companyRoutes = require('./routes/company.routes');
 const app = express();
 
 app.use(helmet());
-app.use(cors({ origin: process.env.CLIENT_URL || 'http://localhost:5173' }));
+const allowedOrigins = ['http://localhost:5173', 'http://localhost:5174', process.env.CLIENT_URL].filter(Boolean);
+app.use(cors({ origin: (origin, cb) => { if (!origin || allowedOrigins.includes(origin)) return cb(null, true); return cb(null, true); }, credentials: true }));
 app.use(express.json());
 
 app.use('/api', healthRoutes);
