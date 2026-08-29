@@ -18,3 +18,6 @@ frontend/package-lock.json
 
 # Next.js reference (Huong A - chi giu frontend Vite)
 recruitment-platform/
+# Secrets - khong commit key that
+backend/.env
+.env
