@@ -2,6 +2,7 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { BarChart3, BriefcaseBusiness, FilePlus2, Search, Users, Sparkles, CheckCircle2, Trash2, Edit2, Calendar } from 'lucide-react';
 import Header from '../components/Header';
+import PdfViewer from '../components/PdfViewer';
 import {
   fetchMyPostings,
   createJob,
@@ -43,6 +44,7 @@ export default function EmployerDashboardPage() {
   const [selectedAppId, setSelectedAppId] = useState(null);
   const [companyNote, setCompanyNote] = useState('');
   const [statusAction, setStatusAction] = useState('pending');
+  const [pdfUrl, setPdfUrl] = useState('');
 
   // React Queries (employer APIs)
   const { data: postings = [], refetch: refetchJobs } = useQuery({
@@ -435,14 +437,7 @@ export default function EmployerDashboardPage() {
                               {app.matchScore}% Matching
                             </span>
 
-                            <a
-                              href={app.cvUrl}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="text-xs font-bold text-blue-600 hover:underline"
-                            >
-                              Xem CV (PDF)
-                            </a>
+                            <button onClick={() => setPdfUrl(app.cvUrl)} className="text-xs font-bold text-blue-600 hover:underline">Xem CV (PDF)</button>
                           </div>
                         </div>
 
@@ -572,6 +567,7 @@ export default function EmployerDashboardPage() {
           © 2026 itmatch. Một sản phẩm tuyển dụng công nghệ độc lập cho sinh viên CNTT.
         </div>
       </footer>
+      {pdfUrl && <PdfViewer url={pdfUrl} onClose={() => setPdfUrl('')} />}
     </div>
   );
 }
