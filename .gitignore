@@ -15,3 +15,6 @@ frontend/package-lock.json
 # Personal / report files
 *.pdf
 *.log
+
+# Next.js reference (Huong A - chi giu frontend Vite)
+recruitment-platform/
