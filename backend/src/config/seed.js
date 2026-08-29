@@ -91,20 +91,18 @@ const seedDB = async () => {
     const admin = await User.create({ name: 'Hệ thống Admin', email: 'admin@itmatch.vn', password: adminPassword, role: 'admin' });
 
     console.log('Seeding jobs...');
-    const job1 = await Job.create({
-      companyId: employer._id, slug: 'senior-frontend-engineer-grab', title: 'Senior Frontend Engineer', company: 'Grab', logo: 'G', tone: 'tone-emerald',
-      location: 'Hồ Chí Minh', salary: '2,500 – 4,000 USD', mode: 'Hybrid', experience: '3+ năm',
-      tags: ['React', 'TypeScript', 'Next.js'], requirements: ['React', 'TypeScript', 'Next.js', 'Git', 'REST API'],
-      description: 'Phát triển và tối ưu hóa các ứng dụng gọi xe.', level: 'Senior', quantity: 2,
-      deadline: new Date(Date.now() + 30*24*60*60*1000), status: 'active', views: 120, applicants: 1,
-    });
-    const job2 = await Job.create({
-      companyId: employer._id, slug: 'backend-engineer-golang-vng', title: 'Backend Engineer — Golang', company: 'VNG Corporation', logo: 'V', tone: 'tone-blue',
-      location: 'Hồ Chí Minh', salary: '2,000 – 3,500 USD', mode: 'On-site', experience: '2+ năm',
-      tags: ['Golang', 'Microservices', 'AWS'], requirements: ['Golang', 'Microservices', 'AWS', 'Docker', 'MySQL'],
-      description: 'Xây dựng hệ thống backend chịu tải cao cho Zalo/ZaloPay.', level: 'Middle', quantity: 3,
-      deadline: new Date(Date.now() + 15*24*60*60*1000), status: 'active', views: 85, applicants: 0,
-    });
+    const d = (days) => new Date(Date.now() + days*24*60*60*1000);
+    const jobsToCreate = [
+      { companyId: employer._id, slug: 'senior-frontend-engineer-grab', title: 'Senior Frontend Engineer', company: 'Grab', logo: 'G', tone: 'tone-emerald', location: 'Hồ Chí Minh', salary: '2,500 – 4,000 USD', mode: 'Hybrid', experience: '3+ năm', tags: ['React', 'TypeScript', 'Next.js'], requirements: ['React', 'TypeScript', 'Next.js', 'Git', 'REST API'], description: 'Phát triển và tối ưu hóa các ứng dụng gọi xe.', level: 'Senior', quantity: 2, deadline: d(30), status: 'active', views: 120, applicants: 1 },
+      { companyId: employer._id, slug: 'backend-engineer-golang-vng', title: 'Backend Engineer — Golang', company: 'VNG Corporation', logo: 'V', tone: 'tone-blue', location: 'Hồ Chí Minh', salary: '2,000 – 3,500 USD', mode: 'On-site', experience: '2+ năm', tags: ['Golang', 'Microservices', 'AWS'], requirements: ['Golang', 'Microservices', 'AWS', 'Docker', 'MySQL'], description: 'Xây dựng hệ thống backend chịu tải cao cho Zalo/ZaloPay.', level: 'Middle', quantity: 3, deadline: d(15), status: 'active', views: 85, applicants: 0 },
+      { companyId: employer._id, slug: 'junior-qa-tester-fpt', title: 'Junior QA Tester', company: 'FPT Software', logo: 'F', tone: 'tone-orange', location: 'Hà Nội', salary: '500 – 800 USD', mode: 'On-site', experience: '0-1 năm', tags: ['Manual Test', 'Jira', 'SQL'], requirements: ['Manual Test', 'Jira', 'SQL'], description: 'Kiểm thử thủ công cho dự án outsourcing.', level: 'Junior', quantity: 5, deadline: d(20), status: 'active', views: 60, applicants: 0 },
+      { companyId: employer._id, slug: 'intern-react-fresher-nashtech', title: 'Fresher Frontend (React) Intern', company: 'NashTech', logo: 'N', tone: 'tone-violet', location: 'Remote', salary: '500 – 800 USD', mode: 'Remote', experience: 'Intern', tags: ['React', 'JavaScript', 'HTML'], requirements: ['React', 'JavaScript', 'HTML'], description: 'Thực tập Frontend có lương, đào tạo bài bản.', level: 'Intern', quantity: 10, deadline: d(45), status: 'active', views: 200, applicants: 0 },
+      { companyId: employer._id, slug: 'middle-devops-aws-shopee', title: 'Middle DevOps Engineer', company: 'Shopee', logo: 'S', tone: 'tone-sky', location: 'Hà Nội', salary: '1,200 – 2,000 USD', mode: 'Hybrid', experience: '2+ năm', tags: ['AWS', 'Docker', 'Kubernetes'], requirements: ['AWS', 'Docker', 'Kubernetes'], description: 'Vận hành hạ tầng thương mại điện tử.', level: 'Middle', quantity: 2, deadline: d(10), status: 'active', views: 95, applicants: 0 },
+      { companyId: employer._id, slug: 'senior-data-engineer-momo', title: 'Senior Data Engineer', company: 'MoMo', logo: 'M', tone: 'tone-pink', location: 'Hồ Chí Minh', salary: '2,500 – 4,000 USD', mode: 'On-site', experience: '4+ năm', tags: ['Python', 'PostgreSQL', 'AWS'], requirements: ['Python', 'PostgreSQL', 'AWS'], description: 'Xây dựng pipeline dữ liệu lớn.', level: 'Senior', quantity: 1, deadline: d(25), status: 'active', views: 70, applicants: 0 },
+      { companyId: employer._id, slug: 'fresher-java-spring-tiki', title: 'Fresher Java Spring Boot', company: 'Tiki', logo: 'T', tone: 'tone-blue', location: 'Hồ Chí Minh', salary: '500 – 800 USD', mode: 'Remote', experience: '0-1 năm', tags: ['Java', 'Spring Boot', 'MySQL'], requirements: ['Java', 'Spring Boot', 'MySQL'], description: 'Tham gia phát triển hệ thống TMĐT.', level: 'Fresher', quantity: 4, deadline: d(-2), status: 'active', views: 40, applicants: 0 },
+      { companyId: employer._id, slug: 'middle-mobile-flutter-be', title: 'Middle Flutter Developer', company: 'Be Group', logo: 'B', tone: 'tone-emerald', location: 'Hà Nội', salary: '1,200 – 2,000 USD', mode: 'Hybrid', experience: '2+ năm', tags: ['Flutter', 'Dart', 'Git'], requirements: ['Flutter', 'Dart', 'Git'], description: 'Phát triển ứng dụng gọi xe.', level: 'Middle', quantity: 3, deadline: d(12), status: 'active', views: 55, applicants: 0 },
+    ];
+    const [job1] = await Job.insertMany(jobsToCreate);
     console.log('Seeding applications...');
     await Application.create({ userId: candidate._id, jobId: job1._id, companyId: employer._id, cvUrl: candidate.cvUrl, coverLetter: 'Kính gửi Grab, tôi có kinh nghiệm React và Git.', matchScore: 40, status: 'pending' });
     console.log('Database seeded successfully!');
