@@ -26,4 +26,11 @@ app.use('/api/skills', skillRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/companies', companyRoutes);
 
+// Friendly upload errors (multer)
+app.use((err, _req, res, _next) => {
+  if (err && err.code === 'LIMIT_FILE_SIZE') return res.status(400).json({ message: 'File quá lớn (tối đa 10MB cho PDF, 2MB cho ảnh)' });
+  if (err) return res.status(400).json({ message: err.message || 'Upload lỗi' });
+  return res.status(500).json({ message: 'Lỗi server' });
+});
+
 module.exports = app;
