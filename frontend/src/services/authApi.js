@@ -1,9 +1,8 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
-async function apiRequest(path, method = 'GET', payload = null) {
-  const headers = {
-    'Content-Type': 'application/json',
-  };
+async function apiRequest(path, method = 'GET', payload = null, isFormData = false) {
+  const headers = {};
+  if (!isFormData) headers['Content-Type'] = 'application/json';
 
   const token = localStorage.getItem('itmatch_token');
   if (token) {
@@ -16,7 +15,7 @@ async function apiRequest(path, method = 'GET', payload = null) {
   };
 
   if (payload) {
-    options.body = JSON.stringify(payload);
+    options.body = isFormData ? payload : JSON.stringify(payload);
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, options);
@@ -43,4 +42,12 @@ export function getProfile() {
 
 export function updateProfile(payload) {
   return apiRequest('/api/auth/profile', 'PUT', payload);
+}
+export function uploadAvatar(file) {
+  const fd = new FormData(); fd.append('avatar', file);
+  return apiRequest('/api/auth/upload/avatar', 'POST', fd, true);
+}
+export function uploadCv(file) {
+  const fd = new FormData(); fd.append('cv', file);
+  return apiRequest('/api/auth/upload/cv', 'POST', fd, true);
 }
