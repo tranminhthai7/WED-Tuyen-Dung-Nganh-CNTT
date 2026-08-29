@@ -113,3 +113,6 @@ export async function fetchPendingJobs() {
 export async function moderateJob(id, status) {
   return apiRequest(`/api/companies/admin/jobs/${id}/moderate`, 'PATCH', { status });
 }
+export async function createSkill(payload) { return apiRequest('/api/skills', 'POST', payload); }
+export async function updateSkill(id, payload) { return apiRequest(`/api/skills/${id}`, 'PUT', payload); }
+export async function deleteSkill(id) { return apiRequest(`/api/skills/${id}`, 'DELETE'); }

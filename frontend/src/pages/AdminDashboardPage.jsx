@@ -2,7 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import { ShieldCheck, Users, Briefcase, FileCheck, Check, X } from 'lucide-react';
 import Header from '../components/Header';
-import { fetchDashboardStats, fetchAdminCompanies, verifyCompany, fetchPendingJobs, moderateJob } from '../services/jobsApi';
+import { fetchDashboardStats, fetchAdminCompanies, verifyCompany, fetchPendingJobs, moderateJob, fetchSkills, createSkill, deleteSkill } from '../services/jobsApi';
 
 export default function AdminDashboardPage() {
   const qc = useQueryClient();
@@ -10,9 +10,13 @@ export default function AdminDashboardPage() {
   const { data: stats = { candidates: 4520, employers: 320, jobs: 1840, applications: 9680 } } = useQuery({ queryKey: ['adminStats'], queryFn: fetchDashboardStats });
   const { data: companies = [] } = useQuery({ queryKey: ['adminCompanies'], queryFn: fetchAdminCompanies, enabled: tab !== 'overview' });
   const { data: pendingJobs = [] } = useQuery({ queryKey: ['pendingJobs'], queryFn: fetchPendingJobs, enabled: tab !== 'overview' });
+  const { data: skills = [] } = useQuery({ queryKey: ['adminSkills'], queryFn: fetchSkills, enabled: tab === 'skills' });
+  const [newSkill, setNewSkill] = useState({ name: '', category: 'Other' });
 
   const mVerify = useMutation({ mutationFn: ({ id, v }) => verifyCompany(id, v), onSuccess: () => qc.invalidateQueries({ queryKey: ['adminCompanies'] }) });
   const mJob = useMutation({ mutationFn: ({ id, s }) => moderateJob(id, s), onSuccess: () => qc.invalidateQueries({ queryKey: ['pendingJobs'] }) });
+  const mAddSkill = useMutation({ mutationFn: createSkill, onSuccess: () => { qc.invalidateQueries({ queryKey: ['adminSkills'] }); setNewSkill({ name: '', category: 'Other' }); } });
+  const mDelSkill = useMutation({ mutationFn: deleteSkill, onSuccess: () => qc.invalidateQueries({ queryKey: ['adminSkills'] }) });
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
@@ -24,7 +28,7 @@ export default function AdminDashboardPage() {
             <h1 className="text-3xl font-black text-gray-900 mt-1">Dashboard quản trị Admin</h1>
           </div>
           <div className="flex gap-2">
-            {[{ k: 'overview', l: 'Tổng quan' }, { k: 'companies', l: `DN chờ duyệt (${companies.filter(c => !c.isVerified).length})` }, { k: 'jobs', l: `Tin chờ duyệt (${pendingJobs.length})` }].map(t => (
+            {[{ k: 'overview', l: 'Tổng quan' }, { k: 'companies', l: `DN chờ duyệt (${companies.filter(c => !c.isVerified).length})` }, { k: 'jobs', l: `Tin chờ duyệt (${pendingJobs.length})` }, { k: 'skills', l: `Kỹ năng (${skills.length})` }].map(t => (
               <button key={t.k} onClick={() => setTab(t.k)} className={`px-3 py-2 rounded-xl text-xs font-bold border ${tab === t.k ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'}`}>{t.l}</button>
             ))}
           </div>
@@ -87,6 +91,17 @@ export default function AdminDashboardPage() {
                 ))}
               </div>
             )}
+          </div>
+        )}
+        {tab === 'skills' && (
+          <div className="bg-white border border-gray-200/80 rounded-3xl p-6 shadow-sm">
+            <h2 className="font-black text-gray-900 mb-4">Quản lý kỹ năng</h2>
+            <form onSubmit={e => { e.preventDefault(); if (!newSkill.name.trim()) return; mAddSkill.mutate(newSkill); }} className="flex gap-2 mb-4">
+              <input value={newSkill.name} onChange={e => setNewSkill({ ...newSkill, name: e.target.value })} placeholder="Tên kỹ năng" className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
+              <select value={newSkill.category} onChange={e => setNewSkill({ ...newSkill, category: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm"><option>Frontend</option><option>Backend</option><option>Database</option><option>DevOps</option><option>Mobile</option><option>Design</option><option>Other</option></select>
+              <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold">Thêm</button>
+            </form>
+            <div className="flex flex-wrap gap-2">{skills.map(s => (<span key={s._id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 rounded-full text-xs font-semibold text-gray-700">{s.name}<span className="text-[10px] text-gray-400">{s.category}</span><button onClick={() => mDelSkill.mutate(s._id)} className="ml-1 text-red-500 hover:text-red-700"><X size={12} /></button></span>))}</div>
           </div>
         )}
       </main>
