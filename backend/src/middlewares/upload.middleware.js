@@ -6,7 +6,16 @@ function createUploader(folder, allowedFormats, maxBytes, transformation, resour
   if (hasKeys) {
     const storage = new CloudinaryStorage({
       cloudinary,
-      params: { folder: `itmatch/${folder}`, allowed_formats: allowedFormats, resource_type: resourceType || 'auto', transformation: transformation || undefined },
+      params: async (_req, file) => {
+        const isPdf = file.mimetype === 'application/pdf' || file.originalname?.toLowerCase().endsWith('.pdf');
+        return {
+          folder: `itmatch/${folder}`,
+          allowed_formats: allowedFormats,
+          resource_type: resourceType || 'auto',
+          transformation: transformation || undefined,
+          ...(isPdf && resourceType === 'raw' ? { flags: 'attachment:false' } : {}),
+        };
+      },
     });
     return multer({ storage, limits: { fileSize: maxBytes } });
   }
