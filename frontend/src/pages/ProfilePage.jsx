@@ -187,8 +187,8 @@ export default function ProfilePage() {
 
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">Avatar</span>
-                <div className="flex items-center gap-3">
-                  {formData.avatar ? <img src={formData.avatar} alt="avatar" className="w-12 h-12 rounded-full object-cover border" /> : <div className="w-12 h-12 rounded-full bg-gray-100 border flex items-center justify-center text-gray-400 text-xs">No img</div>}
+                <div className="flex items-center gap-4">
+                  {formData.avatar ? <img src={formData.avatar} alt="avatar" className="w-28 h-28 rounded-2xl object-cover border-2 border-gray-100 shadow-sm" /> : <div className="w-28 h-28 rounded-2xl bg-gray-100 border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400 text-xs">No img</div>}
                   <label className="text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">{upAvatar ? 'Đang tải...' : 'Chọn ảnh'}<input type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} disabled={upAvatar} /></label>
                 </div>
               </label>
