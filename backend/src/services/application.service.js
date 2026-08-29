@@ -3,6 +3,7 @@ const Application = require('../models/Application');
 const Job = require('../models/Job');
 const User = require('../models/User');
 const { calculateMatchingScore } = require('../utils/matching');
+const { sendMail } = require('../utils/mail');
 const { demoJobs } = require('./job.service');
 
 const demoApplications = [
@@ -239,6 +240,20 @@ const updateApplicationStatus = async (applicationId, { status, companyNote }, e
       app.companyNote = companyNote;
     }
     await app.save();
+
+    // Gui mail thong bao (khong block neu loi)
+    try {
+      const cand = await User.findById(app.userId);
+      const job = await Job.findById(app.jobId);
+      if (cand && cand.email) {
+        const statusText = { accepted: 'được chấp nhận', rejected: 'bị từ chối', interviewing: 'được mời phỏng vấn', pending: 'đang chờ' }[status] || status;
+        await sendMail({
+          to: cand.email,
+          subject: `[ITMatch] Ho so ${job ? job.title : ''} ${statusText}`,
+          html: `<p>Xin chao ${cand.name},</p><p>Ho so ung tuyen cho <b>${job ? job.title : 'vi tri'}</b> cua ban da duoc cap nhat: <b>${statusText}</b>.</p>${companyNote ? `<p>Ghi chu tu NTD: ${companyNote}</p>` : ''}<p>Tran trong,<br/>ITMatch</p>`,
+        });
+      }
+    } catch (e) { console.warn('[mail] loi gui mail', e.message); }
 
     return {
       message: 'Cập nhật trạng thái thành công',
