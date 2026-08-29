@@ -1,5 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { BarChart3, BriefcaseBusiness, FilePlus2, Search, Users, Sparkles, CheckCircle2, Trash2, Edit2, Calendar } from 'lucide-react';
 import Header from '../components/Header';
 import {
@@ -9,6 +9,9 @@ import {
   updateApplicationStatus,
   deleteJob,
   fetchDashboardStats,
+  fetchMyCompany,
+  updateMyCompany,
+  uploadCompanyLogo,
 } from '../services/jobsApi';
 
 export default function EmployerDashboardPage() {
@@ -31,6 +34,11 @@ export default function EmployerDashboardPage() {
 
   const [postStatus, setPostStatus] = useState({ kind: 'idle', message: '' });
 
+  // Company profile
+  const [company, setCompany] = useState({ name: '', website: '', industry: '', size: '', address: '', description: '', techStack: '' });
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [companyMsg, setCompanyMsg] = useState('');
+
   // Recruiter notes update states
   const [selectedAppId, setSelectedAppId] = useState(null);
   const [companyNote, setCompanyNote] = useState('');
@@ -51,6 +59,8 @@ export default function EmployerDashboardPage() {
     queryKey: ['employerStats'],
     queryFn: fetchDashboardStats,
   });
+  const { data: myCompany } = useQuery({ queryKey: ['myCompany'], queryFn: fetchMyCompany });
+  useEffect(() => { if (myCompany) setCompany({ name: myCompany.name || '', website: myCompany.website || '', industry: myCompany.industry || '', size: myCompany.size || '', address: myCompany.address || '', description: myCompany.description || '', techStack: (myCompany.techStack || []).join(', ') }); }, [myCompany]);
 
   // Create job mutation
   const createJobMutation = useMutation({
@@ -147,6 +157,7 @@ export default function EmployerDashboardPage() {
 
             {[
               { key: 'dashboard', label: 'Tổng quan', Icon: BarChart3 },
+              { key: 'company', label: 'Hồ sơ công ty', Icon: BriefcaseBusiness },
               { key: 'jobs', label: 'Tin tuyển dụng', Icon: BriefcaseBusiness },
               { key: 'candidates', label: 'Ứng viên', Icon: Users },
               { key: 'post', label: 'Đăng tin mới', Icon: FilePlus2 },
@@ -164,6 +175,29 @@ export default function EmployerDashboardPage() {
 
           {/* Section Main Container */}
           <section className="min-h-[500px]">
+            {section === 'company' && (
+              <div className="bg-white border border-gray-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <h1 className="text-2xl font-black text-gray-900">Hồ sơ công ty</h1>
+                <p className="text-xs text-gray-400 mt-1">Cập nhật thông tin để Admin duyệt hiển thị tin tuyển dụng.</p>
+                {myCompany?.isVerified === false && <p className="mt-3 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2">Đang chờ Admin duyệt — tin đăng sẽ ở trạng thái pending.</p>}
+                {myCompany?.isVerified === true && <p className="mt-3 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">Đã xác thực ✓</p>}
+                <div className="mt-6 flex items-center gap-4">
+                  {myCompany?.logo ? <img src={myCompany.logo} alt="logo" className="w-16 h-16 rounded-2xl object-cover border" /> : <div className="w-16 h-16 rounded-2xl bg-gray-100 border flex items-center justify-center text-gray-400 text-xs">Logo</div>}
+                  <label className="text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50">{logoUploading ? 'Đang tải...' : 'Upload logo'}<input type="file" accept="image/*" className="hidden" disabled={logoUploading} onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; setLogoUploading(true); try { await uploadCompanyLogo(f); setCompanyMsg('Upload logo thành công!'); } catch (err) { setCompanyMsg(err.message); } finally { setLogoUploading(false); } }} /></label>
+                </div>
+                <form onSubmit={async (e) => { e.preventDefault(); try { await updateMyCompany({ ...company, techStack: company.techStack.split(',').map(s => s.trim()).filter(Boolean) }); setCompanyMsg('Đã lưu hồ sơ công ty!'); } catch (err) { setCompanyMsg(err.message); } }} className="mt-6 grid gap-4 md:grid-cols-2">
+                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Tên công ty</span><input value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Website</span><input value={company.website} onChange={e => setCompany({ ...company, website: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Ngành</span><input value={company.industry} onChange={e => setCompany({ ...company, industry: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Quy mô</span><input value={company.size} onChange={e => setCompany({ ...company, size: e.target.value })} placeholder="50-200" className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5 md:col-span-2"><span className="text-xs font-bold text-gray-700">Địa chỉ</span><input value={company.address} onChange={e => setCompany({ ...company, address: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5 md:col-span-2"><span className="text-xs font-bold text-gray-700">Mô tả</span><textarea rows={3} value={company.description} onChange={e => setCompany({ ...company, description: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5 md:col-span-2"><span className="text-xs font-bold text-gray-700">Tech stack (phẩy)</span><input value={company.techStack} onChange={e => setCompany({ ...company, techStack: e.target.value })} placeholder="React, Node.js, AWS" className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <button type="submit" className="md:col-span-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-sm">Lưu hồ sơ công ty</button>
+                  {companyMsg && <p className="md:col-span-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">{companyMsg}</p>}
+                </form>
+              </div>
+            )}
             {/* 1. POST NEW JOB */}
             {section === 'post' && (
               <div className="bg-white border border-gray-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
