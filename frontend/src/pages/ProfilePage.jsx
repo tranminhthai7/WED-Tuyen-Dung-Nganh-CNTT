@@ -24,6 +24,7 @@ export default function ProfilePage() {
   const [saveStatus, setSaveStatus] = useState({ kind: 'idle', message: '' });
   const [upAvatar, setUpAvatar] = useState(false);
   const [upCv, setUpCv] = useState(false);
+  const [cvFullscreen, setCvFullscreen] = useState(false);
 
   // Fetch full profile details (to get latest DB state)
   const { data: profileData, isLoading: profileLoading } = useQuery({
@@ -218,10 +219,24 @@ export default function ProfilePage() {
                 <input name="cvUrl" type="url" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf (hoặc bấm Upload CV để chọn file)" className="mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800" />
                 {formData.cvUrl && formData.cvUrl.startsWith('http') && (
                   <div className="mt-2 border border-gray-200 rounded-xl overflow-hidden bg-white">
-                    <iframe key={formData.cvUrl} title="CV preview" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="w-full h-[600px] border-0" />
+                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
+                      <span className="text-xs font-bold text-gray-600">Xem trước CV</span>
+                      <button type="button" onClick={() => setCvFullscreen(true)} className="ml-auto text-[11px] font-bold px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100">⛶ Phóng to</button>
+                      <button type="button" onClick={handleDownloadCv} className="text-[11px] px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Tải PDF</button>
+                    </div>
+                    <iframe key={formData.cvUrl} title="CV preview" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="w-full border-0 h-[650px]" />
                   </div>
                 )}
               </label>
+              {cvFullscreen && formData.cvUrl && (
+                <div className="fixed inset-0 z-50 bg-black/70 flex flex-col p-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <button type="button" onClick={() => setCvFullscreen(false)} className="text-sm font-bold px-3 py-1.5 bg-white rounded-xl hover:bg-gray-100">✕ Thu nhỏ</button>
+                    <button type="button" onClick={handleDownloadCv} className="text-sm px-3 py-1.5 bg-blue-600 text-white rounded-xl">Tải PDF</button>
+                  </div>
+                  <iframe title="CV fullscreen" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="flex-1 w-full border-0 rounded-xl bg-white" />
+                </div>
+              )}
             </div>
 
             <div className="grid sm:grid-cols-2 gap-4">
