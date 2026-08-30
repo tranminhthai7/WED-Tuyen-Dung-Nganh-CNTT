@@ -144,7 +144,7 @@ export default function ProfilePage() {
     <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
       <Header />
 
-      <main className="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <main className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
           <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Ứng viên</p>
           <h1 className="text-3xl font-black text-gray-900 mt-1">Cập nhật hồ sơ cá nhân</h1>
@@ -163,7 +163,7 @@ export default function ProfilePage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid md:grid-cols-[1fr_280px] gap-8">
+        <form onSubmit={handleSubmit} className="grid lg:grid-cols-[1fr_300px] gap-6">
           {/* Main profile form */}
           <div className="bg-white border border-gray-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
             <label className="flex flex-col gap-1.5">
@@ -224,7 +224,7 @@ export default function ProfilePage() {
                       <button type="button" onClick={() => setCvFullscreen(true)} className="ml-auto text-[11px] font-bold px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100">⛶ Phóng to</button>
                       <button type="button" onClick={handleDownloadCv} className="text-[11px] px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Tải PDF</button>
                     </div>
-                    <iframe key={formData.cvUrl} title="CV preview" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="w-full border-0 h-[650px]" />
+                    <iframe key={formData.cvUrl} title="CV preview" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="w-full border-0 h-[720px]" />
                   </div>
                 )}
               </label>
