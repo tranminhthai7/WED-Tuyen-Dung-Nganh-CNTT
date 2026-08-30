@@ -104,6 +104,16 @@ export default function ProfilePage() {
     setUpCv(true);
     try { const r = await uploadCv(file); setFormData(p => ({ ...p, cvUrl: r.url })); updateUser(r.user); setSaveStatus({ kind: 'success', message: 'Upload CV thành công!' }); } catch (err) { setSaveStatus({ kind: 'error', message: err.message }); } finally { setUpCv(false); }
   };
+  const handleDownloadCv = async () => {
+    if (!formData.cvUrl) return;
+    try {
+      const res = await fetch(formData.cvUrl);
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = 'CV.pdf'; document.body.appendChild(a); a.click(); a.remove();
+      URL.revokeObjectURL(url);
+    } catch { window.open(formData.cvUrl, '_blank'); }
+  };
 
   if (profileLoading) {
     return (
@@ -199,15 +209,16 @@ export default function ProfilePage() {
                   <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-300 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 text-gray-700">{upCv ? 'Đang tải...' : 'Upload CV'}<input type="file" accept=".pdf" className="hidden" onChange={handleCvFile} disabled={upCv} /></label>
                   {formData.cvUrl && (
                     <>
-                      <a href={formData.cvUrl?.includes('/raw/upload/') && !formData.cvUrl.includes('fl_attachment') ? formData.cvUrl.replace('/raw/upload/', '/raw/upload/fl_attachment:false/') : formData.cvUrl} target="_blank" rel="noreferrer" className="text-xs font-bold px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">Mở tab mới ↗</a>
-                      <a href={formData.cvUrl} download className="text-xs text-gray-600 underline">Tải về</a>
+                      <a href={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} target="_blank" rel="noreferrer" className="text-xs font-bold px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">Mở tab mới ↗</a>
+                      <button type="button" onClick={handleDownloadCv} className="text-xs text-gray-600 underline">Tải về</button>
+                      <button type="button" onClick={() => { setFormData(p => ({ ...p, cvUrl: '' })); setSaveStatus({ kind: 'success', message: 'Đã xóa CV ở form — bấm Lưu hồ sơ để lưu.' }); }} className="text-xs font-bold px-3 py-2 bg-white border border-red-200 text-red-600 rounded-xl hover:bg-red-50">Xóa</button>
                     </>
                   )}
                 </div>
                 <input name="cvUrl" type="url" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf (hoặc bấm Upload CV để chọn file)" className="mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800" />
                 {formData.cvUrl && formData.cvUrl.startsWith('http') && (
                   <div className="mt-2 border border-gray-200 rounded-xl overflow-hidden bg-white">
-                    <iframe title="CV preview" src={formData.cvUrl?.includes('/raw/upload/') && !formData.cvUrl.includes('fl_attachment') ? formData.cvUrl.replace('/raw/upload/', '/raw/upload/fl_attachment:false/') : formData.cvUrl} className="w-full h-[600px] border-0" />
+                    <iframe key={formData.cvUrl} title="CV preview" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="w-full h-[600px] border-0" />
                   </div>
                 )}
               </label>
