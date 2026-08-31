@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { Search, SlidersHorizontal, MapPin, Sparkles } from 'lucide-react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import JobCard from '../components/JobCard';
-import { fetchJobs } from '../services/jobsApi';
+import { fetchJobs, aiSuggestJobs } from '../services/jobsApi';
+import useAuthStore from '../store/authStore';
 
 export default function JobsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -27,6 +28,15 @@ export default function JobsPage() {
     queryKey: ['jobs'],
     queryFn: fetchJobs,
   });
+  const { isAuthenticated, user } = useAuthStore();
+  const [aiPicks, setAiPicks] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiErr, setAiErr] = useState('');
+  const handleAiSuggest = async () => {
+    setAiLoading(true); setAiErr('');
+    try { const r = await aiSuggestJobs(); setAiPicks(r.picks || []); } catch (e) { setAiErr(e.message); }
+    finally { setAiLoading(false); }
+  };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -97,35 +107,40 @@ export default function JobsPage() {
         </div>
 
         {/* Search Row */}
-        <form onSubmit={handleSearchSubmit} className="p-2.5 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-3 mb-8">
+        <form onSubmit={handleSearchSubmit} className="p-2.5 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-3 mb-6">
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl flex-grow border border-transparent focus-within:border-blue-500 transition-colors">
             <Search size={18} className="text-gray-400" />
-            <input
-              type="text"
-              value={q}
-              onChange={(e) => setQ(e.target.value)}
-              placeholder="Tìm công việc, vị trí, kỹ năng..."
-              className="w-full bg-transparent outline-none text-sm text-gray-800"
-            />
+            <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm công việc, vị trí, kỹ năng..." className="w-full bg-transparent outline-none text-sm text-gray-800" />
           </div>
           <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-transparent focus-within:border-blue-500 transition-colors md:max-w-xs w-full">
             <MapPin size={18} className="text-gray-400" />
-            <select
-              value={loc}
-              onChange={(e) => setLoc(e.target.value)}
-              className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer appearance-none"
-              aria-label="Địa điểm"
-            >
-              <option>Tất cả địa điểm</option>
-              <option>Hồ Chí Minh</option>
-              <option>Hà Nội</option>
-              <option>Remote</option>
-            </select>
+            <select value={loc} onChange={(e) => setLoc(e.target.value)} className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer appearance-none" aria-label="Địa điểm"><option>Tất cả địa điểm</option><option>Hồ Chí Minh</option><option>Hà Nội</option><option>Remote</option></select>
           </div>
-          <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl transition-colors shadow-sm">
-            Tìm kiếm
-          </button>
+          <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl transition-colors shadow-sm">Tìm kiếm</button>
         </form>
+        {/* AI Suggest */}
+        {isAuthenticated && user?.role === 'candidate' && (
+          <div className="mb-6 p-3 bg-gradient-to-r from-violet-50 to-blue-50 border border-violet-100 rounded-2xl flex flex-wrap items-center gap-3">
+            <span className="text-xs font-bold text-violet-700 flex items-center gap-1.5"><Sparkles size={14} /> Gợi ý AI cho bạn</span>
+            <button onClick={handleAiSuggest} disabled={aiLoading} className="px-3 py-1.5 bg-violet-600 text-white rounded-xl text-xs font-bold hover:bg-violet-700 disabled:opacity-50">{aiLoading ? 'Đang gợi ý...' : '✨ Gợi ý việc phù hợp'}</button>
+            {aiErr && <span className="text-xs text-red-600">{aiErr}</span>}
+          </div>
+        )}
+        {aiPicks && aiPicks.length > 0 && (
+          <div className="mb-8 space-y-3">
+            <p className="text-xs font-bold text-violet-700">Top 3 AI gợi ý {aiPicks[0]?.source === 'fallback' && '(fallback matching)'}</p>
+            <div className="grid md:grid-cols-3 gap-4">
+              {aiPicks.map(({ job, score, reason, source }) => (
+                <Link key={job.id || job.slug} to={`/jobs/${job.slug}`} className="bg-white border border-violet-100 rounded-2xl p-4 hover:shadow-md block">
+                  <p className="text-sm font-black text-gray-900 line-clamp-1">{job.title}</p>
+                  <p className="text-xs text-gray-500">{job.company} · {job.location}</p>
+                  <span className={`inline-block mt-2 text-[11px] font-bold px-2 py-0.5 rounded ${source==='ai'?'bg-violet-600 text-white':'bg-gray-100 text-gray-600'}`}>{score}% {source==='ai'?'AI':'Matching'}</span>
+                  <p className="text-[11px] text-gray-400 mt-1 line-clamp-2">{reason}</p>
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="grid md:grid-cols-2 gap-6">

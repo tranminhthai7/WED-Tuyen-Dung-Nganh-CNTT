@@ -1,4 +1,4 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { BarChart3, BriefcaseBusiness, FilePlus2, Search, Users, Sparkles, CheckCircle2, Trash2, Edit2, Calendar } from 'lucide-react';
 import Header from '../components/Header';
@@ -13,6 +13,7 @@ import {
   fetchMyCompany,
   updateMyCompany,
   uploadCompanyLogo,
+  aiGenerateJD,
 } from '../services/jobsApi';
 
 export default function EmployerDashboardPage() {
@@ -45,7 +46,10 @@ export default function EmployerDashboardPage() {
   const [companyNote, setCompanyNote] = useState('');
   const [statusAction, setStatusAction] = useState('pending');
   const [pdfUrl, setPdfUrl] = useState('');
+  const [aiJdPrompt, setAiJdPrompt] = useState('');
+  const [aiJdLoading, setAiJdLoading] = useState(false);
 
+  const queryClient = useQueryClient();
   // React Queries (employer APIs)
   const { data: postings = [], refetch: refetchJobs } = useQuery({
     queryKey: ['myPostings'],
@@ -94,14 +98,18 @@ export default function EmployerDashboardPage() {
     },
   });
 
-  // Update application status mutation
+  // Update application status mutation — optimistic update để đổi ngay
   const updateStatusMutation = useMutation({
     mutationFn: ({ id, payload }) => updateApplicationStatus(id, payload),
-    onSuccess: () => {
-      refetchCandidates();
-      setSelectedAppId(null);
-      setCompanyNote('');
+    onMutate: async ({ id, payload }) => {
+      await queryClient.cancelQueries({ queryKey: ['receivedApplications'] });
+      const prev = queryClient.getQueryData(['receivedApplications']);
+      queryClient.setQueryData(['receivedApplications'], (old) => (old || []).map(a => a.id === id ? { ...a, status: payload.status, companyNote: payload.companyNote ?? a.companyNote } : a));
+      return { prev };
     },
+    onError: (_e, _v, ctx) => { if (ctx?.prev) queryClient.setQueryData(['receivedApplications'], ctx.prev); },
+    onSuccess: () => { setSelectedAppId(null); setCompanyNote(''); },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: ['receivedApplications'] }),
   });
 
   // Delete job mutation
@@ -213,6 +221,14 @@ export default function EmployerDashboardPage() {
                   </div>
                 ) : (
                   <form onSubmit={handlePostSubmit} className="mt-8 grid gap-5 md:grid-cols-2">
+                    {/* AI generate */}
+                    <div className="md:col-span-2 p-3 bg-gradient-to-r from-violet-50 to-blue-50 border border-violet-100 rounded-2xl flex flex-col gap-2">
+                      <span className="text-xs font-bold text-violet-700 flex items-center gap-1.5"><Sparkles size={14} /> Soạn tin bằng AI</span>
+                      <div className="flex gap-2">
+                        <input value={aiJdPrompt} onChange={(e) => setAiJdPrompt(e.target.value)} placeholder="VD: Cần React dev 2 năm, lương 20-30tr, HCM" className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm outline-none" />
+                        <button type="button" disabled={aiJdLoading || !aiJdPrompt.trim()} onClick={async () => { setAiJdLoading(true); try { const r = await aiGenerateJD(aiJdPrompt); const jd = r.jd; setJobForm((f) => ({ ...f, title: jd.title || f.title, description: jd.description || f.description, tagsInput: (jd.requirements || []).join(', '), salary: jd.salary || f.salary })); setPostStatus({ kind: 'success', message: 'Đã điền bằng AI - kiểm tra lại rồi bấm Đăng tuyển' }); setTimeout(() => setPostStatus({ kind: 'idle', message: '' }), 3000); } catch (e) { setPostStatus({ kind: 'error', message: e.message }); } finally { setAiJdLoading(false); } }} className="px-4 py-2 bg-violet-600 text-white rounded-xl text-xs font-bold hover:bg-violet-700 disabled:opacity-50 shrink-0">{aiJdLoading ? 'Đang sinh...' : '✨ Sinh JD'}</button>
+                      </div>
+                    </div>
                     {postStatus.kind === 'error' && (
                       <div className="md:col-span-2 p-3 bg-red-50 text-red-800 rounded-xl text-xs font-semibold border border-red-100">
                         {postStatus.message}
@@ -436,6 +452,7 @@ export default function EmployerDashboardPage() {
                               <Sparkles size={12} />
                               {app.matchScore}% Matching
                             </span>
+                            <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border ${app.status==='accepted'?'bg-emerald-50 text-emerald-700 border-emerald-100':app.status==='rejected'?'bg-red-50 text-red-700 border-red-100':app.status==='interview'?'bg-purple-50 text-purple-700 border-purple-100':app.status==='viewed'?'bg-amber-50 text-amber-700 border-amber-100':'bg-gray-100 text-gray-600 border-gray-200'}`}>{({pending:'Chờ duyệt',viewed:'Đã xem',interview:'Phỏng vấn',accepted:'Đã nhận',rejected:'Từ chối'})[app.status]||app.status}</span>
 
                             <button onClick={() => setPdfUrl(app.cvUrl)} className="text-xs font-bold text-blue-600 hover:underline">Xem CV (PDF)</button>
                           </div>

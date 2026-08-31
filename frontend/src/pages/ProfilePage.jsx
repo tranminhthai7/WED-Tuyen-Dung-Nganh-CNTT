@@ -25,6 +25,8 @@ export default function ProfilePage() {
   const [upAvatar, setUpAvatar] = useState(false);
   const [upCv, setUpCv] = useState(false);
   const [cvFullscreen, setCvFullscreen] = useState(false);
+  const [showPreview, setShowPreview] = useState(false);
+  const [customSkill, setCustomSkill] = useState('');
 
   // Fetch full profile details (to get latest DB state)
   const { data: profileData, isLoading: profileLoading } = useQuery({
@@ -83,6 +85,14 @@ export default function ProfilePage() {
         return [...prev, skillName];
       }
     });
+  };
+
+  const handleAddCustomSkill = () => {
+    const v = customSkill.trim();
+    if (!v) return;
+    if (selectedSkills.some((s) => s.toLowerCase() === v.toLowerCase())) { setCustomSkill(''); return; }
+    setSelectedSkills((prev) => [...prev, v]);
+    setCustomSkill('');
   };
 
   const handleSubmit = (e) => {
@@ -219,12 +229,19 @@ export default function ProfilePage() {
                 <input name="cvUrl" type="url" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf (hoặc bấm Upload CV để chọn file)" className="mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800" />
                 {formData.cvUrl && formData.cvUrl.startsWith('http') && (
                   <div className="mt-2 border border-gray-200 rounded-xl overflow-hidden bg-white">
-                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200">
-                      <span className="text-xs font-bold text-gray-600">Xem trước CV</span>
-                      <button type="button" onClick={() => setCvFullscreen(true)} className="ml-auto text-[11px] font-bold px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100">⛶ Phóng to</button>
-                      <button type="button" onClick={handleDownloadCv} className="text-[11px] px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Tải PDF</button>
+                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200 flex-wrap">
+                      <span className="text-xs font-bold text-gray-600">CV của bạn</span>
+                      <div className="ml-auto flex items-center gap-2">
+                        {!showPreview ? (
+                          <button type="button" onClick={() => setShowPreview(true)} className="text-xs font-bold px-3 py-1.5 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">👁 Xem trước</button>
+                        ) : (
+                          <button type="button" onClick={() => setShowPreview(false)} className="text-[11px] font-bold px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100">Ẩn</button>
+                        )}
+                        <button type="button" onClick={() => setCvFullscreen(true)} className="text-[11px] font-bold px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100">⛶ Phóng to</button>
+                        <button type="button" onClick={handleDownloadCv} className="text-[11px] px-2 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">Tải PDF</button>
+                      </div>
                     </div>
-                    <iframe key={formData.cvUrl} title="CV preview" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="w-full border-0 h-[720px]" />
+                    {showPreview && <iframe key={formData.cvUrl} title="CV preview" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="w-full border-0 h-[720px]" />}
                   </div>
                 )}
               </label>
@@ -363,6 +380,29 @@ export default function ProfilePage() {
                 ))}
               </div>
             )}
+            {/* Kỹ năng tự thêm (không có trong bảng) */}
+            {(() => {
+              const known = new Set(skills.map((s) => s.name.toLowerCase()));
+              const customs = selectedSkills.filter((s) => !known.has(s.toLowerCase()));
+              if (customs.length === 0) return null;
+              return (
+                <div className="space-y-2">
+                  <span className="text-[10px] font-black uppercase text-gray-400 tracking-wider">Kỹ năng khác</span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {customs.map((s) => (
+                      <span key={s} className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 border border-blue-100 rounded-full text-xs font-semibold text-blue-700">
+                        {s}<button type="button" onClick={() => setSelectedSkills((p) => p.filter((x) => x !== s))} className="ml-1 text-blue-400 hover:text-red-500 leading-none">×</button>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              );
+            })()}
+            {/* Thêm kỹ năng khác */}
+            <div className="flex gap-2">
+              <input value={customSkill} onChange={(e) => setCustomSkill(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSkill(); } }} placeholder="Thêm kỹ năng khác, vd: Jira" className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-xs" />
+              <button type="button" onClick={handleAddCustomSkill} className="px-3 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 shrink-0">Thêm</button>
+            </div>
             <div className="text-[10px] text-gray-400 leading-normal flex items-start gap-1 p-2 bg-blue-50/50 rounded-xl">
               <AlertCircle size={14} className="shrink-0 text-blue-600" />
               <span>Hãy chọn đúng kỹ năng của bạn để thuật toán tính điểm Matching Score khớp chuẩn nhất!</span>
