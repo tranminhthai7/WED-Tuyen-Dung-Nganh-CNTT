@@ -116,3 +116,9 @@ export async function moderateJob(id, status) {
 export async function createSkill(payload) { return apiRequest('/api/skills', 'POST', payload); }
 export async function updateSkill(id, payload) { return apiRequest(`/api/skills/${id}`, 'PUT', payload); }
 export async function deleteSkill(id) { return apiRequest(`/api/skills/${id}`, 'DELETE'); }
+// AI
+export async function aiMatch(candidateSkills, jobRequirements) { return apiRequest('/api/ai/match', 'POST', { candidateSkills, jobRequirements }); }
+export async function aiSuggestJobs() { return apiRequest('/api/ai/suggest-jobs', 'POST', {}); }
+export async function aiGenerateJD(prompt) { return apiRequest('/api/ai/generate-jd', 'POST', { prompt }); }
+export async function aiCoverLetter(jobSlug) { return apiRequest('/api/ai/cover-letter', 'POST', { jobSlug }); }
+export async function aiStatus() { return apiRequest('/api/ai/status'); }
