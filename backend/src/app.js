@@ -10,6 +10,7 @@ const applicationRoutes = require('./routes/application.routes');
 const skillRoutes = require('./routes/skill.routes');
 const dashboardRoutes = require('./routes/dashboard.routes');
 const companyRoutes = require('./routes/company.routes');
+const aiRoutes = require('./routes/ai.routes');
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use('/api/applications', applicationRoutes);
 app.use('/api/skills', skillRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/companies', companyRoutes);
+app.use('/api/ai', aiRoutes);
 
 // Friendly upload errors (multer)
 app.use((err, _req, res, _next) => {
