@@ -21,3 +21,5 @@ recruitment-platform/
 # Secrets - khong commit key that
 backend/.env
 .env
+docs/BAO_CAO_*
+TranMinhThai-*
