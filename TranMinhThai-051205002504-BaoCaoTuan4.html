@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.6;
+    color: #1a1a1a;
+    padding: 25mm 20mm 20mm 25mm;
+  }
+  h1 { font-size: 18pt; color: #1e3a5f; border-bottom: 2px solid #1e3a5f; padding-bottom: 6px; margin: 20px 0 12px; }
+  h2 { font-size: 14pt; color: #1e3a5f; border-left: 4px solid #3b82f6; padding-left: 10px; margin: 18px 0 10px; }
+  h3 { font-size: 12pt; color: #374151; margin: 14px 0 8px; }
+  h4 { font-size: 11pt; color: #4b5563; margin: 10px 0 6px; }
+  p { margin: 8px 0; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 10pt;
+  }
+  th, td {
+    border: 1px solid #d1d5db;
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: top;
+  }
+  th { background: #1e3a5f; color: white; font-weight: 600; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  pre {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #3b82f6;
+    padding: 12px;
+    border-radius: 4px;
+    font-size: 9pt;
+    font-family: 'Courier New', monospace;
+    white-space: pre-wrap;
+    word-break: break-all;
+    margin: 10px 0;
+  }
+  code {
+    background: #f1f5f9;
+    padding: 1px 4px;
+    border-radius: 3px;
+    font-size: 9pt;
+    font-family: 'Courier New', monospace;
+  }
+  pre code { background: none; padding: 0; }
+  ul, ol { padding-left: 20px; margin: 8px 0; }
+  li { margin: 3px 0; }
+  hr { border: none; border-top: 1px solid #e5e7eb; margin: 16px 0; }
+  strong { font-weight: 700; }
+  .cover {
+    text-align: center;
+    padding: 60px 0 40px;
+    border-bottom: 2px solid #1e3a5f;
+    margin-bottom: 30px;
+  }
+  .cover h1 { border: none; font-size: 22pt; }
+  .cover .subtitle { color: #6b7280; font-size: 12pt; margin-top: 8px; }
+  @media print {
+    body { padding: 0; }
+    h2 { page-break-before: auto; }
+    pre, table { page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<h1>BÁO CÁO THỰC TẬP — TUẦN 4</h1>
+<br>
+<table><tr><th>Thông tin</th><th>Chi tiết</th></tr><tr><td>**Họ và tên**</td><td>Trần Minh Thái</td></tr><tr><td>**MSSV**</td><td>051205002504</td></tr><tr><td>**Tên đề tài**</td><td>Xây dựng Website Tuyển dụng chuyên ngành Công nghệ thông tin (ITMatch)</td></tr><tr><td>**Tuần báo cáo**</td><td>Tuần 4</td></tr><tr><td>**Thời gian**</td><td>18/08/2026 – 23/08/2026</td></tr><tr><td>**Ngày nộp**</td><td>23/08/2026</td></tr><tr><td>**GitHub**</td><td>https://github.com/tranminhthai7/WED-Tuyen-Dung-Nganh-CNTT</td></tr></table>
+<br>
+<hr>
+<br>
+<h2>1. MỤC TIÊU CỦA TUẦN 4</h2>
+<br>
+<p>Theo kế hoạch 8 tuần đã đề ra, tuần 4 tập trung vào <strong>nền tảng nghiệp vụ cốt lõi và giao diện người dùng</strong>. Cụ thể:</p>
+<br>
+<ul><li>Hoàn thiện backend Auth: kết nối MongoDB, middleware xác thực JWT</li><li>Xây dựng model dữ liệu đầy đủ cho User, Job</li><li>Triển khai API Jobs (danh sách, chi tiết)</li><li>Dựng giao diện đăng ký / đăng nhập kết nối với backend thật</li><li>Dựng trang chủ (HomePage) với danh sách việc làm lấy từ API</li><li>Đảm bảo luồng đăng nhập → lưu token → hiển thị dữ liệu hoạt động end-to-end</li></ul>
+<br>
+<hr>
+<br>
+<h2>2. CÔNG VIỆC ĐÃ THỰC HIỆN</h2>
+<br>
+<h3>2.1 Backend — Node.js + Express.js</h3>
+<br>
+<h4>2.1.1 Cấu trúc backend hoàn chỉnh</h4>
+<br>
+<p>Cấu trúc <code>backend/src/</code> đã được tổ chức đầy đủ theo mô hình phân tầng:</p>
+<br>
+<pre><code>backend/src/
+├── app.js              ← Express app, đăng ký routes
+├── server.js           ← Entry point, kết nối MongoDB
+├── config/             ← Cấu hình môi trường
+├── controllers/
+│   ├── auth.controller.js
+│   └── job.controller.js
+├── middlewares/        ← Sẵn sàng cho auth middleware
+├── models/
+│   ├── User.js
+│   └── Job.js
+├── routes/
+│   ├── auth.routes.js
+│   ├── health.routes.js
+│   └── job.routes.js
+├── services/
+│   ├── auth.service.js
+│   └── job.service.js
+├── utils/
+│   └── jwt.js          ← Tạo và xác thực token
+└── validators/</code></pre>
+<br>
+<h4>2.1.2 Model dữ liệu</h4>
+<br>
+<p><strong>User Model</strong> — Tài khoản người dùng:</p>
+<br>
+<table><tr><th>Trường</th><th>Kiểu</th><th>Mô tả</th></tr><tr><td>`name`</td><td>String (required)</td><td>Họ và tên</td></tr><tr><td>`email`</td><td>String (required, unique)</td><td>Email đăng nhập</td></tr><tr><td>`password`</td><td>String (required, minLength 6)</td><td>Mật khẩu đã hash</td></tr><tr><td>`role`</td><td>Enum: candidate/employer/admin</td><td>Phân quyền</td></tr><tr><td>`isActive`</td><td>Boolean</td><td>Trạng thái hoạt động</td></tr><tr><td>`createdAt`, `updatedAt`</td><td>Timestamps</td><td>Tự động</td></tr></table>
+<br>
+<p><strong>Job Model</strong> — Tin tuyển dụng:</p>
+<br>
+<table><tr><th>Trường</th><th>Kiểu</th><th>Mô tả</th></tr><tr><td>`slug`</td><td>String (required, unique)</td><td>URL-friendly ID</td></tr><tr><td>`title`</td><td>String (required)</td><td>Tên vị trí</td></tr><tr><td>`company`</td><td>String (required)</td><td>Tên công ty</td></tr><tr><td>`logo`</td><td>String</td><td>Ký hiệu logo</td></tr><tr><td>`tone`</td><td>String</td><td>Màu sắc card hiển thị</td></tr><tr><td>`location`</td><td>String</td><td>Địa điểm làm việc</td></tr><tr><td>`salary`</td><td>String</td><td>Mức lương</td></tr><tr><td>`mode`</td><td>String</td><td>Hình thức (On-site/Hybrid/Remote)</td></tr><tr><td>`experience`</td><td>String</td><td>Yêu cầu kinh nghiệm</td></tr><tr><td>`tags`</td><td>[String]</td><td>Kỹ năng yêu cầu</td></tr><tr><td>`posted`</td><td>String</td><td>Thời gian đăng</td></tr><tr><td>`applicants`</td><td>Number</td><td>Số lượt ứng tuyển</td></tr></table>
+<br>
+<h4>2.1.3 Auth Service — Dual-mode (MongoDB + Demo)</h4>
+<br>
+<p><code>services/auth.service.js</code> triển khai logic xác thực với <strong>cơ chế dual-mode</strong>:</p>
+<br>
+<ul><li>Nếu MongoDB đang kết nối (<code>readyState === 1</code>): thao tác với database thật</li><li>Nếu MongoDB chưa kết nối: dùng <code>demoUsers[]</code> in-memory để backend vẫn hoạt động khi chưa có <code>.env</code></li></ul>
+<br>
+<p><strong>Luồng đăng ký:</strong></p>
+<ul><li>Validate: kiểm tra đủ <code>name</code>, <code>email</code>, <code>password</code></li><li>Chuẩn hóa email (lowercase + trim)</li><li>Hash password với <code>bcryptjs</code> (salt rounds = 10)</li><li>Kiểm tra email đã tồn tại</li><li>Tạo user mới (MongoDB hoặc demo)</li><li>Trả về <code>{ message, user: { id, name, email, role }, token }</code></li></ul>
+<br>
+<p><strong>Luồng đăng nhập:</strong></p>
+<ul><li>Validate: kiểm tra đủ <code>email</code>, <code>password</code></li><li>Tìm user theo email</li><li>So sánh password với <code>bcrypt.compare()</code></li><li>Trả về JWT token nếu khớp</li></ul>
+<br>
+<h4>2.1.4 Routes đã đăng ký</h4>
+<br>
+<table><tr><th>Route</th><th>Method</th><th>Chức năng</th></tr><tr><td>`/api/health`</td><td>GET</td><td>Kiểm tra server hoạt động</td></tr><tr><td>`/api/auth/register`</td><td>POST</td><td>Đăng ký tài khoản mới</td></tr><tr><td>`/api/auth/login`</td><td>POST</td><td>Đăng nhập, nhận JWT token</td></tr><tr><td>`/api/jobs`</td><td>GET</td><td>Lấy danh sách tin tuyển dụng</td></tr></table>
+<br>
+<h4>2.1.5 Dependencies đã cài đặt</h4>
+<br>
+<table><tr><th>Package</th><th>Phiên bản</th><th>Mục đích</th></tr><tr><td>express</td><td>^4.21.2</td><td>Web framework</td></tr><tr><td>mongoose</td><td>^8.8.1</td><td>MongoDB ODM</td></tr><tr><td>bcryptjs</td><td>^3.0.3</td><td>Hash mật khẩu</td></tr><tr><td>jsonwebtoken</td><td>^9.0.3</td><td>Tạo/xác thực JWT</td></tr><tr><td>cors</td><td>^2.8.5</td><td>Cross-origin</td></tr><tr><td>dotenv</td><td>^16.4.5</td><td>Biến môi trường</td></tr></table>
+<br>
+<hr>
+<br>
+<h3>2.2 Frontend — React.js + Vite</h3>
+<br>
+<h4>2.2.1 Cấu trúc frontend hoàn chỉnh</h4>
+<br>
+<pre><code>frontend/src/
+├── App.jsx             ← Root component, hash-based navigation
+├── main.jsx            ← Entry point
+├── styles.css          ← Global design system (14KB)
+├── assets/
+├── components/
+│   ├── Header.jsx      ← Thanh điều hướng
+│   └── JobCard.jsx     ← Card hiển thị tin tuyển dụng
+├── hooks/
+├── layouts/
+├── pages/
+│   ├── AuthPage.jsx
+│   ├── HomePage.jsx
+│   ├── JobsPage.jsx
+│   ├── DashboardPage.jsx
+│   ├── EmployerDashboardPage.jsx
+│   └── AdminDashboardPage.jsx
+├── routes/
+├── services/
+│   ├── authApi.js
+│   └── jobsApi.js
+├── store/
+└── utils/</code></pre>
+<br>
+<h4>2.2.2 Trang chủ — HomePage.jsx</h4>
+<br>
+<p>Landing Page đã được dựng hoàn chỉnh với các thành phần:</p>
+<br>
+<p><strong>Hero Section:</strong></p>
+<ul><li>Slogan: <em>"Tìm nơi bạn có thể làm việc tốt."</em></li><li>Search bar với ô tìm kiếm từ khóa + dropdown địa điểm (TP.HCM / Hà Nội / Remote)</li><li>Quick-filter roles: Frontend, Backend, Product &amp; Design, Data &amp; AI, QA &amp; Automation, DevOps &amp; Cloud</li><li>Stat card: <strong>2,480+ việc đang mở</strong>, <strong>620 đội ngũ công nghệ</strong></li></ul>
+<br>
+<p><strong>Trust Strip:</strong></p>
+<ul><li>3 cam kết: Thông tin minh bạch | Đúng ngành công nghệ | Hai phía cùng tốt hơn</li></ul>
+<br>
+<p><strong>Job Section:</strong></p>
+<ul><li>Danh sách <code>JobCard</code> lấy từ API (<code>GET /api/jobs</code>)</li><li>Tự động fallback sang dữ liệu mẫu nếu API chưa sẵn sàng</li></ul>
+<br>
+<p><strong>Dữ liệu fallback job mẫu:</strong></p>
+<br>
+<table><tr><th>Vị trí</th><th>Công ty</th><th>Lương</th><th>Kỹ năng</th></tr><tr><td>Senior Frontend Engineer</td><td>Grab</td><td>2,500–4,000 USD</td><td>React, TypeScript, Next.js</td></tr><tr><td>Product Designer (UI/UX)</td><td>MoMo</td><td>1,800–2,800 USD</td><td>Figma, UX Research</td></tr><tr><td>Backend Engineer — Golang</td><td>VNG</td><td>2,000–3,500 USD</td><td>Golang, Microservices, AWS</td></tr><tr><td>Data Analyst</td><td>Tiki</td><td>1,200–2,000 USD</td><td>SQL, Python, BI</td></tr></table>
+<br>
+<p><strong>Company Section:</strong> FPT Software, Shopee Vietnam, NashTech</p>
+<br>
+<p><strong>Audience Section:</strong> Card đôi dành cho ứng viên và nhà tuyển dụng → dẫn đến trang Auth</p>
+<br>
+<h4>2.2.3 Trang đăng ký / đăng nhập — AuthPage.jsx</h4>
+<br>
+<table><tr><th>Tính năng</th><th>Chi tiết</th></tr><tr><td>Tab chuyển đổi</td><td>Đăng nhập ↔ Đăng ký</td></tr><tr><td>Form đăng ký</td><td>Họ tên + Email + Mật khẩu</td></tr><tr><td>Form đăng nhập</td><td>Email + Mật khẩu</td></tr><tr><td>Loading state</td><td>Button disable khi đang gửi request</td></tr><tr><td>Thông báo</td><td>Hiển thị success/error rõ ràng</td></tr><tr><td>Kết nối API</td><td>Gọi backend thật qua `authApi.js`</td></tr><tr><td>Lưu token</td><td>`localStorage`: `itmatch_token`, `itmatch_user`</td></tr><tr><td>Giao diện</td><td>2 cột: Brand panel (trái) + Form panel (phải)</td></tr></table>
+<br>
+<h4>2.2.4 API Service Layer</h4>
+<br>
+<p><strong><code>services/authApi.js</code>:</strong></p>
+<ul><li><code>registerAccount(payload)</code> → <code>POST /api/auth/register</code></li><li><code>loginAccount(payload)</code> → <code>POST /api/auth/login</code></li></ul>
+<br>
+<p><strong><code>services/jobsApi.js</code>:</strong></p>
+<ul><li><code>fetchJobs()</code> → <code>GET /api/jobs</code> → trả về mảng hoặc <code>[]</code> nếu lỗi</li></ul>
+<br>
+<h4>2.2.5 Navigation — Hash-based Routing</h4>
+<br>
+<p><code>App.jsx</code> dùng <code>window.location.hash</code> thay Router (nhẹ, không cần dependency):</p>
+<ul><li>Hash <code>#auth</code> → render <code>AuthPage</code></li><li>Không có hash → render <code>HomePage</code></li><li>Hỗ trợ browser back/forward button qua event <code>hashchange</code></li></ul>
+<br>
+<h4>2.2.6 Dependencies đã cài đặt</h4>
+<br>
+<table><tr><th>Package</th><th>Phiên bản</th><th>Mục đích</th></tr><tr><td>react</td><td>^18.3.1</td><td>Core framework</td></tr><tr><td>react-dom</td><td>^18.3.1</td><td>DOM rendering</td></tr><tr><td>lucide-react</td><td>^0.451.0</td><td>Icon library</td></tr></table>
+<br>
+<hr>
+<br>
+<h3>2.3 Quản lý GitHub</h3>
+<br>
+<ul><li>Repository: https://github.com/tranminhthai7/WED-Tuyen-Dung-Nganh-CNTT</li><li>Mã nguồn commit theo tiến độ từng buổi làm</li><li>Cấu trúc: <code>frontend/</code>, <code>backend/</code>, <code>docs/</code></li></ul>
+<br>
+<hr>
+<br>
+<h2>3. SẢN PHẨM ĐẦU RA ĐÃ CÓ</h2>
+<br>
+<h3>3.1 Backend</h3>
+<br>
+<table><tr><th>Thành phần</th><th>Trạng thái</th></tr><tr><td>Express server + CORS + dotenv</td><td>✅ Hoàn thành</td></tr><tr><td>Route `/api/health`</td><td>✅ Hoàn thành</td></tr><tr><td>Route `POST /api/auth/register`</td><td>✅ Hoàn thành</td></tr><tr><td>Route `POST /api/auth/login`</td><td>✅ Hoàn thành</td></tr><tr><td>Route `GET /api/jobs`</td><td>✅ Hoàn thành</td></tr><tr><td>Model User (Mongoose Schema)</td><td>✅ Hoàn thành</td></tr><tr><td>Model Job (Mongoose Schema)</td><td>✅ Hoàn thành</td></tr><tr><td>Auth Service dual-mode (MongoDB + demo)</td><td>✅ Hoàn thành</td></tr><tr><td>Job Service (CRUD cơ bản)</td><td>✅ Hoàn thành</td></tr><tr><td>JWT utils</td><td>✅ Hoàn thành</td></tr><tr><td>Password hashing (bcryptjs)</td><td>✅ Hoàn thành</td></tr></table>
+<br>
+<h3>3.2 Frontend</h3>
+<br>
+<table><tr><th>Thành phần</th><th>Trạng thái</th></tr><tr><td>Cấu trúc thư mục đầy đủ</td><td>✅ Hoàn thành</td></tr><tr><td>`App.jsx` + hash navigation</td><td>✅ Hoàn thành</td></tr><tr><td>`HomePage.jsx` — Landing page đầy đủ</td><td>✅ Hoàn thành</td></tr><tr><td>`AuthPage.jsx` — Form auth kết nối API</td><td>✅ Hoàn thành</td></tr><tr><td>`authApi.js` — Service gọi API auth</td><td>✅ Hoàn thành</td></tr><tr><td>`jobsApi.js` — Service gọi API jobs</td><td>✅ Hoàn thành</td></tr><tr><td>`Header.jsx` component</td><td>✅ Hoàn thành</td></tr><tr><td>`JobCard.jsx` component</td><td>✅ Hoàn thành</td></tr><tr><td>`styles.css` — Design system 14KB</td><td>✅ Hoàn thành</td></tr><tr><td>Scaffold 3 trang Dashboard (3 role)</td><td>⚠️ Có cấu trúc, chưa có nội dung</td></tr><tr><td>Build production</td><td>✅ Thành công</td></tr></table>
+<br>
+<h3>3.3 Kết quả kiểm tra thực tế</h3>
+<br>
+<table><tr><th>Kiểm tra</th><th>Kết quả</th></tr><tr><td>`GET /api/health`</td><td>✅ `{"status":"ok","message":"ITMatch backend đang hoạt động"}`</td></tr><tr><td>`POST /api/auth/register`</td><td>✅ Trả về user + JWT token</td></tr><tr><td>`POST /api/auth/login`</td><td>✅ Trả về user + JWT token</td></tr><tr><td>Frontend build (`vite build`)</td><td>✅ `✓ built in 2.15s`</td></tr><tr><td>Frontend runtime (`localhost:5173`)</td><td>✅ App chạy, navigation hoạt động</td></tr><tr><td>Luồng auth end-to-end</td><td>✅ Đăng ký → token nhận → lưu localStorage</td></tr></table>
+<br>
+<hr>
+<br>
+<h2>4. ĐÁNH GIÁ KẾT QUẢ</h2>
+<br>
+<h3>4.1 Đạt được</h3>
+<br>
+<ul><li>Backend có cấu trúc phân tầng chuẩn MVC (controller / service / model / route)</li><li>Auth Service dual-mode: hoạt động cả khi có và chưa có MongoDB</li><li>Model User và Job khớp với thiết kế schema trong đề án</li><li>Frontend Landing Page chuyên nghiệp, đầy đủ section</li><li>Trang Auth kết nối API backend thật, lưu token đúng chuẩn</li><li>Job list lấy từ API, có fallback tự động khi API chưa sẵn sàng</li><li>Design system CSS đồng bộ toàn bộ giao diện</li></ul>
+<br>
+<h3>4.2 Hạn chế hiện tại</h3>
+<br>
+<ul><li>MongoDB Atlas chưa được kết nối (đang chạy chế độ demo in-memory)</li><li>Chưa có JWT middleware bảo vệ các route cần xác thực</li><li>Dashboard 3 role mới có scaffold, chưa có nội dung thật</li><li>Chưa triển khai upload CV và upload logo (Multer + Cloudinary)</li><li>Chưa có CRUD đầy đủ hồ sơ ứng viên và hồ sơ công ty</li></ul>
+<br>
+<h3>4.3 So sánh với kế hoạch tuần 4</h3>
+<br>
+<table><tr><th>Hạng mục kế hoạch</th><th>Kết quả</th></tr><tr><td>Tạo job</td><td>⚠️ Model có, API get list có, chưa có create</td></tr><tr><td>Duyệt job</td><td>❌ Chưa thực hiện</td></tr><tr><td>Search / filter / pagination</td><td>❌ Chưa thực hiện (mới fetch list)</td></tr><tr><td>Trang list và detail job</td><td>⚠️ Có list ở home, chưa có detail</td></tr><tr><td>Admin moderation</td><td>❌ Chưa thực hiện</td></tr><tr><td>Giao diện login/register kết nối API</td><td>✅ Hoàn thành (Bù đắp)</td></tr><tr><td>Thiết kế HomePage & Data flow</td><td>✅ Hoàn thành</td></tr></table>
+<br>
+<hr>
+<br>
+<h2>5. KẾ HOẠCH TUẦN 5</h2>
+<br>
+<p>Tuần 5 sẽ tiếp tục hoàn thiện các phần lõi còn lại:</p>
+<br>
+<ul><li><strong>Kết nối MongoDB Atlas thật</strong> — cấu hình <code>MONGODB_URI</code> trong <code>.env</code></li><li><strong>JWT Middleware</strong> — bảo vệ các route cần xác thực</li><li><strong>Hoàn thiện Job CRUD</strong> — tạo, sửa, xóa, lấy detail</li><li><strong>Trang chi tiết Job</strong> — hiển thị thông tin tuyển dụng, nút ứng tuyển</li><li><strong>Search/Filter Job</strong> — lọc theo kỹ năng, địa điểm</li><li><strong>CRUD hồ sơ ứng viên</strong> — <code>GET/PUT /api/users/profile</code></li><li><strong>Seed kỹ năng IT</strong> — danh mục skill chuẩn (React, Node.js, Python...)</li></ul>
+<br>
+<hr>
+<br>
+<h2>6. GHI CHÚ</h2>
+<br>
+<p>Báo cáo này được lập dựa trên trạng thái thực tế của source code tại repo GitHub. Toàn bộ nội dung đã được kiểm tra qua quá trình build và chạy thử local.</p>
+<br>
+<hr>
+<br>
+<p><em>Sinh viên thực hiện:</em> <strong>Trần Minh Thái</strong></p>
+<br>
+<p><em>Ngày: 23/08/2026</em></p>
+<br>
+</body>
+</html>

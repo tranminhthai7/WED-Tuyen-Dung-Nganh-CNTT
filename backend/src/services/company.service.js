@@ -20,9 +20,15 @@ const getMyCompany = async (ownerId) => {
 const updateMyCompany = async (ownerId, data) => {
   const allowed = ['name','website','industry','size','address','description','techStack','logo'];
   const upd = {}; allowed.forEach(k => { if (data[k] !== undefined) upd[k] = data[k]; });
-  if (!isDatabaseReady()) return { company: { ownerId, ...upd } };
+  if (!isDatabaseReady()) return { company: { ownerId, ...upd, isVerified: false }, message: 'Cập nhật — cần Admin duyệt lại (demo)' };
+  const existing = await Company.findOne({ ownerId });
+  const wasVerified = existing?.isVerified === true;
+  // nếu đã verified mà sửa thông tin quan trọng → cần duyệt lại
+  const importantChanged = wasVerified && allowed.some(k => data[k] !== undefined && String(data[k] ?? '') !== String(existing[k] ?? ''));
+  if (importantChanged) upd.isVerified = false;
   const c = await Company.findOneAndUpdate({ ownerId }, upd, { new: true, upsert: true });
-  return { message: 'Cập nhật công ty thành công', company: c };
+  const msg = importantChanged ? 'Đã lưu — hồ sơ thay đổi nên cần Admin duyệt lại' : 'Cập nhật công ty thành công';
+  return { message: msg, company: c, needsReverify: importantChanged };
 };
 
 const uploadLogo = async (file, ownerId) => {

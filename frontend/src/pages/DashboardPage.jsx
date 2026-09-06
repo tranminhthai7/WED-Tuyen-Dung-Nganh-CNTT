@@ -84,59 +84,55 @@ export default function DashboardPage() {
             </p>
           </div>
         ) : (
-          <div className="bg-white border border-gray-200 rounded-3xl overflow-hidden shadow-sm">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="border-b border-gray-100 bg-gray-50 text-[10px] font-black uppercase text-gray-400 tracking-wider">
-                    <th className="px-6 py-4">Công việc</th>
-                    <th className="px-6 py-4">Ngày nộp</th>
-                    <th className="px-6 py-4">Matching Score</th>
-                    <th className="px-6 py-4">Trạng thái</th>
-                    <th className="px-6 py-4">Phản hồi của NTD</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100 text-sm text-gray-800">
-                  {apps.map((app) => (
-                    <tr key={app.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-6 py-4">
-                        <div>
-                          <strong className="block text-gray-900 font-bold">{app.jobTitle}</strong>
-                          <span className="block text-xs text-gray-500 mt-0.5">{app.companyName}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-xs text-gray-500">
-                        <span className="flex items-center gap-1">
-                          <Calendar size={14} />
-                          {new Date(app.appliedAt).toLocaleDateString('vi-VN')}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
-                          <Sparkles size={12} />
-                          {app.matchScore}%
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className={`inline-flex px-2.5 py-0.5 rounded-lg text-xs font-bold border ${getStatusBadge(app.status)}`}>
-                          {getStatusText(app.status)}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-xs text-gray-500">
-                        {app.companyNote ? (
-                          <span className="flex items-start gap-1 p-2 bg-yellow-50/50 rounded-xl text-yellow-800 max-w-xs leading-normal">
-                            <MessageSquare size={14} className="shrink-0 mt-0.5 text-yellow-600" />
-                            <span>{app.companyNote}</span>
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 italic">Chưa có phản hồi</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+          <div className="space-y-4">
+            {apps.map((app) => (
+              <div key={app.id} className="bg-white border border-gray-100 rounded-2xl p-5 hover:shadow-sm transition-all">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <strong className="text-sm font-black text-gray-900 block">{app.jobTitle}</strong>
+                    <span className="text-xs text-gray-500">{app.companyName}</span>
+                    <div className="flex gap-4 mt-2 text-[11px] text-gray-500 font-semibold">
+                      <span className="flex items-center gap-1"><Calendar size={12} /> {new Date(app.appliedAt).toLocaleDateString('vi-VN')}</span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col items-end gap-2 shrink-0">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-bold border border-blue-100">
+                      <Sparkles size={12} /> {app.matchScore}% Matching
+                    </span>
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-lg border ${getStatusBadge(app.status)}`}>{getStatusText(app.status)}</span>
+                  </div>
+                </div>
+
+                {/* Cover Letter — giống hệt bên NTD */}
+                {app.coverLetter ? (
+                  <div className="mt-3 p-3 bg-gray-50 rounded-xl text-xs text-gray-600 whitespace-pre-line leading-relaxed border border-gray-100">
+                    <strong className="text-gray-700">Cover Letter:</strong> {app.coverLetter}
+                  </div>
+                ) : (
+                  <p className="mt-3 text-xs text-gray-400 italic">Không có thư giới thiệu</p>
+                )}
+
+                {app.companyNote ? (
+                  <div className="mt-2 p-3 bg-yellow-50/50 text-yellow-800 border border-yellow-100 rounded-xl text-xs flex items-start gap-1.5">
+                    <MessageSquare size={14} className="shrink-0 mt-0.5 text-yellow-600" />
+                    <span><strong>Phản hồi NTD:</strong> {app.companyNote}</span>
+                  </div>
+                ) : (
+                  <p className="mt-2 text-[11px] text-gray-400 italic">Chưa có phản hồi</p>
+                )}
+                {app.interview?.date && (
+                  <div className="mt-2 p-3 bg-blue-50/60 border border-blue-100 rounded-xl text-xs text-blue-900">
+                    <strong className="text-blue-700">📅 Lịch phỏng vấn:</strong> {app.interview.date}{app.interview.time ? ` lúc ${app.interview.time}` : ''} {app.interview.location ? `— ${app.interview.location}` : ''} {app.interview.interviewer ? `(gặp ${app.interview.interviewer})` : ''} {app.interview.meetLink && <a href={app.interview.meetLink} target="_blank" rel="noreferrer" className="text-blue-600 underline ml-1">{app.interview.meetLink}</a>}
+                    {app.interview.note && <div className="mt-1 text-blue-700/70">{app.interview.note}</div>}
+                  </div>
+                )}
+                {app.history?.length > 0 && (
+                  <details className="mt-2 text-[11px] text-gray-500"><summary className="cursor-pointer font-bold">Lịch sử cập nhật ({app.history.length})</summary>
+                    <div className="mt-1 space-y-1 border-l-2 border-gray-100 pl-3">{app.history.slice(-5).reverse().map((h,i)=>(<div key={i}>{new Date(h.at).toLocaleString('vi-VN')}: {h.from} → <b>{h.to}</b> {h.companyNote ? `— ${h.companyNote}` : ''}</div>))}</div>
+                  </details>
+                )}
+              </div>
+            ))}
           </div>
         )}
       </main>

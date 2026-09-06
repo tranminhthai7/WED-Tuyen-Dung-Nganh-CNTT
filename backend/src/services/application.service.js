@@ -160,6 +160,8 @@ const getMyApplications = async (userId) => {
       matchScore: app.matchScore,
       status: app.status,
       companyNote: app.companyNote,
+      interview: app.interview || null,
+      history: app.history || [],
       appliedAt: app.createdAt,
     }));
   }
@@ -188,6 +190,8 @@ const getEmployerApplications = async (employerId) => {
       matchScore: app.matchScore,
       status: app.status,
       companyNote: app.companyNote,
+      interview: app.interview || null,
+      history: app.history || [],
       appliedAt: app.createdAt,
     }));
   }
@@ -214,11 +218,17 @@ const getEmployerApplications = async (employerId) => {
   });
 };
 
-const updateApplicationStatus = async (applicationId, { status, companyNote }, employerId) => {
+const updateApplicationStatus = async (applicationId, { status, companyNote, interview }, employerId) => {
   if (!status) {
     const error = new Error('Thiếu trạng thái cập nhật');
     error.statusCode = 400;
     throw error;
+  }
+  if (status === 'interview') {
+    if (!interview || (!interview.date && !interview.time && !interview.location && !interview.meetLink)) {
+      const e = new Error('Mời phỏng vấn cần có ngày/giờ hoặc địa điểm/link');
+      e.statusCode = 400; throw e;
+    }
   }
 
   if (isDatabaseReady()) {
@@ -235,9 +245,19 @@ const updateApplicationStatus = async (applicationId, { status, companyNote }, e
       throw error;
     }
 
+    const from = app.status;
+    app.history.push({ from, to: status, companyNote: companyNote ?? app.companyNote, interview: interview ?? app.interview, by: employerId, at: new Date() });
     app.status = status;
-    if (companyNote !== undefined) {
-      app.companyNote = companyNote;
+    if (companyNote !== undefined) app.companyNote = companyNote;
+    if (interview !== undefined) {
+      app.interview = {
+        date: interview?.date || '',
+        time: interview?.time || '',
+        location: interview?.location || '',
+        interviewer: interview?.interviewer || '',
+        meetLink: interview?.meetLink || '',
+        note: interview?.note || '',
+      };
     }
     await app.save();
 
@@ -245,11 +265,26 @@ const updateApplicationStatus = async (applicationId, { status, companyNote }, e
     User.findById(app.userId).then(cand => {
       if (!cand || !cand.email) return;
       return Job.findById(app.jobId).then(job => {
-        const statusText = { accepted: 'được chấp nhận', rejected: 'bị từ chối', interview: 'được mời phỏng vấn', interviewing: 'được mời phỏng vấn', viewed: 'đã xem', pending: 'đang chờ' }[status] || status;
+        const statusText = { accepted: 'được chấp nhận — chờ nhận offer', rejected: 'chưa phù hợp', interview: 'được mời phỏng vấn', viewed: 'đã được xem', pending: 'đang chờ duyệt' }[status] || status;
+        const title = job ? job.title : 'vị trí ứng tuyển';
+        const iv = app.interview || {};
+        const ivHtml = status === 'interview' ? `
+          <div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;margin:12px 0">
+            <b style="color:#1d4ed8">Lịch phỏng vấn</b><br/>
+            ${iv.date ? `📅 Ngày: <b>${iv.date}</b> ${iv.time ? `lúc ${iv.time}` : ''}<br/>` : ''}
+            ${iv.location ? `📍 Địa điểm: ${iv.location}<br/>` : ''}
+            ${iv.meetLink ? `🔗 Link: <a href="${iv.meetLink}">${iv.meetLink}</a><br/>` : ''}
+            ${iv.interviewer ? `👤 Người phỏng vấn: ${iv.interviewer}<br/>` : ''}
+            ${iv.note ? `📝 Lưu ý: ${iv.note}<br/>` : ''}
+          </div>` : '';
+        const noteHtml = companyNote ? `<p style="background:#fefce8;border:1px solid #fde68a;border-radius:10px;padding:10px 14px">Ghi chú từ NTD: ${companyNote}</p>` : '';
         return sendMail({
           to: cand.email,
-          subject: `[ITMatch] Ho so ${job ? job.title : ''} ${statusText}`,
-          html: `<p>Xin chao ${cand.name},</p><p>Ho so ung tuyen cho <b>${job ? job.title : 'vi tri'}</b> cua ban da duoc cap nhat: <b>${statusText}</b>.</p>${companyNote ? `<p>Ghi chu tu NTD: ${companyNote}</p>` : ''}<p>Tran trong,<br/>ITMatch</p>`,
+          subject: `[ITMatch] ${title} — ${statusText}`,
+          html: `<p>Xin chào <b>${cand.name}</b>,</p>
+            <p>Hồ sơ ứng tuyển <b>${title}</b> ${job ? `tại <b>${job.company}</b>` : ''} của bạn: <b style="color:${status==='rejected'?'#dc2626':status==='accepted'?'#059669':'#2563eb'}">${statusText}</b>.</p>
+            ${ivHtml}${noteHtml}
+            <p>Vui lòng đăng nhập ITMatch để xem chi tiết & phản hồi.<br/>Trân trọng,<br/>ITMatch</p>`,
         });
       });
     }).catch(e => console.warn('[mail] loi gui mail', e.message));
@@ -268,10 +303,12 @@ const updateApplicationStatus = async (applicationId, { status, companyNote }, e
     throw error;
   }
 
+  const prev = demoApplications[appIndex].status;
+  demoApplications[appIndex].history = demoApplications[appIndex].history || [];
+  demoApplications[appIndex].history.push({ from: prev, to: status, companyNote, interview, at: new Date().toISOString(), by: employerId });
   demoApplications[appIndex].status = status;
-  if (companyNote !== undefined) {
-    demoApplications[appIndex].companyNote = companyNote;
-  }
+  if (companyNote !== undefined) demoApplications[appIndex].companyNote = companyNote;
+  if (interview !== undefined) demoApplications[appIndex].interview = interview;
 
   return {
     message: 'Cập nhật trạng thái thành công (Demo)',

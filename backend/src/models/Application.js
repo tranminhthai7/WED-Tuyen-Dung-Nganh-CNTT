@@ -38,6 +38,27 @@ const applicationSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    interview: {
+      date: { type: String, default: '' },          // YYYY-MM-DD
+      time: { type: String, default: '' },          // HH:mm
+      location: { type: String, default: '' },      // phòng / địa chỉ / Meet
+      interviewer: { type: String, default: '' },
+      meetLink: { type: String, default: '' },
+      note: { type: String, default: '' },
+    },
+    history: {
+      type: [
+        {
+          from: String,
+          to: String,
+          companyNote: String,
+          interview: Object,
+          by: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
+          at: { type: Date, default: Date.now },
+        },
+      ],
+      default: [],
+    },
   },
   { timestamps: true }
 );

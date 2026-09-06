@@ -45,6 +45,7 @@ export default function EmployerDashboardPage() {
   const [selectedAppId, setSelectedAppId] = useState(null);
   const [companyNote, setCompanyNote] = useState('');
   const [statusAction, setStatusAction] = useState('pending');
+  const [interviewForm, setInterviewForm] = useState({ date: '', time: '', location: '', interviewer: '', meetLink: '', note: '' });
   const [pdfUrl, setPdfUrl] = useState('');
   const [aiJdPrompt, setAiJdPrompt] = useState('');
   const [aiJdLoading, setAiJdLoading] = useState(false);
@@ -135,11 +136,17 @@ export default function EmployerDashboardPage() {
   };
 
   const handleUpdateStatusSubmit = (appId) => {
+    const isInterview = statusAction === 'interview';
+    if (isInterview && !interviewForm.date && !interviewForm.time && !interviewForm.location && !interviewForm.meetLink) {
+      alert('Mời phỏng vấn cần nhập ngày/giờ hoặc địa điểm/link');
+      return;
+    }
     updateStatusMutation.mutate({
       id: appId,
       payload: {
         status: statusAction,
         companyNote,
+        ...(isInterview ? { interview: interviewForm } : {}),
       },
     });
   };
@@ -195,7 +202,7 @@ export default function EmployerDashboardPage() {
                   {myCompany?.logo ? <img src={myCompany.logo} alt="logo" className="w-16 h-16 rounded-2xl object-cover border" /> : <div className="w-16 h-16 rounded-2xl bg-gray-100 border flex items-center justify-center text-gray-400 text-xs">Logo</div>}
                   <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-300 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 text-gray-700">{logoUploading ? 'Đang tải...' : 'Upload logo'}<input type="file" accept="image/*" className="hidden" disabled={logoUploading} onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; setLogoUploading(true); try { await uploadCompanyLogo(f); setCompanyMsg('Upload logo thành công!'); } catch (err) { setCompanyMsg(err.message); } finally { setLogoUploading(false); } }} /></label>
                 </div>
-                <form onSubmit={async (e) => { e.preventDefault(); try { await updateMyCompany({ ...company, techStack: company.techStack.split(',').map(s => s.trim()).filter(Boolean) }); setCompanyMsg('Đã lưu hồ sơ công ty!'); } catch (err) { setCompanyMsg(err.message); } }} className="mt-6 grid gap-4 md:grid-cols-2">
+                <form onSubmit={async (e) => { e.preventDefault(); try { const r = await updateMyCompany({ ...company, techStack: company.techStack.split(',').map(s => s.trim()).filter(Boolean) }); setCompanyMsg(r.message || 'Đã lưu!'); queryClient.invalidateQueries({ queryKey: ['myCompany'] }); } catch (err) { setCompanyMsg(err.message); } }} className="mt-6 grid gap-4 md:grid-cols-2">
                   <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Tên công ty</span><input value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
                   <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Website</span><input value={company.website} onChange={e => setCompany({ ...company, website: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
                   <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Ngành</span><input value={company.industry} onChange={e => setCompany({ ...company, industry: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
@@ -226,7 +233,7 @@ export default function EmployerDashboardPage() {
                       <span className="text-xs font-bold text-violet-700 flex items-center gap-1.5"><Sparkles size={14} /> Soạn tin bằng AI</span>
                       <div className="flex gap-2">
                         <input value={aiJdPrompt} onChange={(e) => setAiJdPrompt(e.target.value)} placeholder="VD: Cần React dev 2 năm, lương 20-30tr, HCM" className="flex-1 px-3 py-2 bg-white border border-gray-200 rounded-xl text-sm outline-none" />
-                        <button type="button" disabled={aiJdLoading || !aiJdPrompt.trim()} onClick={async () => { setAiJdLoading(true); try { const r = await aiGenerateJD(aiJdPrompt); const jd = r.jd; setJobForm((f) => ({ ...f, title: jd.title || f.title, description: jd.description || f.description, tagsInput: (jd.requirements || []).join(', '), salary: jd.salary || f.salary })); setPostStatus({ kind: 'success', message: 'Đã điền bằng AI - kiểm tra lại rồi bấm Đăng tuyển' }); setTimeout(() => setPostStatus({ kind: 'idle', message: '' }), 3000); } catch (e) { setPostStatus({ kind: 'error', message: e.message }); } finally { setAiJdLoading(false); } }} className="px-4 py-2 bg-violet-600 text-white rounded-xl text-xs font-bold hover:bg-violet-700 disabled:opacity-50 shrink-0">{aiJdLoading ? 'Đang sinh...' : '✨ Sinh JD'}</button>
+                        <button type="button" disabled={aiJdLoading || !aiJdPrompt.trim()} onClick={async () => { setAiJdLoading(true); try { const r = await aiGenerateJD(aiJdPrompt); const jd = r.jd; setJobForm((f) => ({ ...f, title: jd.title || f.title, description: jd.description || f.description, tagsInput: (jd.requirements || []).join(', '), salary: jd.salary || f.salary, location: jd.location || f.location, mode: jd.mode || f.mode, level: jd.level || f.level, quantity: jd.quantity || f.quantity, deadline: jd.deadline || f.deadline })); setPostStatus({ kind: 'success', message: 'Đã điền bằng AI (kể cả SL & hạn nộp) - kiểm tra lại rồi bấm Đăng tuyển' }); setTimeout(() => setPostStatus({ kind: 'idle', message: '' }), 3000); } catch (e) { setPostStatus({ kind: 'error', message: e.message }); } finally { setAiJdLoading(false); } }} className="px-4 py-2 bg-violet-600 text-white rounded-xl text-xs font-bold hover:bg-violet-700 disabled:opacity-50 shrink-0">{aiJdLoading ? 'Đang sinh...' : '✨ Sinh JD'}</button>
                       </div>
                     </div>
                     {postStatus.kind === 'error' && (
@@ -459,15 +466,26 @@ export default function EmployerDashboardPage() {
                         </div>
 
                         {app.coverLetter && (
-                          <div className="mt-3 p-3 bg-gray-50 rounded-xl text-xs text-gray-600">
-                            <strong>Cover Letter:</strong> {app.coverLetter}
+                          <div className="mt-3 p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs text-gray-600 whitespace-pre-line leading-relaxed">
+                            <strong className="text-gray-700">Cover Letter:</strong> {app.coverLetter}
                           </div>
                         )}
 
                         {app.companyNote && (
-                          <div className="mt-2 p-3 bg-yellow-50/50 text-yellow-800 border border-yellow-100 rounded-xl text-xs">
+                          <div className="mt-2 p-3 bg-yellow-50/50 text-yellow-800 border border-yellow-100 rounded-xl text-xs flex items-start gap-1.5">
                             <strong>Ghi chú:</strong> {app.companyNote}
                           </div>
+                        )}
+                        {app.interview?.date && (
+                          <div className="mt-2 p-3 bg-blue-50/60 border border-blue-100 rounded-xl text-xs text-blue-900">
+                            <strong className="text-blue-700">📅 Lịch phỏng vấn:</strong> {app.interview.date}{app.interview.time ? ` lúc ${app.interview.time}` : ''} {app.interview.location ? `— ${app.interview.location}` : ''} {app.interview.interviewer ? `(gặp ${app.interview.interviewer})` : ''} {app.interview.meetLink && <a href={app.interview.meetLink} target="_blank" rel="noreferrer" className="text-blue-600 underline ml-1">{app.interview.meetLink}</a>}
+                            {app.interview.note && <div className="mt-1 text-blue-700/70">{app.interview.note}</div>}
+                          </div>
+                        )}
+                        {app.history?.length > 0 && (
+                          <details className="mt-2 text-[11px] text-gray-500"><summary className="cursor-pointer font-bold">Lịch sử cập nhật ({app.history.length})</summary>
+                            <div className="mt-1 space-y-1 border-l-2 border-gray-100 pl-3">{app.history.slice(-5).reverse().map((h,i)=>(<div key={i}>{new Date(h.at).toLocaleString('vi-VN')}: {h.from} → <b>{h.to}</b> {h.companyNote ? `— ${h.companyNote}` : ''}</div>))}</div>
+                          </details>
                         )}
 
                         <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
@@ -480,7 +498,7 @@ export default function EmployerDashboardPage() {
                               <div className="flex gap-2">
                                 <select
                                   value={statusAction}
-                                  onChange={(e) => setStatusAction(e.target.value)}
+                                  onChange={(e) => { setStatusAction(e.target.value); if (e.target.value !== 'interview') setInterviewForm({ date: '', time: '', location: '', interviewer: '', meetLink: '', note: '' }); else { const iv = app.interview || {}; setInterviewForm({ date: iv.date||'', time: iv.time||'', location: iv.location||'', interviewer: iv.interviewer||'', meetLink: iv.meetLink||'', note: iv.note||'' }); } }}
                                   className="text-xs px-2.5 py-1.5 border border-gray-200 rounded-xl outline-none focus:border-blue-500 bg-gray-50 cursor-pointer"
                                 >
                                   <option value="viewed">Đã xem CV</option>
@@ -496,6 +514,16 @@ export default function EmployerDashboardPage() {
                                   className="text-xs flex-grow px-3 py-1.5 border border-gray-200 rounded-xl outline-none focus:border-blue-500 bg-gray-50"
                                 />
                               </div>
+                              {statusAction === 'interview' && (
+                                <div className="grid grid-cols-2 gap-2 p-3 bg-blue-50/50 border border-blue-100 rounded-xl">
+                                  <label className="flex flex-col gap-1 text-[11px] font-bold text-gray-700">Ngày<input type="date" value={interviewForm.date} onChange={e=>setInterviewForm({...interviewForm,date:e.target.value})} className="px-2 py-1.5 border rounded-lg text-xs" /></label>
+                                  <label className="flex flex-col gap-1 text-[11px] font-bold text-gray-700">Giờ<input type="time" value={interviewForm.time} onChange={e=>setInterviewForm({...interviewForm,time:e.target.value})} className="px-2 py-1.5 border rounded-lg text-xs" /></label>
+                                  <label className="flex flex-col gap-1 text-[11px] font-bold text-gray-700 col-span-2">Địa điểm<input value={interviewForm.location} onChange={e=>setInterviewForm({...interviewForm,location:e.target.value})} placeholder="P.301, 123 CMT8, Q10" className="px-2 py-1.5 border rounded-lg text-xs" /></label>
+                                  <label className="flex flex-col gap-1 text-[11px] font-bold text-gray-700">Người PV<input value={interviewForm.interviewer} onChange={e=>setInterviewForm({...interviewForm,interviewer:e.target.value})} placeholder="Anh Minh" className="px-2 py-1.5 border rounded-lg text-xs" /></label>
+                                  <label className="flex flex-col gap-1 text-[11px] font-bold text-gray-700">Link Meet<input value={interviewForm.meetLink} onChange={e=>setInterviewForm({...interviewForm,meetLink:e.target.value})} placeholder="https://meet..." className="px-2 py-1.5 border rounded-lg text-xs" /></label>
+                                  <label className="flex flex-col gap-1 text-[11px] font-bold text-gray-700 col-span-2">Ghi chú<input value={interviewForm.note} onChange={e=>setInterviewForm({...interviewForm,note:e.target.value})} placeholder="Mang laptop, đến trước 15p" className="px-2 py-1.5 border rounded-lg text-xs" /></label>
+                                </div>
+                              )}
                               <div className="flex gap-2 justify-end">
                                 <button
                                   onClick={() => setSelectedAppId(null)}
@@ -517,6 +545,8 @@ export default function EmployerDashboardPage() {
                                 setSelectedAppId(app.id);
                                 setStatusAction(app.status);
                                 setCompanyNote(app.companyNote || '');
+                                const iv = app.interview || {};
+                                setInterviewForm({ date: iv.date||'', time: iv.time||'', location: iv.location||'', interviewer: iv.interviewer||'', meetLink: iv.meetLink||'', note: iv.note||'' });
                               }}
                               className="text-xs font-bold text-blue-600 hover:text-blue-700 flex items-center gap-1"
                             >
