@@ -27,43 +27,43 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
       <Header />
 
-      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        {/* Hero Section */}
-        <section className="relative rounded-3xl overflow-hidden bg-gradient-to-br from-emerald-50 via-slate-50 to-amber-50/70 border border-gray-200/50 shadow-sm p-8 sm:p-12 mb-10">
+      {/* Hero full-bleed teal/mint */}
+      <section className="w-full bg-gradient-to-br from-[#e8f6f2] via-[#eefaf6] to-[#fdf3d7] border-b border-teal-900/5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
           <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
             <div>
-              <p className="text-xs font-extrabold tracking-widest text-blue-600 uppercase mb-4">
+              <p className="text-xs font-extrabold tracking-widest text-[#0f766e] uppercase mb-4">
                 Tuyển dụng công nghệ, rõ ràng hơn
               </p>
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 leading-none tracking-tight">
-                Tìm nơi bạn có thể <span className="text-blue-600">làm việc tốt.</span>
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0f2e2e] leading-none tracking-tight">
+                Tìm nơi bạn có thể <span className="text-[#0f766e]">làm việc tốt.</span>
               </h1>
-              <p className="mt-5 text-base sm:text-lg text-gray-500 max-w-xl leading-relaxed">
+              <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed">
                 Cơ hội thật, thông tin đủ, và những đội ngũ đang tìm đúng người. Không ồn ào, không vòng vo.
               </p>
 
               {/* Search Panel */}
-              <form onSubmit={handleSearchSubmit} className="mt-8 p-2.5 bg-white/95 rounded-2xl border border-gray-200 shadow-lg flex flex-col md:flex-row gap-3">
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl flex-grow border border-transparent focus-within:border-blue-500 transition-colors">
-                  <Search size={18} className="text-gray-400" />
+              <form onSubmit={handleSearchSubmit} className="mt-8 p-2.5 bg-white rounded-[18px] border border-teal-900/10 shadow-[0_12px_32px_rgba(16,60,57,0.08)] flex flex-col md:flex-row gap-3">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] rounded-xl flex-grow min-w-0 border border-transparent focus-within:border-teal-500 transition-colors">
+                  <Search size={18} className="text-slate-400 shrink-0" />
                   <input
                     type="text"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     placeholder="Chức danh, kỹ năng hoặc tên công ty"
-                    className="w-full bg-transparent outline-none text-sm text-gray-800"
+                    className="w-full bg-transparent outline-none text-sm text-slate-800 placeholder:whitespace-nowrap min-w-0"
                     aria-label="Từ khóa tìm kiếm"
                   />
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-transparent focus-within:border-blue-500 transition-colors md:max-w-xs w-full">
-                  <MapPin size={18} className="text-gray-400" />
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] rounded-xl border border-transparent focus-within:border-teal-500 transition-colors md:max-w-xs w-full min-w-0">
+                  <MapPin size={18} className="text-slate-400 shrink-0" />
                   <select
                     value={locationTerm}
                     onChange={(e) => setLocationTerm(e.target.value)}
-                    className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer appearance-none"
+                    className="w-full bg-transparent outline-none text-sm text-slate-800 cursor-pointer appearance-none whitespace-nowrap overflow-hidden text-ellipsis min-w-0"
                     aria-label="Địa điểm"
                   >
                     <option>Tất cả địa điểm</option>
@@ -71,26 +71,26 @@ export default function HomePage() {
                     <option>Hà Nội</option>
                     <option>Remote</option>
                   </select>
-                  <ChevronDown size={16} className="text-gray-400" />
+                  <ChevronDown size={16} className="text-slate-400 shrink-0" />
                 </div>
-                <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-3 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2">
+                <button type="submit" className="bg-[#0f3d3a] hover:bg-[#16423f] text-white font-bold px-6 py-3 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 shrink-0 whitespace-nowrap leading-none">
                   Tìm việc <ArrowRight size={18} />
                 </button>
               </form>
 
               {/* Roles Row */}
-              <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-gray-500">
-                <span className="font-semibold text-gray-700">Đang được tìm kiếm:</span>
+              <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-slate-500">
+                <span className="font-semibold text-slate-700">Đang được tìm kiếm:</span>
                 {roles.slice(0, 4).map((role) => (
-                  <Link key={role} to={`/jobs?q=${role}`} className="text-blue-600 hover:underline">
+                  <Link key={role} to={`/jobs?q=${role}`} className="text-teal-700 hover:text-teal-800 underline decoration-teal-700/30">
                     {role}
                   </Link>
                 ))}
               </div>
             </div>
 
-            {/* Note Panel */}
-            <div className="bg-gradient-to-b from-blue-600 to-blue-800 text-white p-8 rounded-3xl shadow-xl transform rotate-1 lg:max-w-md w-full justify-self-center lg:justify-self-end">
+            {/* Note Panel teal */}
+            <div className="bg-[#16423f] text-white p-8 rounded-[28px] shadow-[0_20px_48px_rgba(16,60,57,0.22)] transform rotate-[1.2deg] lg:max-w-md w-full justify-self-center lg:justify-self-end">
               <div className="flex items-center justify-between text-[11px] font-bold opacity-80 uppercase tracking-widest">
                 <span className="flex items-center gap-1.5"><Sparkles size={14} /> itmatch signal</span>
                 <span>01 / 04</span>
@@ -113,7 +113,10 @@ export default function HomePage() {
               </Link>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
+
+      <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         {/* Trust Strip */}
         <section className="bg-white border border-gray-200/80 rounded-2xl shadow-sm p-6 mb-12">

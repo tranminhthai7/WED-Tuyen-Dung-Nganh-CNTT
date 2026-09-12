@@ -9,11 +9,11 @@ export default function CompanyDetailPage() {
   const { slug } = useParams();
   const { data: company, isLoading, isError } = useQuery({ queryKey: ['company', slug], queryFn: () => fetchCompany(slug), enabled: !!slug });
 
-  if (isLoading) return <div className="min-h-screen bg-gray-50"><Header /><p className="text-center py-20 text-slate-400">Đang tải…</p></div>;
-  if (isError || !company) return <div className="min-h-screen bg-gray-50"><Header /><div className="max-w-3xl mx-auto py-20 text-center"><p className="text-slate-500">Không tìm thấy công ty.</p><Link to="/companies" className="text-teal-700 font-bold mt-4 inline-block">← Về danh sách công ty</Link></div></div>;
+  if (isLoading) return <div className="min-h-screen bg-[#f6fbf9]"><Header /><p className="text-center py-20 text-slate-400">Đang tải…</p></div>;
+  if (isError || !company) return <div className="min-h-screen bg-[#f6fbf9]"><Header /><div className="max-w-3xl mx-auto py-20 text-center"><p className="text-slate-500">Không tìm thấy công ty.</p><Link to="/companies" className="text-teal-700 font-bold mt-4 inline-block">← Về danh sách công ty</Link></div></div>;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f6fbf9]">
       <Header />
       <div className="bg-[#16423f] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex items-center justify-between gap-6">

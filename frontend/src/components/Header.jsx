@@ -14,11 +14,11 @@ export default function Header() {
   };
 
   return (
-    <header className="site-header border-b border-gray-200/50 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+    <header className="sticky top-0 z-50 border-b border-teal-900/5 bg-[#eaf7f3]/80 backdrop-blur-xl">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 font-black text-2xl tracking-tight text-gray-900">
-          <span className="grid size-9 place-items-center rounded-xl bg-blue-600 text-white font-bold text-lg">i</span>
-          <span>itmatch<span className="text-blue-600">.</span></span>
+        <Link to="/" className="flex items-center gap-2 font-black text-2xl tracking-tight text-[#0f2e2e]">
+          <span className="grid size-9 place-items-center rounded-xl bg-[#16423f] text-white font-bold text-lg">i</span>
+          <span>itmatch<span className="text-[#0f766e]">.</span></span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -88,7 +88,7 @@ export default function Header() {
       {menuOpen && (
         <div className="md:hidden border-t border-gray-100 bg-white px-4 py-3 space-y-2">
           <Link to="/jobs" onClick={() => setMenuOpen(false)} className="block py-2 text-gray-600 hover:text-blue-600 font-medium">Tìm việc</Link>
-          <Link to="/#companies" onClick={() => setMenuOpen(false)} className="block py-2 text-gray-600 hover:text-blue-600 font-medium">Công ty</Link>
+          <Link to="/companies" onClick={() => setMenuOpen(false)} className="block py-2 text-gray-600 hover:text-blue-600 font-medium">Công ty</Link>
           {isAuthenticated ? (
             <>
               {user?.role === 'candidate' && (

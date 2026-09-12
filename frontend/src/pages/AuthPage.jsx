@@ -90,7 +90,7 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-[#f6fbf9] flex items-center justify-center p-4">
       <div className="bg-white border border-gray-200 shadow-xl rounded-3xl overflow-hidden max-w-4xl w-full grid md:grid-cols-2">
         {/* Left Info Panel */}
         <section className="bg-gradient-to-br from-blue-600 to-blue-800 p-8 sm:p-12 text-white flex flex-col justify-between">
@@ -152,7 +152,7 @@ export default function AuthPage() {
             {isRegister && (
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">Họ tên</span>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
                   <UserRound size={18} className="text-gray-400" />
                   <input
                     name="name"
@@ -169,7 +169,7 @@ export default function AuthPage() {
 
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-bold text-gray-700">Email</span>
-              <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
+              <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
                 <Mail size={18} className="text-gray-400" />
                 <input
                   name="email"
@@ -185,7 +185,7 @@ export default function AuthPage() {
 
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-bold text-gray-700">Mật khẩu</span>
-              <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
+              <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
                 <Lock size={18} className="text-gray-400" />
                 <input
                   name="password"

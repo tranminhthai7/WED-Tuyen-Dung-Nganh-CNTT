@@ -128,7 +128,7 @@ export default function ProfilePage() {
 
   if (profileLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+      <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
         <Header />
         <div className="max-w-4xl w-full mx-auto px-4 py-20 flex-grow">
           <div className="bg-white border border-gray-200 rounded-3xl p-8 animate-pulse space-y-6">
@@ -151,7 +151,7 @@ export default function ProfilePage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
       <Header />
 
       <main className="flex-grow max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -178,7 +178,7 @@ export default function ProfilePage() {
           <div className="bg-white border border-gray-200/80 rounded-3xl p-6 sm:p-8 shadow-sm space-y-5">
             <label className="flex flex-col gap-1.5">
               <span className="text-xs font-bold text-gray-700">Họ và tên</span>
-              <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
+              <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
                 <UserRound size={18} className="text-gray-400" />
                 <input
                   name="name"
@@ -194,7 +194,7 @@ export default function ProfilePage() {
             <div className="grid sm:grid-cols-2 gap-4">
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">Số điện thoại</span>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
                   <Phone size={18} className="text-gray-400" />
                   <input
                     name="phone"
@@ -210,14 +210,14 @@ export default function ProfilePage() {
                 <span className="text-xs font-bold text-gray-700">Avatar</span>
                 <div className="flex items-center gap-4">
                   {formData.avatar ? <img src={formData.avatar} alt="avatar" className="w-28 h-28 rounded-full object-cover border-2 border-gray-100 shadow-sm" /> : <div className="w-28 h-28 rounded-full bg-gray-100 border-2 border-dashed border-gray-200 flex items-center justify-center text-gray-400 text-xs">No img</div>}
-                  <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-300 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 text-gray-700">{upAvatar ? 'Đang tải...' : 'Chọn ảnh'}<input type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} disabled={upAvatar} /></label>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-300 rounded-xl shadow-sm cursor-pointer hover:bg-[#f6fbf9] text-gray-700">{upAvatar ? 'Đang tải...' : 'Chọn ảnh'}<input type="file" accept="image/*" className="hidden" onChange={handleAvatarFile} disabled={upAvatar} /></label>
                 </div>
               </label>
 
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">CV (PDF)</span>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-300 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 text-gray-700">{upCv ? 'Đang tải...' : 'Upload CV'}<input type="file" accept=".pdf" className="hidden" onChange={handleCvFile} disabled={upCv} /></label>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-300 rounded-xl shadow-sm cursor-pointer hover:bg-[#f6fbf9] text-gray-700">{upCv ? 'Đang tải...' : 'Upload CV'}<input type="file" accept=".pdf" className="hidden" onChange={handleCvFile} disabled={upCv} /></label>
                   {formData.cvUrl && (
                     <>
                       <a href={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} target="_blank" rel="noreferrer" className="text-xs font-bold px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700">Mở tab mới ↗</a>
@@ -226,14 +226,14 @@ export default function ProfilePage() {
                     </>
                   )}
                 </div>
-                <input name="cvUrl" type="url" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf (hoặc bấm Upload CV để chọn file)" className="mt-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800" />
+                <input name="cvUrl" type="url" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf (hoặc bấm Upload CV để chọn file)" className="mt-1 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800" />
                 {formData.cvUrl && formData.cvUrl.startsWith('http') && (
                   <div className="mt-2 border border-gray-200 rounded-xl overflow-hidden bg-white">
-                    <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border-b border-gray-200 flex-wrap">
+                    <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border-b border-gray-200 flex-wrap">
                       <span className="text-xs font-bold text-gray-600">CV của bạn</span>
                       <div className="ml-auto flex items-center gap-2">
                         {!showPreview ? (
-                          <button type="button" onClick={() => setShowPreview(true)} className="text-xs font-bold px-3 py-1.5 bg-white border border-gray-300 rounded-xl hover:bg-gray-50">👁 Xem trước</button>
+                          <button type="button" onClick={() => setShowPreview(true)} className="text-xs font-bold px-3 py-1.5 bg-white border border-gray-300 rounded-xl hover:bg-[#f6fbf9]">👁 Xem trước</button>
                         ) : (
                           <button type="button" onClick={() => setShowPreview(false)} className="text-[11px] font-bold px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-100">Ẩn</button>
                         )}
@@ -259,7 +259,7 @@ export default function ProfilePage() {
             <div className="grid sm:grid-cols-2 gap-4">
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">Kinh nghiệm làm việc</span>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
                   <Briefcase size={18} className="text-gray-400" />
                   <input
                     name="experience"
@@ -274,7 +274,7 @@ export default function ProfilePage() {
 
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">Học vấn / Bằng cấp</span>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
                   <GraduationCap size={18} className="text-gray-400" />
                   <input
                     name="education"
@@ -296,14 +296,14 @@ export default function ProfilePage() {
                 value={formData.bio}
                 onChange={handleChange}
                 placeholder="Giới thiệu nhanh về mục tiêu nghề nghiệp, stack đang quan tâm..."
-                className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
+                className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
               />
             </label>
 
             <div className="grid sm:grid-cols-2 gap-4">
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">Link GitHub</span>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
                   <Github size={18} className="text-gray-400" />
                   <input
                     name="github"
@@ -317,7 +317,7 @@ export default function ProfilePage() {
 
               <label className="flex flex-col gap-1.5">
                 <span className="text-xs font-bold text-gray-700">Link LinkedIn</span>
-                <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
+                <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl focus-within:border-blue-500 transition-colors">
                   <Linkedin size={18} className="text-gray-400" />
                   <input
                     name="linkedin"
@@ -400,7 +400,7 @@ export default function ProfilePage() {
             })()}
             {/* Thêm kỹ năng khác */}
             <div className="flex gap-2">
-              <input value={customSkill} onChange={(e) => setCustomSkill(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSkill(); } }} placeholder="Thêm kỹ năng khác, vd: Jira" className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-xs" />
+              <input value={customSkill} onChange={(e) => setCustomSkill(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSkill(); } }} placeholder="Thêm kỹ năng khác, vd: Jira" className="flex-1 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-xs" />
               <button type="button" onClick={handleAddCustomSkill} className="px-3 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold hover:bg-blue-700 shrink-0">Thêm</button>
             </div>
             <div className="text-[10px] text-gray-400 leading-normal flex items-start gap-1 p-2 bg-blue-50/50 rounded-xl">

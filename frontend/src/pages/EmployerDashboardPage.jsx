@@ -158,7 +158,7 @@ export default function EmployerDashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
       <Header />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -182,7 +182,7 @@ export default function EmployerDashboardPage() {
               <button
                 key={key}
                 onClick={() => setSection(key)}
-                className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-bold transition-colors ${section === key ? 'bg-blue-50 text-blue-700 shadow-sm border-l-2 border-blue-600' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'}`}
+                className={`flex items-center gap-3 rounded-xl px-4 py-2.5 text-xs font-bold transition-colors ${section === key ? 'bg-blue-50 text-blue-700 shadow-sm border-l-2 border-blue-600' : 'text-gray-500 hover:bg-[#f6fbf9] hover:text-gray-700'}`}
               >
                 <Icon size={16} />
                 <span>{label}</span>
@@ -200,16 +200,16 @@ export default function EmployerDashboardPage() {
                 {myCompany?.isVerified === true && <p className="mt-3 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-xl px-3 py-2">Đã xác thực ✓</p>}
                 <div className="mt-6 flex items-center gap-4">
                   {myCompany?.logo ? <img src={myCompany.logo} alt="logo" className="w-16 h-16 rounded-2xl object-cover border" /> : <div className="w-16 h-16 rounded-2xl bg-gray-100 border flex items-center justify-center text-gray-400 text-xs">Logo</div>}
-                  <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-300 rounded-xl shadow-sm cursor-pointer hover:bg-gray-50 text-gray-700">{logoUploading ? 'Đang tải...' : 'Upload logo'}<input type="file" accept="image/*" className="hidden" disabled={logoUploading} onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; setLogoUploading(true); try { await uploadCompanyLogo(f); setCompanyMsg('Upload logo thành công!'); } catch (err) { setCompanyMsg(err.message); } finally { setLogoUploading(false); } }} /></label>
+                  <label className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-300 rounded-xl shadow-sm cursor-pointer hover:bg-[#f6fbf9] text-gray-700">{logoUploading ? 'Đang tải...' : 'Upload logo'}<input type="file" accept="image/*" className="hidden" disabled={logoUploading} onChange={async (e) => { const f = e.target.files?.[0]; if (!f) return; setLogoUploading(true); try { await uploadCompanyLogo(f); setCompanyMsg('Upload logo thành công!'); } catch (err) { setCompanyMsg(err.message); } finally { setLogoUploading(false); } }} /></label>
                 </div>
                 <form onSubmit={async (e) => { e.preventDefault(); try { const r = await updateMyCompany({ ...company, techStack: company.techStack.split(',').map(s => s.trim()).filter(Boolean) }); setCompanyMsg(r.message || 'Đã lưu!'); queryClient.invalidateQueries({ queryKey: ['myCompany'] }); } catch (err) { setCompanyMsg(err.message); } }} className="mt-6 grid gap-4 md:grid-cols-2">
-                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Tên công ty</span><input value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
-                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Website</span><input value={company.website} onChange={e => setCompany({ ...company, website: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
-                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Ngành</span><input value={company.industry} onChange={e => setCompany({ ...company, industry: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
-                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Quy mô</span><input value={company.size} onChange={e => setCompany({ ...company, size: e.target.value })} placeholder="50-200" className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
-                  <label className="flex flex-col gap-1.5 md:col-span-2"><span className="text-xs font-bold text-gray-700">Địa chỉ</span><input value={company.address} onChange={e => setCompany({ ...company, address: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
-                  <label className="flex flex-col gap-1.5 md:col-span-2"><span className="text-xs font-bold text-gray-700">Mô tả</span><textarea rows={3} value={company.description} onChange={e => setCompany({ ...company, description: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
-                  <label className="flex flex-col gap-1.5 md:col-span-2"><span className="text-xs font-bold text-gray-700">Tech stack (phẩy)</span><input value={company.techStack} onChange={e => setCompany({ ...company, techStack: e.target.value })} placeholder="React, Node.js, AWS" className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Tên công ty</span><input value={company.name} onChange={e => setCompany({ ...company, name: e.target.value })} className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Website</span><input value={company.website} onChange={e => setCompany({ ...company, website: e.target.value })} className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Ngành</span><input value={company.industry} onChange={e => setCompany({ ...company, industry: e.target.value })} className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5"><span className="text-xs font-bold text-gray-700">Quy mô</span><input value={company.size} onChange={e => setCompany({ ...company, size: e.target.value })} placeholder="50-200" className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5 md:col-span-2"><span className="text-xs font-bold text-gray-700">Địa chỉ</span><input value={company.address} onChange={e => setCompany({ ...company, address: e.target.value })} className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5 md:col-span-2"><span className="text-xs font-bold text-gray-700">Mô tả</span><textarea rows={3} value={company.description} onChange={e => setCompany({ ...company, description: e.target.value })} className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
+                  <label className="flex flex-col gap-1.5 md:col-span-2"><span className="text-xs font-bold text-gray-700">Tech stack (phẩy)</span><input value={company.techStack} onChange={e => setCompany({ ...company, techStack: e.target.value })} placeholder="React, Node.js, AWS" className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm" /></label>
                   <button type="submit" className="md:col-span-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl text-sm">Lưu hồ sơ công ty</button>
                   {companyMsg && <p className="md:col-span-2 text-xs font-semibold text-blue-700 bg-blue-50 border border-blue-100 rounded-xl px-3 py-2">{companyMsg}</p>}
                 </form>
@@ -250,7 +250,7 @@ export default function EmployerDashboardPage() {
                         value={jobForm.title}
                         onChange={(e) => setJobForm({ ...jobForm, title: e.target.value })}
                         placeholder="Ví dụ: Senior Frontend Engineer"
-                        className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
+                        className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
                       />
                     </label>
 
@@ -262,7 +262,7 @@ export default function EmployerDashboardPage() {
                         value={jobForm.salary}
                         onChange={(e) => setJobForm({ ...jobForm, salary: e.target.value })}
                         placeholder="Ví dụ: 2,000 – 3,500 USD"
-                        className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
+                        className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
                       />
                     </label>
 
@@ -274,7 +274,7 @@ export default function EmployerDashboardPage() {
                         value={jobForm.location}
                         onChange={(e) => setJobForm({ ...jobForm, location: e.target.value })}
                         placeholder="Ví dụ: Hồ Chí Minh, Hà Nội"
-                        className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
+                        className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
                       />
                     </label>
 
@@ -284,7 +284,7 @@ export default function EmployerDashboardPage() {
                         <select
                           value={jobForm.mode}
                           onChange={(e) => setJobForm({ ...jobForm, mode: e.target.value })}
-                          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800 cursor-pointer"
+                          className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800 cursor-pointer"
                         >
                           <option>Hybrid</option>
                           <option>On-site</option>
@@ -297,7 +297,7 @@ export default function EmployerDashboardPage() {
                         <select
                           value={jobForm.level}
                           onChange={(e) => setJobForm({ ...jobForm, level: e.target.value })}
-                          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800 cursor-pointer"
+                          className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800 cursor-pointer"
                         >
                           <option>Intern</option>
                           <option>Fresher</option>
@@ -316,7 +316,7 @@ export default function EmployerDashboardPage() {
                           min={1}
                           value={jobForm.quantity}
                           onChange={(e) => setJobForm({ ...jobForm, quantity: parseInt(e.target.value) || 1 })}
-                          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
+                          className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
                         />
                       </label>
 
@@ -326,7 +326,7 @@ export default function EmployerDashboardPage() {
                           type="date"
                           value={jobForm.deadline}
                           onChange={(e) => setJobForm({ ...jobForm, deadline: e.target.value })}
-                          className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800 cursor-pointer"
+                          className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800 cursor-pointer"
                         />
                       </label>
                     </div>
@@ -338,7 +338,7 @@ export default function EmployerDashboardPage() {
                         value={jobForm.tagsInput}
                         onChange={(e) => setJobForm({ ...jobForm, tagsInput: e.target.value })}
                         placeholder="Ví dụ: React, TypeScript, Next.js, Git"
-                        className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
+                        className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
                       />
                     </label>
 
@@ -350,7 +350,7 @@ export default function EmployerDashboardPage() {
                         value={jobForm.description}
                         onChange={(e) => setJobForm({ ...jobForm, description: e.target.value })}
                         placeholder="Mô tả chi tiết vai trò, yêu cầu và quyền lợi..."
-                        className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
+                        className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
                       />
                     </label>
 
@@ -391,7 +391,7 @@ export default function EmployerDashboardPage() {
                     {postings.map((job) => (
                       <div
                         key={job.id || job.slug}
-                        className="flex items-center justify-between rounded-2xl border border-gray-100 p-5 hover:bg-gray-50/50 transition-colors"
+                        className="flex items-center justify-between rounded-2xl border border-gray-100 p-5 hover:bg-[#f6fbf9]/50 transition-colors"
                       >
                         <div>
                           <strong className="block text-sm font-bold text-gray-900">{job.title}</strong>
@@ -466,7 +466,7 @@ export default function EmployerDashboardPage() {
                         </div>
 
                         {app.coverLetter && (
-                          <div className="mt-3 p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs text-gray-600 whitespace-pre-line leading-relaxed">
+                          <div className="mt-3 p-3 bg-[#f6fbf9] border border-gray-100 rounded-xl text-xs text-gray-600 whitespace-pre-line leading-relaxed">
                             <strong className="text-gray-700">Cover Letter:</strong> {app.coverLetter}
                           </div>
                         )}
@@ -499,7 +499,7 @@ export default function EmployerDashboardPage() {
                                 <select
                                   value={statusAction}
                                   onChange={(e) => { setStatusAction(e.target.value); if (e.target.value !== 'interview') setInterviewForm({ date: '', time: '', location: '', interviewer: '', meetLink: '', note: '' }); else { const iv = app.interview || {}; setInterviewForm({ date: iv.date||'', time: iv.time||'', location: iv.location||'', interviewer: iv.interviewer||'', meetLink: iv.meetLink||'', note: iv.note||'' }); } }}
-                                  className="text-xs px-2.5 py-1.5 border border-gray-200 rounded-xl outline-none focus:border-blue-500 bg-gray-50 cursor-pointer"
+                                  className="text-xs px-2.5 py-1.5 border border-gray-200 rounded-xl outline-none focus:border-blue-500 bg-[#f6fbf9] cursor-pointer"
                                 >
                                   <option value="viewed">Đã xem CV</option>
                                   <option value="interview">Mời phỏng vấn</option>
@@ -511,7 +511,7 @@ export default function EmployerDashboardPage() {
                                   placeholder="Ghi chú thêm gửi ứng viên..."
                                   value={companyNote}
                                   onChange={(e) => setCompanyNote(e.target.value)}
-                                  className="text-xs flex-grow px-3 py-1.5 border border-gray-200 rounded-xl outline-none focus:border-blue-500 bg-gray-50"
+                                  className="text-xs flex-grow px-3 py-1.5 border border-gray-200 rounded-xl outline-none focus:border-blue-500 bg-[#f6fbf9]"
                                 />
                               </div>
                               {statusAction === 'interview' && (

@@ -77,7 +77,7 @@ export default function JobsPage() {
   useEffect(() => { if (page > totalPages) setPage(totalPages); }, [totalPages, page]);
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
       <Header />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -108,11 +108,11 @@ export default function JobsPage() {
 
         {/* Search Row */}
         <form onSubmit={handleSearchSubmit} className="p-2.5 bg-white rounded-2xl border border-gray-200 shadow-sm flex flex-col md:flex-row gap-3 mb-6">
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl flex-grow border border-transparent focus-within:border-blue-500 transition-colors">
+          <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] rounded-xl flex-grow border border-transparent focus-within:border-blue-500 transition-colors">
             <Search size={18} className="text-gray-400" />
             <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm công việc, vị trí, kỹ năng..." className="w-full bg-transparent outline-none text-sm text-gray-800" />
           </div>
-          <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 rounded-xl border border-transparent focus-within:border-blue-500 transition-colors md:max-w-xs w-full">
+          <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] rounded-xl border border-transparent focus-within:border-blue-500 transition-colors md:max-w-xs w-full">
             <MapPin size={18} className="text-gray-400" />
             <select value={loc} onChange={(e) => setLoc(e.target.value)} className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer appearance-none" aria-label="Địa điểm"><option>Tất cả địa điểm</option><option>Hồ Chí Minh</option><option>Hà Nội</option><option>Remote</option></select>
           </div>

@@ -10,7 +10,7 @@ export default function CompaniesPage() {
   const { data: companies = [], isLoading } = useQuery({ queryKey: ['companies'], queryFn: fetchCompanies });
   const filtered = useMemo(() => companies.filter(c => !q || c.name.toLowerCase().includes(q.toLowerCase())), [companies, q]);
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#f6fbf9]">
       <Header />
       <div className="bg-[#0f2a2e] text-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

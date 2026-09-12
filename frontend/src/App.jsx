@@ -34,7 +34,7 @@ export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <div className="app-shell bg-gray-50 min-h-screen">
+        <div className="app-shell bg-[#f6fbf9] min-h-screen">
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />

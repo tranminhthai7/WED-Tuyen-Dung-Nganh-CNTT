@@ -19,7 +19,7 @@ export default function AdminDashboardPage() {
   const mDelSkill = useMutation({ mutationFn: deleteSkill, onSuccess: () => qc.invalidateQueries({ queryKey: ['adminSkills'] }) });
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
       <Header />
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="flex items-center justify-between mb-6">
@@ -97,8 +97,8 @@ export default function AdminDashboardPage() {
           <div className="bg-white border border-gray-200/80 rounded-3xl p-6 shadow-sm">
             <h2 className="font-black text-gray-900 mb-4">Quản lý kỹ năng</h2>
             <form onSubmit={e => { e.preventDefault(); if (!newSkill.name.trim()) return; mAddSkill.mutate(newSkill); }} className="flex gap-2 mb-4">
-              <input value={newSkill.name} onChange={e => setNewSkill({ ...newSkill, name: e.target.value })} placeholder="Tên kỹ năng" className="flex-1 px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm" />
-              <select value={newSkill.category} onChange={e => setNewSkill({ ...newSkill, category: e.target.value })} className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm"><option>Frontend</option><option>Backend</option><option>Database</option><option>DevOps</option><option>Mobile</option><option>Design</option><option>Other</option></select>
+              <input value={newSkill.name} onChange={e => setNewSkill({ ...newSkill, name: e.target.value })} placeholder="Tên kỹ năng" className="flex-1 px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl text-sm" />
+              <select value={newSkill.category} onChange={e => setNewSkill({ ...newSkill, category: e.target.value })} className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl text-sm"><option>Frontend</option><option>Backend</option><option>Database</option><option>DevOps</option><option>Mobile</option><option>Design</option><option>Other</option></select>
               <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs font-bold">Thêm</button>
             </form>
             <div className="flex flex-wrap gap-2">{skills.map(s => (<span key={s._id} className="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 rounded-full text-xs font-semibold text-gray-700">{s.name}<span className="text-[10px] text-gray-400">{s.category}</span><button onClick={() => mDelSkill.mutate(s._id)} className="ml-1 text-red-500 hover:text-red-700"><X size={12} /></button></span>))}</div>

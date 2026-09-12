@@ -69,7 +69,7 @@ export default function JobDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+      <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
         <Header />
         <div className="max-w-4xl w-full mx-auto px-4 py-20 flex-grow">
           <div className="bg-white border border-gray-200 rounded-3xl p-8 animate-pulse space-y-6">
@@ -84,7 +84,7 @@ export default function JobDetailPage() {
 
   if (error || !job) {
     return (
-      <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+      <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
         <Header />
         <div className="max-w-xl w-full mx-auto px-4 py-20 text-center flex-grow">
           <h2 className="text-2xl font-black text-gray-900">Không tìm thấy việc làm</h2>
@@ -113,7 +113,7 @@ export default function JobDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
       <Header />
 
       <main className="flex-grow max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -171,7 +171,7 @@ export default function JobDetailPage() {
                 <button disabled={aiLoading} onClick={async () => { setAiLoading(true); try { const r = await aiMatch(user?.skills || [], job.requirements || []); setAiScore(r); } catch {} finally { setAiLoading(false); } }} className="text-[11px] font-bold px-2.5 py-1 bg-violet-600 text-white rounded-lg hover:bg-violet-700 disabled:opacity-50">{aiLoading ? 'Đang tính...' : aiScore ? 'Tính lại AI' : '✨ Tính bằng AI'}</button>
               </div>
               {aiScore && (
-                <div className={`text-xs rounded-xl px-3 py-2 border ${aiScore.source === 'ai' ? 'bg-violet-50 border-violet-200 text-violet-800' : 'bg-gray-50 border-gray-200 text-gray-600'}`}>
+                <div className={`text-xs rounded-xl px-3 py-2 border ${aiScore.source === 'ai' ? 'bg-violet-50 border-violet-200 text-violet-800' : 'bg-[#f6fbf9] border-gray-200 text-gray-600'}`}>
                   <span className="font-bold">AI: {aiScore.score}%</span> · {aiScore.reason} <span className="text-[10px]">({aiScore.source === 'ai' ? 'Gemini' : 'fallback'})</span>
                   {aiScore.aliasMatches?.length > 0 && <span className="block text-[11px] opacity-75">Alias: {aiScore.aliasMatches.join(', ')}</span>}
                 </div>
@@ -261,7 +261,7 @@ export default function JobDetailPage() {
                   value={coverLetter}
                   onChange={(e) => setCoverLetter(e.target.value)}
                   placeholder="Giới thiệu bản thân và lý do bạn phù hợp với công việc này..."
-                  className="px-3 py-2 bg-gray-50 border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
+                  className="px-3 py-2 bg-[#f6fbf9] border border-gray-200 rounded-xl outline-none focus:border-blue-500 text-sm text-gray-800"
                 />
               </label>
 
@@ -269,7 +269,7 @@ export default function JobDetailPage() {
                 <button
                   type="button"
                   onClick={() => setShowApplyForm(false)}
-                  className="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-500 hover:bg-gray-50"
+                  className="px-5 py-2.5 rounded-xl border border-gray-200 text-xs font-bold text-gray-500 hover:bg-[#f6fbf9]"
                 >
                   Hủy
                 </button>

@@ -20,7 +20,7 @@ export default function DashboardPage() {
       case 'viewed':
         return 'bg-blue-50 text-blue-700 border-blue-100';
       default:
-        return 'bg-gray-50 text-gray-700 border-gray-100';
+        return 'bg-[#f6fbf9] text-gray-700 border-gray-100';
     }
   };
 
@@ -40,7 +40,7 @@ export default function DashboardPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-between">
+    <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
       <Header />
 
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -105,7 +105,7 @@ export default function DashboardPage() {
 
                 {/* Cover Letter — giống hệt bên NTD */}
                 {app.coverLetter ? (
-                  <div className="mt-3 p-3 bg-gray-50 rounded-xl text-xs text-gray-600 whitespace-pre-line leading-relaxed border border-gray-100">
+                  <div className="mt-3 p-3 bg-[#f6fbf9] rounded-xl text-xs text-gray-600 whitespace-pre-line leading-relaxed border border-gray-100">
                     <strong className="text-gray-700">Cover Letter:</strong> {app.coverLetter}
                   </div>
                 ) : (
