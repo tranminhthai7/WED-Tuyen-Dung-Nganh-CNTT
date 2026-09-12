@@ -1,4 +1,4 @@
-const { getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, moderateJob } = require('../services/company.service');
+const { getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, moderateJob, listCompaniesPublic, getCompanyBySlug } = require('../services/company.service');
 
 const getCompany = async (req, res) => {
   try { const c = await getMyCompany(req.user.id); return res.json({ company: c }); } catch (e) { return res.status(500).json({ message: e.message }); }
@@ -25,5 +25,11 @@ const adminListPendingJobs = async (req, res) => {
 const adminModerateJob = async (req, res) => {
   try { const r = await moderateJob(req.params.id, req.body.status); return res.json(r); } catch (e) { return res.status(e.statusCode || 500).json({ message: e.message }); }
 };
+const listPublicCompanies = async (req, res) => {
+  try { const { listCompaniesPublic } = require('../services/company.service'); const list = await listCompaniesPublic(); return res.json({ companies: list }); } catch (e) { return res.status(500).json({ message: e.message }); }
+};
+const getPublicCompany = async (req, res) => {
+  try { const { getCompanyBySlug } = require('../services/company.service'); const c = await getCompanyBySlug(req.params.slug); if (!c) return res.status(404).json({ message: 'Không tìm thấy công ty' }); return res.json({ company: c }); } catch (e) { return res.status(500).json({ message: e.message }); }
+};
 
-module.exports = { getCompany, updateCompany, uploadCompanyLogo, adminListCompanies, adminVerifyCompany, adminListPendingJobs, adminModerateJob };
+module.exports = { getCompany, updateCompany, uploadCompanyLogo, adminListCompanies, adminVerifyCompany, adminListPendingJobs, adminModerateJob, listPublicCompanies, getPublicCompany };

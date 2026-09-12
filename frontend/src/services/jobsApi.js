@@ -87,7 +87,15 @@ export async function fetchDashboardStats() {
   const data = await apiRequest('/api/dashboard/stats');
   return data.stats;
 }
-// Company API
+// Company API — public (real DB)
+export async function fetchCompanies() {
+  const data = await apiRequest('/api/companies');
+  return data.companies || [];
+}
+export async function fetchCompany(slug) {
+  const data = await apiRequest(`/api/companies/${slug}`);
+  return data.company;
+}
 export async function fetchMyCompany() {
   const data = await apiRequest('/api/companies/my');
   return data.company;

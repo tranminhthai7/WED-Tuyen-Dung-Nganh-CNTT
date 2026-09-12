@@ -4,15 +4,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import Header from '../components/Header';
 import JobCard from '../components/JobCard';
-import { fetchJobs } from '../services/jobsApi';
+import { fetchJobs, fetchCompanies } from '../services/jobsApi';
 
 const roles = ['Frontend', 'Backend', 'Product & Design', 'Data & AI', 'QA & Automation', 'DevOps & Cloud'];
-
-const companies = [
-  { name: 'FPT Software', logo: 'F', tone: 'bg-orange-100 text-orange-700', industry: 'Outsourcing / IT Services', location: 'Hà Nội · Hồ Chí Minh' },
-  { name: 'Shopee Vietnam', logo: 'S', tone: 'bg-orange-100 text-orange-600', industry: 'E-commerce', location: 'Hồ Chí Minh' },
-  { name: 'NashTech', logo: 'N', tone: 'bg-violet-100 text-violet-700', industry: 'Technology', location: 'Hà Nội · Đà Nẵng' },
-];
 
 export default function HomePage() {
   const navigate = useNavigate();
@@ -25,6 +19,7 @@ export default function HomePage() {
     queryFn: fetchJobs,
     staleTime: 1000 * 60 * 5, // 5 mins
   });
+  const { data: companiesReal = [] } = useQuery({ queryKey: ['companies'], queryFn: fetchCompanies, staleTime: 1000*60*5 });
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -178,24 +173,27 @@ export default function HomePage() {
               <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Nơi bạn sẽ muốn làm việc</p>
               <h2 className="text-2xl sm:text-3xl font-black text-gray-900 mt-1">Các đội ngũ đang xây dựng</h2>
             </div>
+            <Link to="/companies" className="hidden sm:inline-flex items-center gap-1 text-sm font-bold text-blue-600">Xem tất cả <ArrowRight size={16} /></Link>
           </div>
-
           <div className="grid md:grid-cols-3 gap-6">
-            {companies.map((company) => (
-              <div key={company.name} className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-                <div className={`grid size-12 place-items-center rounded-xl font-bold text-lg ${company.tone}`}>
-                  {company.logo}
+            {(companiesReal.length ? companiesReal.slice(0,3) : [{ name: 'Chưa có công ty được duyệt', logo: '—', industry: '—', address: '—', slug: '' }].slice(0, companiesReal.length===0?0:3)).map((company) => {
+              const slug = company.slug || (company.name ? company.name.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'') : '') || company._id;
+              if (!slug) return null;
+              return (
+              <Link key={slug} to={`/companies/${slug}`} className="bg-white border border-gray-200/80 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group">
+                <div className="grid size-12 place-items-center rounded-xl font-bold text-lg bg-blue-50 text-blue-700 border border-blue-100 overflow-hidden shrink-0">
+                  {company.logo?.startsWith?.('http') ? <img src={company.logo} alt="" className="w-full h-full object-cover" /> : (company.logo || company.name?.[0] || 'C')}
                 </div>
                 <div className="min-w-0 flex-grow">
-                  <h3 className="font-bold text-gray-900 text-sm truncate">{company.name}</h3>
-                  <p className="text-xs text-gray-500 mt-1">{company.industry} · {company.location}</p>
+                  <h3 className="font-bold text-gray-900 text-sm truncate group-hover:text-blue-700">{company.name}</h3>
+                  <p className="text-xs text-gray-500 mt-1 truncate">{company.industry || '—'} · {company.address || '—'}</p>
                 </div>
-                <Link to="/jobs" className="text-gray-400 hover:text-blue-600 p-2">
-                  <ArrowRight size={16} />
-                </Link>
-              </div>
-            ))}
+                <span className="text-gray-400 group-hover:text-blue-600 p-2"><ArrowRight size={16} /></span>
+              </Link>
+            )})}
           </div>
+          {companiesReal.length===0 && <p className="text-sm text-slate-400 mt-4 text-center">Chưa có công ty được duyệt — dữ liệu thật từ DB. Nhà tuyển dụng tạo hồ sơ ở Employer Dashboard.</p>}
+          <Link to="/companies" className="sm:hidden mt-4 inline-flex items-center gap-1 text-sm font-bold text-blue-600">Xem tất cả <ArrowRight size={16} /></Link>
         </section>
 
         {/* CTA Audience Section */}

@@ -8,6 +8,8 @@ import ProfilePage from './pages/ProfilePage';
 import DashboardPage from './pages/DashboardPage';
 import EmployerDashboardPage from './pages/EmployerDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import CompaniesPage from './pages/CompaniesPage';
+import CompanyDetailPage from './pages/CompanyDetailPage';
 import useAuthStore from './store/authStore';
 
 // Initialize React Query Client
@@ -39,6 +41,8 @@ export default function App() {
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/jobs" element={<JobsPage />} />
             <Route path="/jobs/:slug" element={<JobDetailPage />} />
+            <Route path="/companies" element={<CompaniesPage />} />
+            <Route path="/companies/:slug" element={<CompanyDetailPage />} />
 
             {/* Candidate Protected Routes */}
             <Route

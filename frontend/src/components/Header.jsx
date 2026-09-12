@@ -24,7 +24,7 @@ export default function Header() {
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
           <Link to="/jobs" className="hover:text-blue-600 transition-colors">Tìm việc</Link>
-          <Link to="/#companies" className="hover:text-blue-600 transition-colors">Công ty</Link>
+          <Link to="/companies" className="hover:text-blue-600 transition-colors">Công ty</Link>
           {isAuthenticated && user?.role === 'candidate' && (
             <>
               <Link to="/candidate/profile" className="hover:text-blue-600 transition-colors">Hồ sơ cá nhân</Link>
