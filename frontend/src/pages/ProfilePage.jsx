@@ -90,6 +90,23 @@ export default function ProfilePage() {
     if (!formData.cvUrl) return;
     try { const res = await fetch(formData.cvUrl); const blob = await res.blob(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'CV.pdf'; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); } catch { window.open(formData.cvUrl, '_blank'); }
   };
+  // Drive /view?usp=... -> /preview mới xem được trong iframe; Cloudinary/raw vẫn dùng gview
+  const getDriveId = (url) => {
+    let m = url.match(/drive\.google\.com\/file\/d\/([^/]+)/); if (m) return m[1];
+    m = url.match(/drive\.google\.com\/open\?id=([^&]+)/); if (m) return m[1];
+    return null;
+  };
+  const isDrive = !!getDriveId(formData.cvUrl || '');
+  const getCvIframeSrc = () => {
+    const u = formData.cvUrl || ''; const id = getDriveId(u);
+    if (id) return `https://drive.google.com/file/d/${id}/preview`;
+    return `https://docs.google.com/gview?url=${encodeURIComponent(u)}&embedded=true`;
+  };
+  const getCvOpenUrl = () => {
+    const u = formData.cvUrl || ''; const id = getDriveId(u);
+    if (id) return `https://drive.google.com/file/d/${id}/preview`;
+    return `https://docs.google.com/gview?url=${encodeURIComponent(u)}`;
+  };
 
   if (profileLoading) return (
     <div className="min-h-screen bg-[#f6fbf9]"><Header /><div className="max-w-6xl mx-auto px-4 py-10 animate-pulse"><div className="h-32 bg-white rounded-3xl mb-6" /><div className="grid lg:grid-cols-[1fr_340px] gap-6"><div className="h-96 bg-white rounded-3xl" /><div className="h-96 bg-white rounded-3xl" /></div></div></div>
@@ -222,7 +239,7 @@ export default function ProfilePage() {
                 </div>
                 {formData.cvUrl && (
                   <div className="flex flex-wrap items-center gap-2">
-                    <a href={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"><Eye size={14} />Mở tab mới ↗</a>
+                    <a href={getCvOpenUrl()} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"><Eye size={14} />Mở tab mới ↗</a>
                     <button type="button" onClick={handleDownloadCv} className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50"><Download size={14} />Tải về</button>
                     <button type="button" onClick={() => setShowPreview(v => !v)} className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border ${showPreview ? 'bg-gray-900 text-white border-gray-900' : 'bg-white border-gray-200 hover:bg-gray-50'}`}>{showPreview ? 'Ẩn xem trước' : 'Xem trước inline'}</button>
                     <button type="button" onClick={() => setCvFullscreen(true)} className="text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50">⛶ Toàn màn hình</button>
@@ -234,9 +251,12 @@ export default function ProfilePage() {
                   <ChevronDown size={14} className={`text-gray-400 transition ${showLinkInput ? 'rotate-180' : ''}`} />
                 </button>
                 {showLinkInput && <input name="cvUrl" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf — dán Drive/S3/Cloudinary link rồi bấm Lưu hồ sơ" className="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#0f2a2e] focus:ring-2 focus:ring-[#0f2a2e]/10 text-sm" />}
+                {isDrive && formData.cvUrl && (
+                  <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">Drive cần <b>Bất kỳ ai có link — Người xem</b>, nếu không sẽ báo “Không có bản xem trước”.</p>
+                )}
                 {formData.cvUrl?.startsWith('http') && showPreview && (
                   <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
-                    <iframe key={formData.cvUrl} title="CV preview" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="w-full border-0 h-[560px]" />
+                    <iframe key={getCvIframeSrc()} title="CV preview" src={getCvIframeSrc()} className="w-full border-0 h-[560px]" />
                   </div>
                 )}
                 {cvFullscreen && formData.cvUrl && (
@@ -245,7 +265,7 @@ export default function ProfilePage() {
                       <button type="button" onClick={() => setCvFullscreen(false)} className="text-sm font-bold px-3 py-2 bg-white rounded-xl hover:bg-gray-100 inline-flex items-center gap-1"><X size={14} />Thu nhỏ</button>
                       <button type="button" onClick={handleDownloadCv} className="text-sm px-3 py-2 bg-blue-600 text-white rounded-xl inline-flex items-center gap-1"><Download size={14} />Tải PDF</button>
                     </div>
-                    <iframe title="CV fullscreen" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="flex-1 w-full border-0 rounded-xl bg-white" />
+                    <iframe title="CV fullscreen" src={getCvIframeSrc()} className="flex-1 w-full border-0 rounded-xl bg-white" />
                   </div>
                 )}
               </div>
