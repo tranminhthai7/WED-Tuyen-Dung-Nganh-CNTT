@@ -109,10 +109,19 @@ const listCompaniesPublic = async () => {
     }
     if (!c.slug) c.slug = String(c._id);
   }
-  const names = companies.map(c => c.name);
+  // dedupe by normalized name — heal legacy double CMC / Viettel inserts
+  const seen = new Set();
+  const deduped = [];
+  for (const c of companies) {
+    const key = String(c.name || '').toLowerCase().trim();
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    deduped.push(c);
+  }
+  const names = deduped.map(c => c.name);
   const counts = await Job.aggregate([{ $match: { company: { $in: names }, status: 'active' } }, { $group: { _id: '$company', count: { $sum: 1 } } }]);
   const map = Object.fromEntries(counts.map(x => [x._id, x.count]));
-  return companies.map(c => ({ ...c, jobCount: map[c.name] || 0, slug: c.slug || slugify(c.name) || String(c._id) }));
+  return deduped.map(c => ({ ...c, jobCount: map[c.name] || 0, slug: c.slug || slugify(c.name) || String(c._id) }));
 };
 
 const getCompanyBySlug = async (slug) => {

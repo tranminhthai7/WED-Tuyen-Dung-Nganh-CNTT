@@ -7,7 +7,10 @@ import Header from '../components/Header';
 
 export default function CompaniesPage() {
   const [q, setQ] = useState('');
-  const { data: companies = [], isLoading } = useQuery({ queryKey: ['companies'], queryFn: fetchCompanies });
+  const { data: companiesRaw = [], isLoading } = useQuery({ queryKey: ['companies'], queryFn: fetchCompanies });
+  const companies = useMemo(() => {
+    const seen=new Set(); return companiesRaw.filter(c=>{ const k=String(c.name||'').toLowerCase().trim(); if(!k||seen.has(k)) return false; seen.add(k); return true; });
+  }, [companiesRaw]);
   const filtered = useMemo(() => companies.filter(c => !q || c.name.toLowerCase().includes(q.toLowerCase())), [companies, q]);
   return (
     <div className="min-h-screen bg-[#f6fbf9]">

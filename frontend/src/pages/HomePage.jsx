@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, BriefcaseBusiness, ChevronDown, MapPin, Search, Sparkles, UsersRound, ShieldCheck, Zap, Building2, TrendingUp, CheckCircle2, Layers } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import Header from '../components/Header';
 import JobCard from '../components/JobCard';
@@ -16,7 +16,8 @@ export default function HomePage() {
   const [locationTerm, setLocationTerm] = useState('Tất cả địa điểm');
   const [locOpen, setLocOpen] = useState(false);
   const { data: jobs = [], isLoading } = useQuery({ queryKey: ['jobs'], queryFn: fetchJobs, staleTime: 1000 * 60 * 5 });
-  const { data: companiesReal = [] } = useQuery({ queryKey: ['companies'], queryFn: fetchCompanies, staleTime: 1000*60*5 });
+  const { data: companiesRaw = [] } = useQuery({ queryKey: ['companies'], queryFn: fetchCompanies, staleTime: 1000*60*5 });
+  const companiesReal = useMemo(() => { const seen=new Set(); return companiesRaw.filter(c=>{ const k=String(c.name||'').toLowerCase().trim(); if(!k||seen.has(k)) return false; seen.add(k); return true; }); }, [companiesRaw]);
   const signals = [
     { q: 'Một mô tả công việc tử tế là khởi đầu của một công việc tốt.', bg: 'bg-[#0f2e2e]', glow: 'from-emerald-400/20', accent: 'bg-emerald-400', a: { v: isLoading ? '—' : String(jobs.length), l: 'việc đang mở' }, b: { v: String(companiesReal.length || '—'), l: 'đội ngũ đã duyệt' }, cta: 'Xem toàn bộ cơ hội', to: '/jobs' },
     { q: 'AI soi khớp kỹ năng — đúng người, đúng vị trí.', bg: 'bg-[#111b2f]', glow: 'from-sky-400/20', accent: 'bg-sky-400', a: { v: 'AI', l: 'so khớp CV ↔ JD' }, b: { v: '3 mức', l: 'đỏ · vàng · xanh' }, cta: 'Thử hồ sơ AI', to: '/candidate/profile' },
