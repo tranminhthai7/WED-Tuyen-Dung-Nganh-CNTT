@@ -250,9 +250,9 @@ export default function ProfilePage() {
                   <span className="flex items-center gap-1.5"><span className="w-6 h-6 rounded-lg bg-white border border-gray-200 grid place-items-center">🔗</span> Có link CV sẵn? Dán tại đây</span>
                   <ChevronDown size={14} className={`text-gray-400 transition ${showLinkInput ? 'rotate-180' : ''}`} />
                 </button>
-                {showLinkInput && <input name="cvUrl" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf — dán Drive/S3/Cloudinary link rồi bấm Lưu hồ sơ" className="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#0f2a2e] focus:ring-2 focus:ring-[#0f2a2e]/10 text-sm" />}
+                {showLinkInput && <input name="cvUrl" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf" className="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#0f2a2e] focus:ring-2 focus:ring-[#0f2a2e]/10 text-sm" />}
                 {isDrive && formData.cvUrl && (
-                  <p className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">Drive cần <b>Bất kỳ ai có link — Người xem</b>, nếu không sẽ báo “Không có bản xem trước”.</p>
+                  <p className="text-[11px] text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">Đảm bảo file Drive đã chia sẻ quyền xem.</p>
                 )}
                 {formData.cvUrl?.startsWith('http') && showPreview && (
                   <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
@@ -289,8 +289,8 @@ export default function ProfilePage() {
               </div>
               <label className="block">
                 <span className="text-xs font-bold text-gray-700">Giới thiệu tóm tắt</span>
-                <textarea name="bio" rows={4} value={formData.bio} onChange={handleChange} placeholder="Mục tiêu nghề nghiệp, stack bạn thích, dự án nổi bật…" className="mt-1.5 w-full px-3.5 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#0f2a2e] focus:ring-2 focus:ring-[#0f2a2e]/10 text-sm resize-none" />
-                <span className="text-[11px] text-gray-400 mt-1 block">{formData.bio.length}/300 — càng chi tiết, matching càng chuẩn</span>
+                <textarea name="bio" rows={4} value={formData.bio} onChange={handleChange} placeholder="Giới thiệu ngắn về bạn, thế mạnh và mục tiêu nghề nghiệp…" className="mt-1.5 w-full px-3.5 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#0f2a2e] focus:ring-2 focus:ring-[#0f2a2e]/10 text-sm resize-none" />
+                <span className="text-[11px] text-gray-400 mt-1 block">{formData.bio.length}/300</span>
               </label>
               <div className="grid sm:grid-cols-2 gap-4">
                 <label className="block">
@@ -309,7 +309,7 @@ export default function ProfilePage() {
               <button type="submit" disabled={updateMutation.isPending} className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0f2a2e] hover:bg-black disabled:bg-gray-400 text-white font-black py-3.5 px-8 rounded-xl shadow-sm transition text-sm">
                 {updateMutation.isPending ? 'Đang lưu…' : 'Lưu hồ sơ'} {!updateMutation.isPending && <CheckCircle2 size={16} />}
               </button>
-              <p className="text-[11px] text-gray-400">Lưu xong sẽ cập nhật <span className="font-bold text-gray-600">Matching Score</span> ở /jobs ngay (cache 5 phút).</p>
+              <p className="text-[11px] text-gray-400">Thông tin dùng để gợi ý việc làm phù hợp.</p>
             </div>
           </div>
 
@@ -368,9 +368,9 @@ export default function ProfilePage() {
               <input value={customSkill} onChange={e => setCustomSkill(e.target.value)} onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); handleAddCustomSkill(); } }} placeholder="Thêm kỹ năng khác, vd: Jira" className="flex-1 px-3 py-2.5 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#0f2a2e] focus:ring-2 focus:ring-[#0f2a2e]/10 text-xs" />
               <button type="button" onClick={handleAddCustomSkill} className="px-4 py-2.5 bg-blue-600 text-white rounded-xl text-xs font-black hover:bg-blue-700">Thêm</button>
             </div>
-            <div className="text-[11px] leading-relaxed flex gap-2 p-3 bg-amber-50 border border-amber-100 rounded-xl text-amber-900">
-              <Sparkles size={14} className="shrink-0 text-amber-600 mt-0.5" />
-              <span>Chọn <b>≥5 kỹ năng</b> để <b>Matching Score</b> ở <b>/jobs</b> chính xác nhất. Thêm tay nếu không thấy trong danh sách.</span>
+            <div className="text-[11px] leading-relaxed flex gap-2 p-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-600">
+              <Sparkles size={14} className="shrink-0 text-gray-400 mt-0.5" />
+              <span>Gợi ý chọn 5+ kỹ năng để được đề xuất việc làm phù hợp hơn.</span>
             </div>
           </div>
         </form>
