@@ -27,6 +27,7 @@ export default function ProfilePage() {
   const [skillSearch, setSkillSearch] = useState('');
   const [openCats, setOpenCats] = useState({});
   const [showLinkInput, setShowLinkInput] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState(null); // blob hiện ngay, khỏi đợi upload
 
   const { data: profileData, isLoading: profileLoading, error: profileError } = useQuery({ queryKey: ['profile'], queryFn: getProfile, retry: false });
   const { data: skills = [], isLoading: skillsLoading } = useQuery({ queryKey: ['skills'], queryFn: fetchSkills });
@@ -84,8 +85,12 @@ export default function ProfilePage() {
   };
   const handleSubmit = (e) => { e.preventDefault(); setSaveStatus({ kind: 'idle', message: '' }); updateMutation.mutate({ ...formData, skills: selectedSkills }); };
   const handleAvatarFile = async (e) => {
-    const file = e.target.files?.[0]; if (!file) return; setUpAvatar(true);
-    try { const r = await uploadAvatar(file); setFormData(p => ({ ...p, avatar: r.url })); updateUser(r.user); setSaveStatus({ kind: 'success', message: 'Avatar đã cập nhật!' }); } catch (err) { setSaveStatus({ kind: 'error', message: err.message }); } finally { setUpAvatar(false); }
+    const file = e.target.files?.[0]; if (!file) return;
+    const blobUrl = URL.createObjectURL(file);
+    setAvatarPreview(blobUrl);
+    setFormData(p => ({ ...p, avatar: blobUrl })); // hiện ảnh mới ngay tức thì
+    setUpAvatar(true);
+    try { const r = await uploadAvatar(file); setFormData(p => ({ ...p, avatar: r.url })); updateUser(r.user); setAvatarPreview(null); setSaveStatus({ kind: 'success', message: 'Avatar đã cập nhật!' }); } catch (err) { setFormData(p => ({ ...p, avatar: profileData?.user?.avatar || '' })); setAvatarPreview(null); setSaveStatus({ kind: 'error', message: err.message }); } finally { setUpAvatar(false); e.target.value = ''; URL.revokeObjectURL(blobUrl); }
   };
   const handleCvFile = async (e) => {
     const file = e.target.files?.[0]; if (!file) return; setUpCv(true);
