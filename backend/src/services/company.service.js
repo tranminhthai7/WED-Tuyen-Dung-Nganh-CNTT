@@ -25,6 +25,13 @@ const updateMyCompany = async (ownerId, data) => {
   const upd = {}; allowed.forEach(k => { if (data[k] !== undefined) upd[k] = data[k]; });
   if (data.name) upd.slug = slugify(data.name);
   if (!isDatabaseReady()) return { company: { ownerId, ...upd, isVerified: false }, message: 'Cập nhật — cần Admin duyệt lại (demo)' };
+  // Chuẩn: không cho 2 owner sở hữu cùng tên công ty — báo lỗi rõ ràng thay vì âm thầm tạo duplicate
+  if (data.name) {
+    const dup = await Company.findOne({ name: data.name, ownerId: { $ne: ownerId } });
+    if (dup) { const e = new Error(`Tên công ty "${data.name}" đã tồn tại (sở hữu bởi ${dup.ownerId}). Vui lòng dùng tài khoản cũ hoặc đổi tên.`); e.statusCode = 409; throw e; }
+    const slugDup = await Company.findOne({ slug: slugify(data.name), ownerId: { $ne: ownerId } });
+    if (slugDup) { const e = new Error(`Slug "${slugify(data.name)}" đã có người dùng.`); e.statusCode = 409; throw e; }
+  }
   const existing = await Company.findOne({ ownerId });
   const wasVerified = existing?.isVerified === true;
   const importantChanged = wasVerified && allowed.some(k => data[k] !== undefined && String(data[k] ?? '') !== String(existing[k] ?? ''));
@@ -34,12 +41,17 @@ const updateMyCompany = async (ownerId, data) => {
     const msg = importantChanged ? 'Đã lưu — hồ sơ thay đổi nên cần Admin duyệt lại' : 'Cập nhật công ty thành công';
     return { message: msg, company: c, needsReverify: importantChanged };
   } catch (e) {
-    if (e.code === 11000 && String(e.message).includes('email')) {
-      try { await Company.collection.updateMany({ email: null }, [{ $set: { email: { $concat: ['fix-', { $toString: '$_id' }, '@local'] } } }]); } catch {}
-      try { await Company.collection.dropIndex('email_1'); } catch {}
-      try { await Company.collection.createIndex({ email: 1 }, { unique: true, sparse: true }); } catch {}
-      const c = await Company.findOneAndUpdate({ ownerId }, upd, { new: true, upsert: true });
-      return { message: 'Cập nhật công ty thành công', company: c };
+    if (e.code === 11000) {
+      if (String(e.message).includes('email')) {
+        try { await Company.collection.updateMany({ email: null }, [{ $set: { email: { $concat: ['fix-', { $toString: '$_id' }, '@local'] } } }]); } catch {}
+        try { await Company.collection.dropIndex('email_1'); } catch {}
+        try { await Company.collection.createIndex({ email: 1 }, { unique: true, sparse: true }); } catch {}
+        const c = await Company.findOneAndUpdate({ ownerId }, upd, { new: true, upsert: true });
+        return { message: 'Cập nhật công ty thành công', company: c };
+      }
+      if (String(e.message).includes('name') || String(e.message).includes('slug')) {
+        const dupE = new Error('Tên công ty / slug đã tồn tại — không thể tạo trùng. Hãy đăng nhập bằng tài khoản cũ.'); dupE.statusCode = 409; throw dupE;
+      }
     }
     throw e;
   }
