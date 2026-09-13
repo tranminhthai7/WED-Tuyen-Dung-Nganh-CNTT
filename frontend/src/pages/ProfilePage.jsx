@@ -350,11 +350,10 @@ export default function ProfilePage() {
                           {list.map(skill => {
                             const on = selectedSkills.includes(skill.name);
                             return (
-                              <label key={skill.name} className={`flex items-center gap-2 px-2.5 py-2 rounded-lg cursor-pointer border text-xs transition ${on ? 'bg-[#0f2a2e] text-white border-[#0f2a2e]' : 'bg-white border-gray-100 hover:border-gray-200 text-gray-700'}`}>
-                                <input type="checkbox" checked={on} onChange={() => handleSkillToggle(skill.name)} className="sr-only" />
-                                <span className={`w-4 h-4 rounded flex items-center justify-center border ${on ? 'bg-white text-[#0f2a2e] border-white' : 'bg-white border-gray-300'}`}>{on && <CheckCircle2 size={10} />}</span>
+                              <button key={skill.name} type="button" onClick={() => handleSkillToggle(skill.name)} className={`w-full flex items-center gap-2 px-2.5 py-2 rounded-lg border text-xs text-left transition ${on ? 'bg-[#0f2a2e] text-white border-[#0f2a2e]' : 'bg-white border-gray-100 hover:border-gray-200 text-gray-700'}`}>
+                                <span className={`w-4 h-4 rounded flex items-center justify-center border shrink-0 ${on ? 'bg-white text-[#0f2a2e] border-white' : 'bg-white border-gray-300'}`}>{on && <CheckCircle2 size={10} />}</span>
                                 <span className={`${on ? 'font-bold' : 'font-medium'}`}>{skill.name}</span>
-                              </label>
+                              </button>
                             );
                           })}
                         </div>
