@@ -26,7 +26,7 @@ export default function CompanyDetailPage() {
               <p className="text-sm text-teal-100/80 truncate">{company.industry || '—'} · {company.address || '—'} · {(company.jobs || []).length} việc đang tuyển</p>
             </div>
           </div>
-          <Link to="/jobs" className="hidden sm:inline-flex bg-white text-teal-800 font-bold px-5 py-2.5 rounded-xl">Xem việc làm</Link>
+          <Link to="/jobs" className="inline-flex items-center justify-center bg-white px-5 py-2.5 rounded-xl shadow-sm border border-white whitespace-nowrap font-black" style={{ color: '#16423f', backgroundColor: '#ffffff' }}>Xem việc làm</Link>
         </div>
       </div>
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 grid lg:grid-cols-[1.7fr_0.9fr] gap-6">
@@ -48,6 +48,29 @@ export default function CompanyDetailPage() {
             <div className="flex justify-between"><dt className="text-slate-500">Quy mô</dt><dd className="font-medium">{company.size || '—'}</dd></div>
             <div className="flex justify-between"><dt className="text-slate-500">Địa chỉ</dt><dd className="font-medium truncate max-w-[60%] text-right">{company.address || '—'}</dd></div>
           </dl>
+          {company.address && (
+            <div className="mt-5">
+              <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-100">
+                <iframe
+                  title={`Bản đồ ${company.name}`}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  className="w-full h-[220px] border-0"
+                  src={`https://www.google.com/maps?q=${encodeURIComponent(company.address + ' ' + company.name)}&z=15&output=embed`}
+                  allowFullScreen
+                />
+              </div>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(company.address + ' ' + company.name)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold text-teal-700 hover:text-teal-800"
+              >
+                <MapPin size={14} /> Mở trong Google Maps →
+              </a>
+              <p className="mt-2 text-[11px] text-slate-400 leading-relaxed">Địa chỉ thật từ DB. Muốn chuẩn 100% thì bổ sung API key để dùng Embed chính thức (xem ghi chú dưới).</p>
+            </div>
+          )}
         </aside>
       </main>
     </div>

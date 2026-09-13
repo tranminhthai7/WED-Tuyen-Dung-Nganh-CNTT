@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const Job = require('../models/Job');
+const Company = require('../models/Company');
 const { calculateMatchingScore } = require('../utils/matching');
 
 const demoJobs = [
@@ -65,6 +66,20 @@ const demoJobs = [
   },
 ];
 
+function formatPosted(createdAt) {
+  if (!createdAt) return 'Vừa đăng';
+  const diff = Date.now() - new Date(createdAt).getTime();
+  const m = Math.floor(diff / 60000);
+  if (m < 60) return m <= 1 ? 'Vừa đăng' : `${m} phút trước`;
+  const h = Math.floor(m / 60);
+  if (h < 24) return `${h} giờ trước`;
+  const d = Math.floor(h / 24);
+  if (d < 7) return `${d} ngày trước`;
+  const w = Math.floor(d / 7);
+  if (w < 5) return `${w} tuần trước`;
+  return new Date(createdAt).toLocaleDateString('vi-VN');
+}
+
 const isDatabaseReady = () => mongoose.connection.readyState === 1;
 
 const normalizeJob = (job, userSkills = null) => {
@@ -96,7 +111,8 @@ const normalizeJob = (job, userSkills = null) => {
     experience: job.experience,
     tags: jobTags,
     requirements: reqs,
-    posted: job.posted || 'Vừa đăng',
+    posted: formatPosted(job.createdAt),
+    createdAt: job.createdAt,
     applicants: job.applicants || 0,
     matchingScore: matchResult.score,
     missingSkills: matchResult.missingSkills,
@@ -147,14 +163,37 @@ const createJob = async (jobData, employerId, employerName) => {
     throw error;
   }
 
+  // Logic thực tế: tên cty lấy từ Hồ sơ công ty đã duyệt, không cho nhập tay ở form đăng tin
+  let companyName = employerName || 'Nhà tuyển dụng';
+  let companyStatus = 'pending';
+  let status = 'pending';
+  if (isDatabaseReady()) {
+    try {
+      const comp = await Company.findOne({ ownerId: employerId }).lean();
+      if (comp && comp.name) {
+        companyName = comp.name;
+        companyStatus = comp.isVerified ? 'verified' : 'pending';
+        // Chỉ cho active ngay nếu cty đã verified, ngược lại pending chờ Admin duyệt
+        status = comp.isVerified ? 'active' : 'pending';
+        if (!comp.isVerified) {
+          // vẫn cho tạo nhưng báo rõ
+        }
+      } else if (comp && !comp.name) {
+        const e = new Error('Vui lòng cập nhật Hồ sơ công ty (Tên công ty) trước khi đăng tin');
+        e.statusCode = 400;
+        throw e;
+      }
+    } catch (e) { if (e.statusCode) throw e; }
+  }
+
   const slug = `${title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}-${Date.now().toString().slice(-4)}`;
 
   const newJobObj = {
     companyId: employerId,
     slug,
     title,
-    company: employerName || 'Nhà tuyển dụng',
-    logo: employerName ? employerName.charAt(0).toUpperCase() : 'N',
+    company: companyName,
+    logo: companyName ? companyName.charAt(0).toUpperCase() : 'N',
     tone: 'tone-blue',
     location,
     salary: salary || 'Cạnh tranh',
@@ -166,8 +205,7 @@ const createJob = async (jobData, employerId, employerName) => {
     deadline: deadline ? new Date(deadline) : undefined,
     level: level || 'Junior',
     quantity: quantity || 1,
-    status: 'pending',
-    posted: 'Vừa xong',
+    status,
     applicants: 0,
   };
 

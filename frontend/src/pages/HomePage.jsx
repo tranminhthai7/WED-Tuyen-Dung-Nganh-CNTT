@@ -1,9 +1,11 @@
 import { useQuery } from '@tanstack/react-query';
 import { ArrowRight, BriefcaseBusiness, ChevronDown, MapPin, Search, Sparkles, UsersRound } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence, useMotionValue, useSpring, useTransform } from 'framer-motion';
 import Header from '../components/Header';
 import JobCard from '../components/JobCard';
+import Reveal from '../components/Reveal';
 import { fetchJobs, fetchCompanies } from '../services/jobsApi';
 
 const roles = ['Frontend', 'Backend', 'Product & Design', 'Data & AI', 'QA & Automation', 'DevOps & Cloud'];
@@ -12,14 +14,33 @@ export default function HomePage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [locationTerm, setLocationTerm] = useState('Tất cả địa điểm');
-
-  // React Query fetch jobs (extremely premium cached data flow)
-  const { data: jobs = [], isLoading } = useQuery({
-    queryKey: ['jobs'],
-    queryFn: fetchJobs,
-    staleTime: 1000 * 60 * 5, // 5 mins
-  });
+  const [locOpen, setLocOpen] = useState(false);
+  const { data: jobs = [], isLoading } = useQuery({ queryKey: ['jobs'], queryFn: fetchJobs, staleTime: 1000 * 60 * 5 });
   const { data: companiesReal = [] } = useQuery({ queryKey: ['companies'], queryFn: fetchCompanies, staleTime: 1000*60*5 });
+  const signals = [
+    { q: 'Một công việc tốt bắt đầu từ một mô tả công việc tử tế.', bg: 'bg-[#16423f]', glow: 'from-teal-400/25', a: { v: isLoading ? '—' : String(jobs.length), l: 'việc đang mở' }, b: { v: String(companiesReal.length || '—'), l: 'đội ngũ đã duyệt' }, cta: 'Xem toàn bộ cơ hội', to: '/jobs' },
+    { q: 'AI soi khớp kỹ năng — gợi ý đúng người, đúng vị trí.', bg: 'bg-[#0f2a3a]', glow: 'from-sky-400/25', a: { v: 'AI', l: 'so khớp CV ↔ JD' }, b: { v: '3 mức', l: 'đỏ / vàng / xanh' }, cta: 'Thử hồ sơ AI', to: '/candidate/profile' },
+    { q: 'Lương, hình thức, quy trình — minh bạch từ đầu.', bg: 'bg-[#1a1a2e]', glow: 'from-violet-400/25', a: { v: '100%', l: 'tin có mức lương' }, b: { v: '24h', l: 'duyệt hồ sơ TB' }, cta: 'Khám phá công ty', to: '/companies' },
+    { q: 'Từ sinh viên IT đến đội ngũ mơ ước — bắt đầu hôm nay.', bg: 'bg-[#2a1f0f]', glow: 'from-amber-400/30', a: { v: '0đ', l: 'miễn phí ứng tuyển' }, b: { v: 'Realtime', l: 'theo dõi đơn' }, cta: 'Tạo tài khoản', to: '/auth?register=true' },
+  ];
+  const [sigIdx, setSigIdx] = useState(0);
+  const [dir, setDir] = useState(1);
+  const paused = useRef(false);
+  const go = (n) => { setDir(n > sigIdx ? 1 : -1); setSigIdx(((n % signals.length) + signals.length) % signals.length); };
+  useEffect(() => {
+    const id = setInterval(() => { if (!paused.current) { setDir(1); setSigIdx((i) => (i + 1) % signals.length); } }, 3800);
+    return () => clearInterval(id);
+  }, []);
+  const tiltRef = useRef(null);
+  const mx = useMotionValue(0); const my = useMotionValue(0);
+  const rx = useSpring(useTransform(my, [-0.5, 0.5], [6, -6]), { stiffness: 120, damping: 12 });
+  const ry = useSpring(useTransform(mx, [-0.5, 0.5], [-8, 8]), { stiffness: 120, damping: 12 });
+  const onTiltMove = (e) => {
+    const r = tiltRef.current?.getBoundingClientRect(); if (!r) return;
+    mx.set((e.clientX - r.left) / r.width - 0.5);
+    my.set((e.clientY - r.top) / r.height - 0.5);
+  };
+  const onTiltLeave = () => { mx.set(0); my.set(0); };
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -30,23 +51,29 @@ export default function HomePage() {
     <div className="min-h-screen bg-[#f6fbf9] flex flex-col justify-between">
       <Header />
 
-      {/* Hero full-bleed teal/mint */}
-      <section className="w-full bg-gradient-to-br from-[#e8f6f2] via-[#eefaf6] to-[#fdf3d7] border-b border-teal-900/5">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      {/* Hero full-bleed teal/mint — tech mesh + floating blobs */}
+      <section className="w-full relative bg-gradient-to-br from-[#e8f6f2] via-[#eefaf6] to-[#fdf3d7] border-b border-teal-900/5">
+        {/* grid dot + blobs — clipped inside, but hero allows dropdown overflow */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute inset-0 opacity-[0.45]" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(22,66,63,0.08) 1px, transparent 0)', backgroundSize: '22px 22px' }} />
+          <motion.div animate={{ y: [-10, 10] }} transition={{ duration: 6, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }} className="absolute -top-10 -right-16 w-72 h-72 rounded-full bg-teal-300/20 blur-3xl" />
+          <motion.div animate={{ y: [12, -8] }} transition={{ duration: 7, repeat: Infinity, repeatType: 'reverse', ease: 'easeInOut' }} className="absolute -bottom-16 -left-10 w-80 h-80 rounded-full bg-amber-200/30 blur-3xl" />
+        </div>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 relative">
           <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-10 items-center">
-            <div>
+            <Reveal>
               <p className="text-xs font-extrabold tracking-widest text-[#0f766e] uppercase mb-4">
                 Tuyển dụng công nghệ, rõ ràng hơn
               </p>
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black text-[#0f2e2e] leading-none tracking-tight">
-                Tìm nơi bạn có thể <span className="text-[#0f766e]">làm việc tốt.</span>
+                Tìm nơi bạn có thể <span className="text-[#0f766e] inline-block">làm việc tốt.</span>
               </h1>
               <p className="mt-5 text-base sm:text-lg text-slate-600 max-w-xl leading-relaxed">
                 Cơ hội thật, thông tin đủ, và những đội ngũ đang tìm đúng người. Không ồn ào, không vòng vo.
               </p>
 
               {/* Search Panel */}
-              <form onSubmit={handleSearchSubmit} className="mt-8 p-2.5 bg-white rounded-[18px] border border-teal-900/10 shadow-[0_12px_32px_rgba(16,60,57,0.08)] flex flex-col md:flex-row gap-3">
+              <motion.form onSubmit={handleSearchSubmit} whileHover={{ y: -1 }} className="mt-8 p-2.5 bg-white rounded-[18px] border border-teal-900/10 shadow-[0_12px_32px_rgba(16,60,57,0.08)] flex flex-col md:flex-row gap-3">
                 <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] rounded-xl flex-grow min-w-0 border border-transparent focus-within:border-teal-500 transition-colors">
                   <Search size={18} className="text-slate-400 shrink-0" />
                   <input
@@ -58,25 +85,26 @@ export default function HomePage() {
                     aria-label="Từ khóa tìm kiếm"
                   />
                 </div>
-                <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] rounded-xl border border-transparent focus-within:border-teal-500 transition-colors md:max-w-xs w-full min-w-0">
-                  <MapPin size={18} className="text-slate-400 shrink-0" />
-                  <select
-                    value={locationTerm}
-                    onChange={(e) => setLocationTerm(e.target.value)}
-                    className="w-full bg-transparent outline-none text-sm text-slate-800 cursor-pointer appearance-none whitespace-nowrap overflow-hidden text-ellipsis min-w-0"
-                    aria-label="Địa điểm"
-                  >
-                    <option>Tất cả địa điểm</option>
-                    <option>Hồ Chí Minh</option>
-                    <option>Hà Nội</option>
-                    <option>Remote</option>
-                  </select>
-                  <ChevronDown size={16} className="text-slate-400 shrink-0" />
+                <div className="relative md:max-w-xs w-full min-w-0">
+                  <button type="button" onClick={() => setLocOpen(v=>!v)} className="w-full flex items-center gap-2 px-3 py-2.5 bg-[#f6fbf9] rounded-xl border border-transparent hover:border-slate-200 focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all text-left">
+                    <MapPin size={18} className="text-slate-400 shrink-0" />
+                    <span className="flex-1 text-sm text-slate-800 truncate">{locationTerm}</span>
+                    <motion.span animate={{ rotate: locOpen ? 180 : 0 }} transition={{ duration: 0.2 }}><ChevronDown size={16} className="text-slate-400 shrink-0" /></motion.span>
+                  </button>
+                  <AnimatePresence>
+                    {locOpen && (
+                      <motion.ul initial={{ opacity:0, y:6, scale:0.98 }} animate={{ opacity:1, y:0, scale:1 }} exit={{ opacity:0, y:6, scale:0.98 }} transition={{ duration:0.18, ease:[0.22,1,0.36,1] }} className="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-[0_16px_40px_rgba(16,60,57,0.14)] overflow-hidden py-1">
+                        {['Tất cả địa điểm','Hồ Chí Minh','Hà Nội','Remote'].map(opt => (
+                          <li key={opt}><button type="button" onClick={() => { setLocationTerm(opt); setLocOpen(false); }} className={`w-full text-left px-3.5 py-2.5 text-sm hover:bg-teal-50 transition-colors ${locationTerm===opt ? 'font-bold text-teal-700 bg-teal-50' : 'text-slate-700'}`}>{opt}{locationTerm===opt && '  ✓'}</button></li>
+                        ))}
+                      </motion.ul>
+                    )}
+                  </AnimatePresence>
                 </div>
-                <button type="submit" className="bg-[#0f3d3a] hover:bg-[#16423f] text-white font-bold px-6 py-3 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 shrink-0 whitespace-nowrap leading-none">
+                <motion.button whileTap={{ scale: 0.97 }} whileHover={{ scale: 1.02 }} type="submit" className="bg-[#0f3d3a] hover:bg-[#16423f] text-white font-bold px-6 py-3 rounded-xl transition-colors shadow-md flex items-center justify-center gap-2 shrink-0 whitespace-nowrap leading-none">
                   Tìm việc <ArrowRight size={18} />
-                </button>
-              </form>
+                </motion.button>
+              </motion.form>
 
               {/* Roles Row */}
               <div className="mt-6 flex flex-wrap items-center gap-3 text-xs text-slate-500">
@@ -87,30 +115,67 @@ export default function HomePage() {
                   </Link>
                 ))}
               </div>
-            </div>
+            </Reveal>
 
-            {/* Note Panel teal */}
-            <div className="bg-[#16423f] text-white p-8 rounded-[28px] shadow-[0_20px_48px_rgba(16,60,57,0.22)] transform rotate-[1.2deg] lg:max-w-md w-full justify-self-center lg:justify-self-end">
-              <div className="flex items-center justify-between text-[11px] font-bold opacity-80 uppercase tracking-widest">
-                <span className="flex items-center gap-1.5"><Sparkles size={14} /> itmatch signal</span>
-                <span>01 / 04</span>
+            {/* Note Panel teal — 3D tilt */}
+            <div style={{ perspective: 900 }} className="w-full flex justify-center lg:justify-end">
+            <motion.div
+              ref={tiltRef}
+              onMouseEnter={() => (paused.current = true)}
+              onMouseLeave={() => { paused.current = false; onTiltLeave(); }}
+              onMouseMove={onTiltMove}
+              style={{ rotateX: rx, rotateY: ry, transformStyle: 'preserve-3d' }}
+              className={`relative overflow-hidden p-8 rounded-[28px] shadow-[0_20px_60px_rgba(16,60,57,0.35)] lg:max-w-md w-full will-change-transform ${signals[sigIdx].bg} text-white flex flex-col`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${signals[sigIdx].glow} to-transparent pointer-events-none transition-colors duration-500`} />
+              <div style={{ transform: 'translateZ(24px)' }} className="relative flex items-center justify-between text-[11px] font-bold uppercase tracking-widest shrink-0">
+                <span className="flex items-center gap-1.5"><span className="size-2 rounded-full bg-emerald-400 animate-pulse" /> itmatch signal</span>
+                <span className="opacity-80 tabular-nums">0{sigIdx + 1} / 0{signals.length}</span>
               </div>
-              <p className="mt-12 text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight">
-                “Một công việc tốt bắt đầu từ một mô tả công việc tử tế.”
-              </p>
-              <div className="mt-12 pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
+              <div style={{ transform: 'translateZ(36px)' }} className="relative mt-10 h-[112px] overflow-hidden shrink-0">
+                <AnimatePresence mode="wait" custom={dir}>
+                  <motion.p
+                    key={sigIdx}
+                    custom={dir}
+                    initial={{ opacity: 0, x: dir * 28 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: dir * -28 }}
+                    transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+                    drag="x"
+                    dragConstraints={{ left: 0, right: 0 }}
+                    dragElastic={0.3}
+                    onDragEnd={(_, info) => { if (info.offset.x < -40) go(sigIdx + 1); else if (info.offset.x > 40) go(sigIdx - 1); }}
+                    className="text-2xl sm:text-3xl font-extrabold leading-tight tracking-tight cursor-grab active:cursor-grabbing"
+                  >
+                    “{signals[sigIdx].q}”
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+              {/* dots */}
+              <div style={{ transform: 'translateZ(18px)' }} className="relative mt-6 flex items-center gap-1.5">
+                {signals.map((_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => go(i)}
+                    aria-label={`Signal ${i + 1}`}
+                    className={`h-1.5 rounded-full transition-all ${i === sigIdx ? 'w-6 bg-white' : 'w-1.5 bg-white/35 hover:bg-white/60'}`}
+                  />
+                ))}
+              </div>
+              <div style={{ transform: 'translateZ(18px)' }} className="relative mt-4 pt-6 border-t border-white/10 grid grid-cols-2 gap-4">
                 <div>
-                  <strong className="block text-3xl font-black tracking-tight">2,480+</strong>
-                  <span className="block mt-1 text-xs opacity-75">việc đang mở</span>
+                  <strong className="block text-3xl font-black tracking-tight">{signals[sigIdx].a.v}</strong>
+                  <span className="block mt-1 text-xs opacity-75">{signals[sigIdx].a.l}</span>
                 </div>
                 <div>
-                  <strong className="block text-3xl font-black tracking-tight">620</strong>
-                  <span className="block mt-1 text-xs opacity-75">đội ngũ công nghệ</span>
+                  <strong className="block text-3xl font-black tracking-tight">{signals[sigIdx].b.v}</strong>
+                  <span className="block mt-1 text-xs opacity-75">{signals[sigIdx].b.l}</span>
                 </div>
               </div>
-              <Link to="/jobs" className="mt-8 inline-flex items-center gap-2 text-sm font-bold text-white hover:underline">
-                Xem toàn bộ cơ hội <ArrowRight size={16} />
+              <Link to={signals[sigIdx].to} style={{ transform: 'translateZ(20px)' }} className="relative mt-8 inline-flex items-center gap-2 text-sm font-bold text-white hover:underline">
+                {signals[sigIdx].cta} <ArrowRight size={16} />
               </Link>
+            </motion.div>
             </div>
           </div>
         </div>
@@ -119,7 +184,7 @@ export default function HomePage() {
       <main className="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         {/* Trust Strip */}
-        <section className="bg-white border border-gray-200/80 rounded-2xl shadow-sm p-6 mb-12">
+        <Reveal><section className="bg-white border border-gray-200/80 rounded-2xl shadow-sm p-6 mb-12">
           <div className="grid md:grid-cols-3 gap-6">
             <div className="border-l-4 border-yellow-400 pl-4">
               <strong className="block text-sm text-gray-900 font-bold">Thông tin minh bạch</strong>
@@ -140,10 +205,10 @@ export default function HomePage() {
               </span>
             </div>
           </div>
-        </section>
+        </section></Reveal>
 
         {/* Jobs Section */}
-        <section className="mb-12">
+        <Reveal delay={0.06}><section className="mb-12">
           <div className="flex items-end justify-between mb-6">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Cơ hội mới mỗi ngày</p>
@@ -161,16 +226,18 @@ export default function HomePage() {
               ))}
             </div>
           ) : (
-            <div className="grid md:grid-cols-2 gap-6">
+            <motion.div initial="hidden" whileInView="show" viewport={{ once: true, margin: '-50px' }} variants={{ hidden:{}, show:{ transition:{ staggerChildren:0.07 } } }} className="grid md:grid-cols-2 gap-6">
               {jobs.slice(0, 4).map((job) => (
-                <JobCard key={job.id || job.slug} job={job} />
+                <motion.div key={job.id || job.slug} variants={{ hidden:{ opacity:0, y:14 }, show:{ opacity:1, y:0, transition:{ duration:0.4 } } }}>
+                  <JobCard job={job} />
+                </motion.div>
               ))}
-            </div>
+            </motion.div>
           )}
-        </section>
+        </section></Reveal>
 
         {/* Companies Section */}
-        <section id="companies" className="mb-12">
+        <Reveal delay={0.08}><section id="companies" className="mb-12">
           <div className="flex items-end justify-between mb-6">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-blue-600">Nơi bạn sẽ muốn làm việc</p>
@@ -197,10 +264,10 @@ export default function HomePage() {
           </div>
           {companiesReal.length===0 && <p className="text-sm text-slate-400 mt-4 text-center">Chưa có công ty được duyệt — dữ liệu thật từ DB. Nhà tuyển dụng tạo hồ sơ ở Employer Dashboard.</p>}
           <Link to="/companies" className="sm:hidden mt-4 inline-flex items-center gap-1 text-sm font-bold text-blue-600">Xem tất cả <ArrowRight size={16} /></Link>
-        </section>
+        </section></Reveal>
 
         {/* CTA Audience Section */}
-        <section className="grid md:grid-cols-2 gap-6">
+        <Reveal delay={0.1}><section className="grid md:grid-cols-2 gap-6">
           <Link to="/auth?register=true" className="bg-emerald-50 text-emerald-950 p-8 rounded-3xl hover:shadow-lg transition-all flex flex-col justify-between h-56 border border-emerald-100">
             <UsersRound size={28} className="text-emerald-700" />
             <div>
@@ -222,14 +289,8 @@ export default function HomePage() {
               </p>
             </div>
           </Link>
-        </section>
+        </section></Reveal>
       </main>
-
-      <footer className="bg-white border-t border-gray-200 py-6 mt-16 text-center text-xs text-gray-400">
-        <div className="max-w-7xl mx-auto px-4">
-          © 2026 itmatch. Một sản phẩm tuyển dụng công nghệ độc lập cho sinh viên CNTT.
-        </div>
-      </footer>
     </div>
   );
 }

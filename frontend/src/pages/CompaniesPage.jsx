@@ -36,7 +36,7 @@ export default function CompaniesPage() {
               <h3 className="font-bold text-sm text-slate-900 mt-3 group-hover:text-teal-700">{c.name}</h3>
               <p className="text-xs text-slate-500 mt-1 line-clamp-1">{c.industry || '—'}</p>
               <p className="text-[11px] text-slate-400 mt-2 flex items-center gap-1">◎ {c.address || c.location || '—'}</p>
-              <p className="text-xs font-bold text-teal-700 mt-3">{c.count ?? 0} vị trí đang tuyển</p>
+              <p className="text-xs font-bold text-teal-700 mt-3">{(c.jobCount ?? c.count ?? 0)} vị trí đang tuyển</p>
             </Link>
           )})}
         </div>

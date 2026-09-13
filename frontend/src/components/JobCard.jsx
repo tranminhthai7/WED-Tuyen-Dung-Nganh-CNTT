@@ -1,15 +1,20 @@
 import { ArrowRight, BriefcaseBusiness, Clock3, Heart, MapPin, Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import useAuthStore from '../store/authStore';
 
 export default function JobCard({ job, compact = false }) {
   const [saved, setSaved] = useState(false);
+  const [expanded, setExpanded] = useState(false);
   const { isAuthenticated, user } = useAuthStore();
 
   const isCandidate = isAuthenticated && user?.role === 'candidate';
   const score = job.matchingScore;
   const missing = job.missingSkills || [];
+  const allSkills = (job.requirements?.length ? job.requirements : job.tags) || [];
+  const visibleSkills = expanded ? allSkills : allSkills.slice(0, 3);
+  const extra = allSkills.length - visibleSkills.length;
 
   // Match score badges color calculation
   let scoreBadgeColor = 'bg-red-50 text-red-700 border-red-100';
@@ -23,7 +28,7 @@ export default function JobCard({ job, compact = false }) {
   }
 
   return (
-    <article className="bg-white border border-gray-200/80 hover:border-blue-500/30 rounded-2xl p-5 shadow-sm hover:shadow-md transition-all duration-200 flex flex-col justify-between h-full">
+    <motion.article whileHover={{ y: -6, rotateX: 1.5, rotateY: -1.5 }} transition={{ type: 'spring', stiffness: 300, damping: 18 }} style={{ transformStyle: 'preserve-3d' }} className="bg-white border border-gray-200/80 hover:border-teal-500/30 rounded-2xl p-5 shadow-sm hover:shadow-[0_12px_32px_rgba(16,60,57,0.12)] transition-shadow duration-200 flex flex-col justify-between h-full will-change-transform" content-visibility="auto">
       <div>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
@@ -82,11 +87,16 @@ export default function JobCard({ job, compact = false }) {
       {!compact && (
         <div className="mt-4 pt-4 border-t border-gray-100 flex flex-col gap-3">
           <div className="flex flex-wrap gap-1.5">
-            {job.tags?.slice(0, 3).map((tag) => (
+            {visibleSkills.map((tag) => (
               <span key={tag} className="inline-flex items-center justify-center px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 text-xs font-semibold">
                 {tag}
               </span>
             ))}
+            {allSkills.length > 3 && (
+              <button type="button" onClick={() => setExpanded(!expanded)} aria-expanded={expanded} className="inline-flex items-center justify-center size-[26px] rounded-lg text-xs font-bold border bg-white text-slate-500 border-slate-200 hover:bg-slate-50 hover:text-slate-700 transition-colors leading-none">
+                {expanded ? '×' : `+${extra}`}
+              </button>
+            )}
           </div>
 
           <div className="flex items-center justify-between mt-1">
@@ -99,6 +109,6 @@ export default function JobCard({ job, compact = false }) {
           </div>
         </div>
       )}
-    </article>
+    </motion.article>
   );
 }

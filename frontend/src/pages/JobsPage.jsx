@@ -1,7 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
-import { Search, SlidersHorizontal, MapPin, Sparkles } from 'lucide-react';
+import { Search, SlidersHorizontal, MapPin, Sparkles, ChevronDown } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import Header from '../components/Header';
 import JobCard from '../components/JobCard';
 import { fetchJobs, aiSuggestJobs } from '../services/jobsApi';
@@ -15,6 +16,19 @@ export default function JobsPage() {
   const [filterLevel, setFilterLevel] = useState('Tất cả');
   const [filterSalary, setFilterSalary] = useState('Tất cả');
   const [showExpired, setShowExpired] = useState(false);
+  const [levelOpen, setLevelOpen] = useState(false);
+  const [salaryOpen, setSalaryOpen] = useState(false);
+  const [locOpen, setLocOpen] = useState(false);
+  const openOnly = (which) => {
+    setLevelOpen(which==='level' ? v=>!v : false);
+    setSalaryOpen(which==='salary' ? v=>!v : false);
+    setLocOpen(which==='loc' ? v=>!v : false);
+  };
+  useEffect(() => {
+    const onDown = (e) => { if (!e.target.closest('[data-dropdown]')) { setLevelOpen(false); setSalaryOpen(false); setLocOpen(false); } };
+    document.addEventListener('mousedown', onDown);
+    return () => document.removeEventListener('mousedown', onDown);
+  }, []);
   const PAGE_SIZE = 6;
   const [page, setPage] = useState(1);
 
@@ -100,8 +114,30 @@ export default function JobsPage() {
         </div>
         <div className="flex flex-wrap items-center gap-2 mb-6">
           <span className="text-xs font-bold text-gray-400">Lọc thêm:</span>
-          <select value={filterLevel} onChange={e => setFilterLevel(e.target.value)} className="px-3 py-1.5 bg-white border border-gray-300 rounded-xl shadow-sm text-xs font-semibold text-gray-700"><option>Tất cả</option><option>Intern</option><option>Fresher</option><option>Junior</option><option>Middle</option><option>Senior</option></select>
-          <select value={filterSalary} onChange={e => setFilterSalary(e.target.value)} className="px-3 py-1.5 bg-white border border-gray-300 rounded-xl shadow-sm text-xs font-semibold text-gray-700"><option value="Tất cả">Mọi mức lương</option><option value="<1000">&lt; 1000 USD</option><option value="1000-2000">1000–2000 USD</option><option value=">2000">&gt; 2000 USD</option></select>
+          <div className="relative" data-dropdown>
+            <button type="button" onClick={() => openOnly('level')} className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-700 hover:border-slate-300 transition-colors">
+              {filterLevel}<motion.span animate={{ rotate: levelOpen ? 180 : 0 }} transition={{duration:0.2}}><ChevronDown size={14} className="text-slate-400" /></motion.span>
+            </button>
+            <AnimatePresence>{levelOpen && (
+              <motion.ul initial={{opacity:0,y:6,scale:0.98}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:6,scale:0.98}} transition={{duration:0.16}} className="absolute z-40 left-0 mt-2 min-w-[160px] bg-white border border-slate-200 rounded-xl shadow-[0_16px_40px_rgba(16,60,57,0.12)] overflow-hidden py-1">
+                {['Tất cả','Intern','Fresher','Junior','Middle','Senior'].map(o=>(
+                  <li key={o}><button type="button" onClick={()=>{setFilterLevel(o);setLevelOpen(false)}} className={`w-full text-left px-3.5 py-2 text-sm hover:bg-teal-50 transition-colors ${filterLevel===o?'font-bold text-teal-700 bg-teal-50':'text-slate-700'}`}>{o}{filterLevel===o?'  ✓':''}</button></li>
+                ))}
+              </motion.ul>
+            )}</AnimatePresence>
+          </div>
+          <div className="relative" data-dropdown>
+            <button type="button" onClick={() => openOnly('salary')} className="inline-flex items-center gap-2 px-3.5 py-2 bg-white border border-slate-200 rounded-xl shadow-sm text-xs font-bold text-slate-700 hover:border-slate-300 transition-colors">
+              {filterSalary==='Tất cả'?'Mọi mức lương':filterSalary==='&lt;1000'?'< 1000 USD':filterSalary==='1000-2000'?'1000–2000 USD':'> 2000 USD'}<motion.span animate={{ rotate: salaryOpen ? 180 : 0 }} transition={{duration:0.2}}><ChevronDown size={14} className="text-slate-400" /></motion.span>
+            </button>
+            <AnimatePresence>{salaryOpen && (
+              <motion.ul initial={{opacity:0,y:6,scale:0.98}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:6,scale:0.98}} transition={{duration:0.16}} className="absolute z-40 left-0 mt-2 min-w-[180px] bg-white border border-slate-200 rounded-xl shadow-[0_16px_40px_rgba(16,60,57,0.12)] overflow-hidden py-1">
+                {[{v:'Tất cả',l:'Mọi mức lương'},{v:'<1000',l:'< 1000 USD'},{v:'1000-2000',l:'1000–2000 USD'},{v:'>2000',l:'> 2000 USD'}].map(o=>(
+                  <li key={o.v}><button type="button" onClick={()=>{setFilterSalary(o.v);setSalaryOpen(false)}} className={`w-full text-left px-3.5 py-2 text-sm hover:bg-teal-50 transition-colors ${filterSalary===o.v?'font-bold text-teal-700 bg-teal-50':'text-slate-700'}`}>{o.l}{filterSalary===o.v?'  ✓':''}</button></li>
+                ))}
+              </motion.ul>
+            )}</AnimatePresence>
+          </div>
           <label className="flex items-center gap-1.5 text-xs font-semibold text-gray-600 cursor-pointer"><input type="checkbox" checked={showExpired} onChange={e => setShowExpired(e.target.checked)} /> Hiện tin hết hạn</label>
           <span className="text-xs text-gray-400">· {filteredJobs.length} tin</span>
         </div>
@@ -112,9 +148,19 @@ export default function JobsPage() {
             <Search size={18} className="text-gray-400" />
             <input type="text" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Tìm công việc, vị trí, kỹ năng..." className="w-full bg-transparent outline-none text-sm text-gray-800" />
           </div>
-          <div className="flex items-center gap-2 px-3 py-2 bg-[#f6fbf9] rounded-xl border border-transparent focus-within:border-blue-500 transition-colors md:max-w-xs w-full">
-            <MapPin size={18} className="text-gray-400" />
-            <select value={loc} onChange={(e) => setLoc(e.target.value)} className="w-full bg-transparent outline-none text-sm text-gray-800 cursor-pointer appearance-none" aria-label="Địa điểm"><option>Tất cả địa điểm</option><option>Hồ Chí Minh</option><option>Hà Nội</option><option>Remote</option></select>
+          <div className="relative md:max-w-xs w-full" data-dropdown>
+            <button type="button" onClick={() => openOnly('loc')} className="w-full flex items-center gap-2 px-3 py-2.5 bg-[#f6fbf9] rounded-xl border border-transparent hover:border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 transition-all text-left">
+              <MapPin size={18} className="text-gray-400 shrink-0" />
+              <span className="flex-1 text-sm text-slate-800 truncate">{loc}</span>
+              <motion.span animate={{ rotate: locOpen ? 180 : 0 }} transition={{duration:0.2}}><ChevronDown size={16} className="text-slate-400 shrink-0" /></motion.span>
+            </button>
+            <AnimatePresence>{locOpen && (
+              <motion.ul initial={{opacity:0,y:6,scale:0.98}} animate={{opacity:1,y:0,scale:1}} exit={{opacity:0,y:6,scale:0.98}} transition={{duration:0.16}} className="absolute z-40 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-[0_16px_40px_rgba(16,60,57,0.12)] overflow-hidden py-1">
+                {['Tất cả địa điểm','Hồ Chí Minh','Hà Nội','Remote'].map(o=>(
+                  <li key={o}><button type="button" onClick={()=>{setLoc(o);setLocOpen(false)}} className={`w-full text-left px-3.5 py-2.5 text-sm hover:bg-teal-50 transition-colors ${loc===o?'font-bold text-teal-700 bg-teal-50':'text-slate-700'}`}>{o}{loc===o?'  ✓':''}</button></li>
+                ))}
+              </motion.ul>
+            )}</AnimatePresence>
           </div>
           <button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-6 py-2.5 rounded-xl transition-colors shadow-sm">Tìm kiếm</button>
         </form>
@@ -176,12 +222,6 @@ export default function JobsPage() {
           </>
         )}
       </main>
-
-      <footer className="bg-white border-t border-gray-200 py-6 mt-16 text-center text-xs text-gray-400">
-        <div className="max-w-7xl mx-auto px-4">
-          © 2026 itmatch. Một sản phẩm tuyển dụng công nghệ độc lập cho sinh viên CNTT.
-        </div>
-      </footer>
     </div>
   );
 }

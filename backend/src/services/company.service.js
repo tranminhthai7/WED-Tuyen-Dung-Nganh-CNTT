@@ -58,6 +58,16 @@ const listPendingJobs = async () => {
   if (!isDatabaseReady()) return [];
   return Job.find({ status: 'pending' }).sort({ createdAt: -1 });
 };
+const listAdminJobs = async (status) => {
+  if (!isDatabaseReady()) return [];
+  const q = {};
+  if (status && ['pending','active','rejected','closed'].includes(status)) q.status = status;
+  return Job.find(q).sort({ createdAt: -1 }).lean();
+};
+const getAdminJobById = async (jobId) => {
+  if (!isDatabaseReady()) return null;
+  return Job.findById(jobId).lean();
+};
 const moderateJob = async (jobId, status) => {
   if (!['active','rejected','closed'].includes(status)) { const e = new Error('Trạng thái không hợp lệ'); e.statusCode = 400; throw e; }
   if (!isDatabaseReady()) return { message: `Demo: job ${status}` };
@@ -70,7 +80,6 @@ const moderateJob = async (jobId, status) => {
 const listCompaniesPublic = async () => {
   if (!isDatabaseReady()) return [];
   const companies = await Company.find({ isVerified: true, isActive: true }).sort({ createdAt: -1 }).lean();
-  // backfill slug for old records
   for (const c of companies) {
     if (!c.slug && c.name) {
       const s = slugify(c.name);
@@ -78,7 +87,6 @@ const listCompaniesPublic = async () => {
     }
     if (!c.slug) c.slug = String(c._id);
   }
-  // count jobs per company name
   const names = companies.map(c => c.name);
   const counts = await Job.aggregate([{ $match: { company: { $in: names }, status: 'active' } }, { $group: { _id: '$company', count: { $sum: 1 } } }]);
   const map = Object.fromEntries(counts.map(x => [x._id, x.count]));
@@ -90,7 +98,6 @@ const getCompanyBySlug = async (slug) => {
   let c = await Company.findOne({ slug, isVerified: true }).lean();
   if (!c) c = await Company.findOne({ slug: slugify(slug), isVerified: true }).lean();
   if (!c) {
-    // fallback: try by _id or by slugified name
     const all = await Company.find({ isVerified: true }).lean();
     c = all.find(x => slugify(x.name) === slugify(slug) || String(x._id) === slug) || null;
   }
@@ -100,4 +107,4 @@ const getCompanyBySlug = async (slug) => {
   return { ...c, jobs, jobCount: jobs.length };
 };
 
-module.exports = { createCompany, getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, moderateJob, listCompaniesPublic, getCompanyBySlug };
+module.exports = { createCompany, getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, listAdminJobs, getAdminJobById, moderateJob, listCompaniesPublic, getCompanyBySlug };

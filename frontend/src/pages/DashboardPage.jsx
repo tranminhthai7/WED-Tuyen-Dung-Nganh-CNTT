@@ -136,12 +136,6 @@ export default function DashboardPage() {
           </div>
         )}
       </main>
-
-      <footer className="bg-white border-t border-gray-200 py-6 mt-16 text-center text-xs text-gray-400">
-        <div className="max-w-7xl mx-auto px-4">
-          © 2026 itmatch. Một sản phẩm tuyển dụng công nghệ độc lập cho sinh viên CNTT.
-        </div>
-      </footer>
     </div>
   );
 }

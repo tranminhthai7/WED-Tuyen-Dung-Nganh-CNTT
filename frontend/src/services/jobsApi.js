@@ -118,6 +118,13 @@ export async function verifyCompany(id, isVerified) {
 export async function fetchPendingJobs() {
   const data = await apiRequest('/api/companies/admin/jobs/pending'); return data.jobs || [];
 }
+export async function fetchAdminJobs(status) {
+  const q = status ? `?status=${status}` : '';
+  const data = await apiRequest(`/api/companies/admin/jobs${q}`); return data.jobs || [];
+}
+export async function fetchAdminJob(id) {
+  const data = await apiRequest(`/api/companies/admin/jobs/${id}`); return data.job;
+}
 export async function moderateJob(id, status) {
   return apiRequest(`/api/companies/admin/jobs/${id}/moderate`, 'PATCH', { status });
 }
