@@ -21,21 +21,21 @@ export default function Header() {
           <span>itmatch<span className="text-[#0f766e]">.</span></span>
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-gray-500">
-          <Link to="/jobs" className="hover:text-blue-600 transition-colors">Tìm việc</Link>
-          <Link to="/companies" className="hover:text-blue-600 transition-colors">Công ty</Link>
+        {/* Desktop Navigation — P0: tăng contrast trên nền mint */}
+        <nav className="hidden md:flex items-center gap-7 text-[13px] font-bold tracking-tight">
+          <Link to="/jobs" className="text-[#0f2e2e] hover:text-teal-700 transition-colors">Tìm việc</Link>
+          <Link to="/companies" className="text-[#0f2e2e] hover:text-teal-700 transition-colors">Công ty</Link>
           {isAuthenticated && user?.role === 'candidate' && (
             <>
-              <Link to="/candidate/profile" className="hover:text-blue-600 transition-colors">Hồ sơ cá nhân</Link>
-              <Link to="/candidate/applications" className="hover:text-blue-600 transition-colors">Đơn ứng tuyển</Link>
+              <Link to="/candidate/profile" className="text-[#0f2e2e] hover:text-teal-700 transition-colors">Hồ sơ cá nhân</Link>
+              <Link to="/candidate/applications" className="text-[#0f2e2e] hover:text-teal-700 transition-colors">Đơn ứng tuyển</Link>
             </>
           )}
           {isAuthenticated && user?.role === 'employer' && (
-            <Link to="/employer/dashboard" className="hover:text-blue-600 transition-colors">Employer Workspace</Link>
+            <Link to="/employer/dashboard" className="text-[#0f2e2e] hover:text-teal-700 transition-colors">Employer Workspace</Link>
           )}
           {isAuthenticated && user?.role === 'admin' && (
-            <Link to="/admin/dashboard" className="hover:text-blue-600 transition-colors">Admin Workspace</Link>
+            <Link to="/admin/dashboard" className="text-[#0f2e2e] hover:text-teal-700 transition-colors">Admin Workspace</Link>
           )}
         </nav>
 

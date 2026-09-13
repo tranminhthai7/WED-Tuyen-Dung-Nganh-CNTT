@@ -16,15 +16,15 @@ export default function JobCard({ job, compact = false }) {
   const visibleSkills = expanded ? allSkills : allSkills.slice(0, 3);
   const extra = allSkills.length - visibleSkills.length;
 
-  // Match score badges color calculation
-  let scoreBadgeColor = 'bg-red-50 text-red-700 border-red-100';
-  let scoreColorText = 'Đỏ';
+  // Match score badges — P0: bỏ đỏ gây tiêu cực, <40% dùng xám trung tính
+  let scoreBadgeColor = 'bg-slate-50 text-slate-600 border-slate-200';
+  let scoreColorText = 'Gợi ý bổ sung';
   if (score >= 70) {
-    scoreBadgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-100';
-    scoreColorText = 'Xanh';
+    scoreBadgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+    scoreColorText = 'Rất phù hợp';
   } else if (score >= 40) {
-    scoreBadgeColor = 'bg-amber-50 text-amber-700 border-amber-100';
-    scoreColorText = 'Vàng';
+    scoreBadgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
+    scoreColorText = 'Gần khớp';
   }
 
   return (
