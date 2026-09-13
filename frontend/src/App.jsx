@@ -38,8 +38,17 @@ function AppShell() {
   );
 }
 
-// Initialize React Query Client
-const queryClient = new QueryClient();
+// Cache 5 phút + không refetch khi tab focus — hết nháy loading mỗi lần tab qua lại
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 5 * 60 * 1000,
+      gcTime: 10 * 60 * 1000,
+      refetchOnWindowFocus: false,
+      retry: 1,
+    },
+  },
+});
 
 // Route Protection Component
 function ProtectedRoute({ children, allowedRoles }) {
