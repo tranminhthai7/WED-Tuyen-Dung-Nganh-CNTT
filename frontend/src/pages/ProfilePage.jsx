@@ -221,7 +221,7 @@ export default function ProfilePage() {
                 </div>
                 {formData.cvUrl && (
                   <div className="flex flex-wrap items-center gap-2">
-                    <a href={formData.cvUrl} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"><Eye size={14} />Mở tab mới</a>
+                    <a href={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700"><Eye size={14} />Mở tab mới ↗</a>
                     <button type="button" onClick={handleDownloadCv} className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50"><Download size={14} />Tải về</button>
                     <button type="button" onClick={() => setShowPreview(v => !v)} className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-2 rounded-xl border ${showPreview ? 'bg-gray-900 text-white border-gray-900' : 'bg-white border-gray-200 hover:bg-gray-50'}`}>{showPreview ? 'Ẩn xem trước' : 'Xem trước inline'}</button>
                     <button type="button" onClick={() => setCvFullscreen(true)} className="text-xs font-bold px-3 py-2 bg-white border border-gray-200 rounded-xl hover:bg-gray-50">⛶ Toàn màn hình</button>
