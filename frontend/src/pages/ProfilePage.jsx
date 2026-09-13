@@ -21,6 +21,7 @@ export default function ProfilePage() {
   const [customSkill, setCustomSkill] = useState('');
   const [skillSearch, setSkillSearch] = useState('');
   const [openCats, setOpenCats] = useState({});
+  const [showLinkInput, setShowLinkInput] = useState(false);
 
   const { data: profileData, isLoading: profileLoading, error: profileError } = useQuery({ queryKey: ['profile'], queryFn: getProfile, retry: false });
   const { data: skills = [], isLoading: skillsLoading } = useQuery({ queryKey: ['skills'], queryFn: fetchSkills });
@@ -228,7 +229,11 @@ export default function ProfilePage() {
                     <button type="button" onClick={() => { setFormData(p => ({ ...p, cvUrl: '' })); setShowPreview(false); setSaveStatus({ kind: 'success', message: 'Đã xóa CV ở form — bấm Lưu hồ sơ để lưu.' }); }} className="inline-flex items-center gap-1 text-xs font-bold px-3 py-2 bg-white border border-red-200 text-red-600 rounded-xl hover:bg-red-50"><Trash2 size={14} />Xóa</button>
                   </div>
                 )}
-                <input name="cvUrl" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf  — dán link nếu đã có sẵn" className="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#0f2a2e] focus:ring-2 focus:ring-[#0f2a2e]/10 text-sm" />
+                <button type="button" onClick={() => setShowLinkInput(v => !v)} className="w-full flex items-center justify-between gap-2 px-3.5 py-2.5 bg-gray-50 hover:bg-white border border-gray-200 rounded-xl text-xs font-bold text-gray-700 transition">
+                  <span className="flex items-center gap-1.5"><span className="w-6 h-6 rounded-lg bg-white border border-gray-200 grid place-items-center">🔗</span> Có link CV sẵn? Dán tại đây</span>
+                  <ChevronDown size={14} className={`text-gray-400 transition ${showLinkInput ? 'rotate-180' : ''}`} />
+                </button>
+                {showLinkInput && <input name="cvUrl" value={formData.cvUrl} onChange={handleChange} placeholder="https://.../cv.pdf — dán Drive/S3/Cloudinary link rồi bấm Lưu hồ sơ" className="w-full px-3.5 py-3 bg-white border border-gray-200 rounded-xl outline-none focus:border-[#0f2a2e] focus:ring-2 focus:ring-[#0f2a2e]/10 text-sm" />}
                 {formData.cvUrl?.startsWith('http') && showPreview && (
                   <div className="border border-gray-200 rounded-xl overflow-hidden bg-white">
                     <iframe key={formData.cvUrl} title="CV preview" src={`https://docs.google.com/gview?url=${encodeURIComponent(formData.cvUrl)}&embedded=true`} className="w-full border-0 h-[560px]" />
