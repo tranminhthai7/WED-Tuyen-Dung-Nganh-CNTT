@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { useEffect } from 'react';
 import HomePage from './pages/HomePage';
 import AuthPage from './pages/AuthPage';
 import JobsPage from './pages/JobsPage';
@@ -13,11 +14,27 @@ import CompanyDetailPage from './pages/CompanyDetailPage';
 import Footer from './components/Footer';
 import useAuthStore from './store/authStore';
 
+function QueryInvalidator() {
+  const user = useAuthStore((s) => s.user);
+  const token = useAuthStore((s) => s.token);
+  const qc = useQueryClient();
+  useEffect(() => {
+    // Đổi tài khoản → bỏ cache cũ, fetch lại profile/company ngay — hết avatar cũ
+    qc.invalidateQueries({ queryKey: ['profile'] });
+    qc.invalidateQueries({ queryKey: ['myCompany'] });
+    qc.invalidateQueries({ queryKey: ['myPostings'] });
+    qc.invalidateQueries({ queryKey: ['receivedApplications'] });
+    if (!token) qc.clear();
+  }, [user?.id, user?.email, token, qc]);
+  return null;
+}
+
 function AppShell() {
   const { pathname } = useLocation();
   const hideFooter = pathname.startsWith('/auth');
   return (
     <div className="app-shell bg-[#f6fbf9] min-h-screen flex flex-col">
+      <QueryInvalidator />
       <div className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -38,7 +55,7 @@ function AppShell() {
   );
 }
 
-// Cache 5 phút + không refetch khi tab focus — hết nháy loading mỗi lần tab qua lại
+// Cache 5 phút — riêng profile/myCompany sẽ bị invalidate khi đổi user nên không dính cũ
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
