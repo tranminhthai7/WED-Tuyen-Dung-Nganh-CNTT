@@ -16,12 +16,12 @@ export default function JobCard({ job, compact = false }) {
   const visibleSkills = expanded ? allSkills : allSkills.slice(0, 3);
   const extra = allSkills.length - visibleSkills.length;
 
-  // Match score badges — P0: bỏ đỏ gây tiêu cực, <40% dùng xám trung tính
+  // Match score — wording tự nhiên TV: Khớp / Cần bổ sung
   let scoreBadgeColor = 'bg-slate-50 text-slate-600 border-slate-200';
-  let scoreColorText = 'Gợi ý bổ sung';
+  let scoreColorText = 'Cần bổ sung';
   if (score >= 70) {
     scoreBadgeColor = 'bg-emerald-50 text-emerald-700 border-emerald-200';
-    scoreColorText = 'Rất phù hợp';
+    scoreColorText = 'Rất khớp';
   } else if (score >= 40) {
     scoreBadgeColor = 'bg-amber-50 text-amber-700 border-amber-200';
     scoreColorText = 'Gần khớp';
@@ -58,7 +58,7 @@ export default function JobCard({ job, compact = false }) {
           <div className={`mt-3 px-3 py-2 border rounded-xl flex flex-col gap-1 text-xs ${scoreBadgeColor}`}>
             <span className="font-bold flex items-center gap-1">
               <Sparkles size={14} className="animate-pulse" />
-              {score}% Phù hợp ({scoreColorText})
+              {score}% Khớp ({scoreColorText})
             </span>
             {missing.length > 0 && (
               <span className="text-[11px] opacity-90 truncate">
