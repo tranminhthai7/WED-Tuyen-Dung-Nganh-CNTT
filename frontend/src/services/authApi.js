@@ -19,10 +19,16 @@ async function apiRequest(path, method = 'GET', payload = null, isFormData = fal
   }
 
   const response = await fetch(`${API_BASE_URL}${path}`, options);
-  const data = await response.json();
+  let data; try { data = await response.json(); } catch { data = {}; }
 
   if (!response.ok) {
-    throw new Error(data.message || 'Lỗi kết nối máy chủ');
+    const msg = data.message || 'Lỗi kết nối máy chủ';
+    if (response.status === 401 && msg.toLowerCase().includes('token')) {
+      localStorage.removeItem('itmatch_token');
+      localStorage.removeItem('itmatch_user');
+      // để ProfilePage tự redirect, không throw loop
+    }
+    throw new Error(msg);
   }
 
   return data;

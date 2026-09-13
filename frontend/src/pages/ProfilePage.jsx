@@ -6,8 +6,11 @@ import { getProfile, updateProfile, uploadAvatar, uploadCv } from '../services/a
 import { fetchSkills } from '../services/jobsApi';
 import useAuthStore from '../store/authStore';
 
+import { useNavigate } from 'react-router-dom';
+
 export default function ProfilePage() {
-  const { updateUser } = useAuthStore();
+  const { updateUser, logout } = useAuthStore();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({ name: '', phone: '', cvUrl: '', experience: '', education: '', bio: '', github: '', linkedin: '', avatar: '' });
   const [selectedSkills, setSelectedSkills] = useState([]);
   const [saveStatus, setSaveStatus] = useState({ kind: 'idle', message: '' });
@@ -19,9 +22,14 @@ export default function ProfilePage() {
   const [skillSearch, setSkillSearch] = useState('');
   const [openCats, setOpenCats] = useState({});
 
-  const { data: profileData, isLoading: profileLoading } = useQuery({ queryKey: ['profile'], queryFn: getProfile });
+  const { data: profileData, isLoading: profileLoading, error: profileError } = useQuery({ queryKey: ['profile'], queryFn: getProfile, retry: false });
   const { data: skills = [], isLoading: skillsLoading } = useQuery({ queryKey: ['skills'], queryFn: fetchSkills });
 
+  useEffect(() => {
+    if (profileError?.message?.toLowerCase().includes('token')) {
+      logout(); navigate('/auth', { replace: true });
+    }
+  }, [profileError]);
   useEffect(() => {
     if (profileData?.user) {
       const u = profileData.user;
