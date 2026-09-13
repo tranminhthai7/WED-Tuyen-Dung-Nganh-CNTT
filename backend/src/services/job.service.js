@@ -147,7 +147,17 @@ const getJobBySlug = async (slug, userSkills = null) => {
 
 const getJobsByEmployer = async (employerId) => {
   if (isDatabaseReady()) {
-    const jobs = await Job.find({ companyId: employerId }).sort({ createdAt: -1 });
+    let jobs = await Job.find({ companyId: employerId }).sort({ createdAt: -1 });
+    if (jobs.length === 0) {
+      try {
+        const comp = await Company.findOne({ ownerId: employerId }).lean();
+        if (comp?.name) {
+          jobs = await Job.find({ company: comp.name }).sort({ createdAt: -1 });
+          // tự gắn lại companyId cho đúng — lần sau tìm thẳng được
+          if (jobs.length) { try { await Job.updateMany({ company: comp.name, companyId: { $ne: employerId } }, { $set: { companyId: employerId } }); } catch {} }
+        }
+      } catch {}
+    }
     return jobs.map((job) => normalizeJob(job));
   }
 
