@@ -21,14 +21,16 @@ const companySchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
+      default: undefined,
     },
     password: {
       type: String,
-      required: true,
+      required: false,
+      default: '',
     },
     logo: {
       type: String,

@@ -29,17 +29,39 @@ const updateMyCompany = async (ownerId, data) => {
   const wasVerified = existing?.isVerified === true;
   const importantChanged = wasVerified && allowed.some(k => data[k] !== undefined && String(data[k] ?? '') !== String(existing[k] ?? ''));
   if (importantChanged) upd.isVerified = false;
-  const c = await Company.findOneAndUpdate({ ownerId }, upd, { new: true, upsert: true });
-  const msg = importantChanged ? 'Đã lưu — hồ sơ thay đổi nên cần Admin duyệt lại' : 'Cập nhật công ty thành công';
-  return { message: msg, company: c, needsReverify: importantChanged };
+  try {
+    const c = await Company.findOneAndUpdate({ ownerId }, upd, { new: true, upsert: true });
+    const msg = importantChanged ? 'Đã lưu — hồ sơ thay đổi nên cần Admin duyệt lại' : 'Cập nhật công ty thành công';
+    return { message: msg, company: c, needsReverify: importantChanged };
+  } catch (e) {
+    if (e.code === 11000 && String(e.message).includes('email')) {
+      try { await Company.collection.updateMany({ email: null }, [{ $set: { email: { $concat: ['fix-', { $toString: '$_id' }, '@local'] } } }]); } catch {}
+      try { await Company.collection.dropIndex('email_1'); } catch {}
+      try { await Company.collection.createIndex({ email: 1 }, { unique: true, sparse: true }); } catch {}
+      const c = await Company.findOneAndUpdate({ ownerId }, upd, { new: true, upsert: true });
+      return { message: 'Cập nhật công ty thành công', company: c };
+    }
+    throw e;
+  }
 };
 
 const uploadLogo = async (file, ownerId) => {
   const url = file.path || file.secure_url || file.location || `memory://${file.originalname}`;
   if (!hasKeys && !file.path) console.warn('[upload] logo fallback memory URL');
   if (!isDatabaseReady()) return { url, message: 'Upload logo (demo)' };
-  const c = await Company.findOneAndUpdate({ ownerId }, { logo: url }, { new: true, upsert: true });
-  return { url, company: c };
+  try {
+    const c = await Company.findOneAndUpdate({ ownerId }, { logo: url }, { new: true, upsert: true });
+    return { url, company: c };
+  } catch (e) {
+    if (e.code === 11000 && String(e.message).includes('email')) {
+      try { await Company.collection.updateMany({ email: null }, [{ $set: { email: { $concat: ['fix-', { $toString: '$_id' }, '@local'] } } }]); } catch {}
+      try { await Company.collection.dropIndex('email_1'); } catch {}
+      try { await Company.collection.createIndex({ email: 1 }, { unique: true, sparse: true }); } catch {}
+      const c = await Company.findOneAndUpdate({ ownerId }, { logo: url }, { new: true, upsert: true });
+      return { url, company: c };
+    }
+    throw e;
+  }
 };
 
 // Admin
