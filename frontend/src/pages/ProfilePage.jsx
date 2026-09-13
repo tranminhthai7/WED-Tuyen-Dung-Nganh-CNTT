@@ -8,6 +8,11 @@ import useAuthStore from '../store/authStore';
 
 import { useNavigate } from 'react-router-dom';
 
+const getCvName = (url) => {
+  if (!url) return '';
+  try { const u = new URL(url); if (u.hostname.includes('drive.google')) return 'CV - Google Drive.pdf'; const p = u.pathname.split('/').pop(); return decodeURIComponent(p || 'CV.pdf'); } catch { return 'CV.pdf'; }
+};
+
 export default function ProfilePage() {
   const { updateUser, logout } = useAuthStore();
   const navigate = useNavigate();
@@ -230,8 +235,8 @@ export default function ProfilePage() {
                 <div onDragOver={e => e.preventDefault()} onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f) handleCvFile({ target: { files: [f] } }); }} className={`rounded-2xl border-2 border-dashed p-5 flex flex-col sm:flex-row items-center gap-4 ${formData.cvUrl ? 'bg-emerald-50/60 border-emerald-200' : 'bg-gray-50 border-gray-200 hover:border-[#0f2a2e]/30 hover:bg-white transition'}`}>
                   <div className={`w-12 h-12 rounded-xl grid place-items-center shrink-0 ${formData.cvUrl ? 'bg-emerald-600 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}><FileText size={18} /></div>
                   <div className="flex-1 min-w-0 text-center sm:text-left">
-                    <p className="text-sm font-bold text-gray-900">{formData.cvUrl ? 'Đã có CV — kéo PDF mới vào để thay thế' : 'Kéo & thả CV PDF vào đây'}</p>
-                    <p className="text-xs text-gray-500 mt-0.5 truncate">{formData.cvUrl || 'hoặc bấm nút bên phải để chọn file'}</p>
+                    <p className="text-sm font-bold text-gray-900">{formData.cvUrl ? getCvName(formData.cvUrl) : 'Kéo & thả CV PDF vào đây'}</p>
+                    <p className="text-xs text-gray-500 mt-0.5 truncate">{formData.cvUrl ? 'PDF · Có thể xem / tải dưới đây' : 'hoặc bấm nút bên phải để chọn file'}</p>
                   </div>
                   <div className="flex items-center gap-2 shrink-0">
                     <label className="inline-flex items-center gap-1.5 text-xs font-bold px-4 py-2.5 bg-[#0f2a2e] text-white rounded-xl hover:bg-black cursor-pointer"><UploadCloud size={14} /> {upCv ? 'Đang tải…' : 'Chọn PDF'}<input type="file" accept=".pdf" className="hidden" onChange={handleCvFile} disabled={upCv} /></label>
