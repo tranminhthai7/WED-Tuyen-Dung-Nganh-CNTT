@@ -32,8 +32,8 @@ export default function JobCard({ job, compact = false }) {
       <div>
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-4 min-w-0">
-            <div className={`grid size-12 shrink-0 place-items-center rounded-xl text-lg font-black bg-blue-50 text-blue-700`}>
-              {job.logo || job.company?.charAt(0).toUpperCase() || 'J'}
+            <div className={`grid size-12 shrink-0 place-items-center rounded-xl text-lg font-black bg-gradient-to-br from-teal-50 to-blue-50 border border-slate-200 overflow-hidden`}>
+              {String(job.logo||'').startsWith('http') ? <img src={job.logo} alt={job.company} className="w-full h-full object-cover" /> : <span className="text-blue-700">{job.logo || job.company?.charAt(0).toUpperCase() || 'J'}</span>}
             </div>
             <div className="min-w-0">
               <Link to={`/jobs/${job.slug}`} className="block truncate font-bold text-gray-900 hover:text-blue-600 transition-colors text-base">

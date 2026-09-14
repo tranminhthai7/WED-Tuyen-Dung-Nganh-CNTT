@@ -175,6 +175,7 @@ const createJob = async (jobData, employerId, employerName) => {
 
   // Logic thực tế: tên cty lấy từ Hồ sơ công ty đã duyệt, không cho nhập tay ở form đăng tin
   let companyName = employerName || 'Nhà tuyển dụng';
+  let companyLogo = '';
   let companyStatus = 'pending';
   let status = 'pending';
   if (isDatabaseReady()) {
@@ -182,6 +183,7 @@ const createJob = async (jobData, employerId, employerName) => {
       const comp = await Company.findOne({ ownerId: employerId }).lean();
       if (comp && comp.name) {
         companyName = comp.name;
+        companyLogo = comp.logo || '';
         companyStatus = comp.isVerified ? 'verified' : 'pending';
         // Chỉ cho active ngay nếu cty đã verified, ngược lại pending chờ Admin duyệt
         status = comp.isVerified ? 'active' : 'pending';
@@ -203,7 +205,7 @@ const createJob = async (jobData, employerId, employerName) => {
     slug,
     title,
     company: companyName,
-    logo: companyName ? companyName.charAt(0).toUpperCase() : 'N',
+    logo: companyLogo || (companyName ? companyName.charAt(0).toUpperCase() : 'N'),
     tone: 'tone-blue',
     location,
     salary: salary || 'Cạnh tranh',

@@ -63,6 +63,8 @@ const uploadLogo = async (file, ownerId) => {
   if (!isDatabaseReady()) return { url, message: 'Upload logo (demo)' };
   try {
     const c = await Company.findOneAndUpdate({ ownerId }, { logo: url }, { new: true, upsert: true });
+    // Đồng bộ logo thật sang mọi tin của công ty — để JobCard không còn hiện chữ cái
+    try { if (c?.name) await Job.updateMany({ company: c.name }, { $set: { logo: url } }); } catch {}
     return { url, company: c };
   } catch (e) {
     if (e.code === 11000 && String(e.message).includes('email')) {
@@ -70,6 +72,7 @@ const uploadLogo = async (file, ownerId) => {
       try { await Company.collection.dropIndex('email_1'); } catch {}
       try { await Company.collection.createIndex({ email: 1 }, { unique: true, sparse: true }); } catch {}
       const c = await Company.findOneAndUpdate({ ownerId }, { logo: url }, { new: true, upsert: true });
+      try { if (c?.name) await Job.updateMany({ company: c.name }, { $set: { logo: url } }); } catch {}
       return { url, company: c };
     }
     throw e;
