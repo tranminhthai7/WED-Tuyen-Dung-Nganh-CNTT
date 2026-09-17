@@ -5,7 +5,6 @@ import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import Header from '../components/Header';
 import { upgradePackage } from '../services/jobsApi';
-import { toast } from 'react-hot-toast';
 
 export default function PricingPage() {
   const { isAuthenticated, user } = useAuthStore();
@@ -49,18 +48,18 @@ export default function PricingPage() {
 
   const handleUpgrade = async (planId) => {
     if (!isAuthenticated) return navigate('/auth?role=employer');
-    if (user.role !== 'employer') return toast.error('Chỉ nhà tuyển dụng mới có thể nâng cấp gói');
+    if (user.role !== 'employer') return alert('Chỉ nhà tuyển dụng mới có thể nâng cấp gói');
     
-    if (planId === 'Enterprise') return toast.success('Đã gửi yêu cầu liên hệ!');
+    if (planId === 'Enterprise') return alert('Đã gửi yêu cầu liên hệ!');
     if (planId === 'Free') return; // Default
 
     setLoading(planId);
     try {
       const res = await upgradePackage(planId);
-      toast.success(res.message);
+      alert(res.message);
       setTimeout(() => navigate('/employer/dashboard'), 1500);
     } catch (e) {
-      toast.error(e.message);
+      alert(e.message);
     } finally {
       setLoading('');
     }
