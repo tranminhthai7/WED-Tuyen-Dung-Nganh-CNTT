@@ -153,18 +153,59 @@ const getCompanyBySlug = async (slug) => {
   return { ...c, jobs, jobCount: jobs.length };
 };
 
-const upgradePackage = async (ownerId, packageType) => {
+const Transaction = require('../models/Transaction');
+
+const upgradePackage = async (ownerId, packageType, paymentMethod = 'manual', metadata = {}) => {
   if (!isDatabaseReady()) return { message: 'Đã nâng cấp gói thành công (demo)' };
   const valid = ['Free', 'Pro', 'Enterprise'];
   if (!valid.includes(packageType)) { const e = new Error('Gói không hợp lệ'); e.statusCode = 400; throw e; }
-  
-  const c = await Company.findOneAndUpdate({ ownerId }, { packageType }, { new: true });
+
+  const c = await Company.findOne({ ownerId });
+  if (!c) { const e = new Error('Không tìm thấy công ty'); e.statusCode = 404; throw e; }
+
+  let packageExpiresAt = null;
+  let amount = 0;
+
+  if (packageType === 'Pro') {
+    amount = 1100000;
+    packageExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+  } else if (packageType === 'Enterprise') {
+    amount = 0;
+    packageExpiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+  }
+
+  c.packageType = packageType;
+  c.packageExpiresAt = packageExpiresAt;
+  await c.save();
+
   if (packageType === 'Pro' || packageType === 'Enterprise') {
     await Job.updateMany({ companyId: ownerId }, { isHot: true });
   } else {
     await Job.updateMany({ companyId: ownerId }, { isHot: false });
   }
-  return { message: `Đã nâng cấp lên gói ${packageType}`, company: c };
+
+  // Create transaction record
+  const txnId = `TXN_${Date.now()}_${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
+  await Transaction.create({
+    companyId: c._id,
+    txnId,
+    amount,
+    packageType,
+    paymentMethod,
+    status: 'success',
+    paidAt: new Date(),
+    metadata,
+  });
+
+  return { message: `Đã nâng cấp lên gói ${packageType}`, company: c, transaction: { txnId, amount, packageType, paymentMethod, paidAt: new Date() } };
 };
 
-module.exports = { createCompany, getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, listAdminJobs, getAdminJobById, moderateJob, listCompaniesPublic, getCompanyBySlug, upgradePackage };
+const getMyTransactions = async (ownerId) => {
+  if (!isDatabaseReady()) return [];
+  const company = await Company.findOne({ ownerId });
+  if (!company) return [];
+  const Transaction = require('../models/Transaction');
+  return Transaction.find({ companyId: company._id }).sort({ createdAt: -1 }).lean();
+};
+
+module.exports = { createCompany, getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, listAdminJobs, getAdminJobById, moderateJob, listCompaniesPublic, getCompanyBySlug, upgradePackage, getMyTransactions };

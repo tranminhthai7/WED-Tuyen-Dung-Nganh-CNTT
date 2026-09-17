@@ -1,5 +1,5 @@
 const express = require('express');
-const { getCompany, updateCompany, uploadCompanyLogo, adminListCompanies, adminVerifyCompany, adminListPendingJobs, adminListJobs, adminGetJob, adminModerateJob, listPublicCompanies, getPublicCompany, upgradePackage } = require('../controllers/company.controller');
+const { getCompany, updateCompany, uploadCompanyLogo, adminListCompanies, adminVerifyCompany, adminListPendingJobs, adminListJobs, adminGetJob, adminModerateJob, listPublicCompanies, getPublicCompany, upgradePackage, getMyTransactions, createPaymentUrl, vnpayReturn } = require('../controllers/company.controller');
 const { authenticate, requireRole } = require('../middlewares/auth.middleware');
 const { logoUpload } = require('../middlewares/upload.middleware');
 
@@ -9,6 +9,11 @@ router.get('/my', authenticate, requireRole('employer'), getCompany);
 router.put('/my', authenticate, requireRole('employer'), updateCompany);
 router.post('/my/logo', authenticate, requireRole('employer'), logoUpload.single('logo'), uploadCompanyLogo);
 router.post('/my/upgrade', authenticate, requireRole('employer'), upgradePackage);
+router.get('/my/transactions', authenticate, requireRole('employer'), getMyTransactions);
+
+// VNPay Routes
+router.post('/my/create-payment-url', authenticate, requireRole('employer'), createPaymentUrl);
+router.get('/my/vnpay-return', authenticate, requireRole('employer'), vnpayReturn);
 
 router.get('/admin/list', authenticate, requireRole('admin'), adminListCompanies);
 router.patch('/admin/:id/verify', authenticate, requireRole('admin'), adminVerifyCompany);

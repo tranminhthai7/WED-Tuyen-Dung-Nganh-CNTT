@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
-import { BarChart3, BriefcaseBusiness, FilePlus2, Search, Users, Sparkles, CheckCircle2, Trash2, Edit2, Calendar } from 'lucide-react';
+import { BarChart3, BriefcaseBusiness, FilePlus2, Search, Users, Sparkles, CheckCircle2, Trash2, Edit2, Calendar, CreditCard, Clock } from 'lucide-react';
 import Header from '../components/Header';
 import PdfViewer from '../components/PdfViewer';
 import {
@@ -67,7 +67,13 @@ export default function EmployerDashboardPage() {
     queryKey: ['employerStats'],
     queryFn: fetchDashboardStats,
   });
+  
   const { data: myCompany } = useQuery({ queryKey: ['myCompany'], queryFn: fetchMyCompany });
+  const { data: transactions = [], isLoading: isLoadingTx } = useQuery({
+    queryKey: ['myTransactions'],
+    queryFn: fetchMyTransactions,
+  });
+
   useEffect(() => { if (myCompany) setCompany({ name: myCompany.name || '', website: myCompany.website || '', industry: myCompany.industry || '', size: myCompany.size || '', address: myCompany.address || '', description: myCompany.description || '', techStack: (myCompany.techStack || []).join(', ') }); }, [myCompany]);
 
   // Create job mutation
@@ -176,7 +182,7 @@ export default function EmployerDashboardPage() {
             {[
               { key: 'dashboard', label: 'Tổng quan', Icon: BarChart3 },
               { key: 'company', label: 'Hồ sơ công ty', Icon: BriefcaseBusiness },
-              { key: 'package', label: 'Gói dịch vụ', Icon: Sparkles },
+              { key: 'package', label: 'Gói dịch vụ', Icon: Sparkles },\n              { key: 'transactions', label: 'Lịch sử giao dịch', Icon: CreditCard },
               { key: 'jobs', label: 'Tin tuyển dụng', Icon: BriefcaseBusiness },
               { key: 'candidates', label: 'Ứng viên', Icon: Users },
               { key: 'post', label: 'Đăng tin mới', Icon: FilePlus2 },
@@ -581,7 +587,70 @@ export default function EmployerDashboardPage() {
               </div>
             )}
 
+            
+            {section === 'transactions' && (
+              <div className="space-y-6">
+                <div>
+                  <h1 className="text-2xl font-black text-gray-900">Lịch sử giao dịch</h1>
+                  <p className="text-xs text-gray-500 mt-1">Quản lý hóa đơn và lịch sử thanh toán của công ty.</p>
+                </div>
+                
+                <div className="bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-sm">
+                  {isLoadingTx ? (
+                    <div className="p-8 text-center text-gray-500 text-sm animate-pulse">Đang tải dữ liệu...</div>
+                  ) : transactions.length === 0 ? (
+                    <div className="p-12 text-center flex flex-col items-center justify-center">
+                      <div className="w-16 h-16 bg-gray-50 text-gray-300 rounded-full flex items-center justify-center mb-4"><CreditCard size={28} /></div>
+                      <h3 className="text-gray-900 font-bold mb-1">Chưa có giao dịch</h3>
+                      <p className="text-gray-500 text-xs">Bạn chưa thực hiện thanh toán nào trên hệ thống.</p>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-left border-collapse">
+                        <thead>
+                          <tr className="bg-gray-50 border-b border-gray-100 text-[10px] uppercase tracking-wider text-gray-500 font-bold">
+                            <th className="px-5 py-4">Mã GD</th>
+                            <th className="px-5 py-4">Gói dịch vụ</th>
+                            <th className="px-5 py-4">Số tiền</th>
+                            <th className="px-5 py-4">Phương thức</th>
+                            <th className="px-5 py-4">Trạng thái</th>
+                            <th className="px-5 py-4">Thời gian</th>
+                          </tr>
+                        </thead>
+                        <tbody className="text-sm">
+                          {transactions.map(tx => (
+                            <tr key={tx._id} className="border-b border-gray-50 hover:bg-[#f6fbf9] transition-colors">
+                              <td className="px-5 py-4 font-mono text-xs text-gray-600">#{tx._id.slice(-6).toUpperCase()}</td>
+                              <td className="px-5 py-4 font-bold text-gray-900">{tx.packageType}</td>
+                              <td className="px-5 py-4 font-bold text-blue-600">{tx.amount.toLocaleString()}đ</td>
+                              <td className="px-5 py-4">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-gray-100 text-gray-700">
+                                  {tx.paymentMethod}
+                                </span>
+                              </td>
+                              <td className="px-5 py-4">
+                                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider ${
+                                  tx.status === 'success' ? 'bg-emerald-50 text-emerald-700' :
+                                  tx.status === 'failed' ? 'bg-red-50 text-red-700' : 'bg-orange-50 text-orange-700'
+                                }`}>
+                                  {tx.status === 'success' ? 'Thành công' : tx.status === 'failed' ? 'Thất bại' : 'Chờ xử lý'}
+                                </span>
+                              </td>
+                              <td className="px-5 py-4 text-xs text-gray-500">
+                                {new Date(tx.createdAt).toLocaleString('vi-VN')}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+            
             {/* 4. OVERVIEW DASHBOARD */}
+
             {section === 'dashboard' && (
               <div className="space-y-6">
                 <div>

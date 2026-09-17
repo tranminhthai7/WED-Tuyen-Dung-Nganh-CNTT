@@ -140,3 +140,15 @@ export async function aiSuggestJobs() { return apiRequest('/api/ai/suggest-jobs'
 export async function aiGenerateJD(prompt) { return apiRequest('/api/ai/generate-jd', 'POST', { prompt }); }
 export async function aiCoverLetter(jobSlug) { return apiRequest('/api/ai/cover-letter', 'POST', { jobSlug }); }
 export async function aiStatus() { return apiRequest('/api/ai/status'); }
+
+// Transaction / VNPay
+export async function fetchMyTransactions() {
+  const data = await apiRequest('/api/companies/my/transactions');
+  return data.transactions || [];
+}
+export async function createPaymentUrl(packageType) {
+  return apiRequest('/api/companies/my/create-payment-url', 'POST', { packageType });
+}
+export async function vnpayReturn(queryString) {
+  return apiRequest(`/api/companies/my/vnpay-return${queryString}`);
+}

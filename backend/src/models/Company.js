@@ -63,8 +63,12 @@ const companySchema = new mongoose.Schema(
     },
     packageType: {
       type: String,
-      enum: ['Free', 'Pro'],
+      enum: ['Free', 'Pro', 'Enterprise'],
       default: 'Free',
+    },
+    packageExpiresAt: {
+      type: Date,
+      default: null,
     },
     isVerified: {
       type: Boolean,
