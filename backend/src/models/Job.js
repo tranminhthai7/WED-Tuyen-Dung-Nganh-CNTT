@@ -87,6 +87,10 @@ const jobSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    isHot: {
+      type: Boolean,
+      default: false,
+    },
     applicants: {
       type: Number,
       default: 0,

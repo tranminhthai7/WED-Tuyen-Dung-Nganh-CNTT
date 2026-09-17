@@ -176,6 +176,7 @@ export default function EmployerDashboardPage() {
             {[
               { key: 'dashboard', label: 'Tổng quan', Icon: BarChart3 },
               { key: 'company', label: 'Hồ sơ công ty', Icon: BriefcaseBusiness },
+              { key: 'package', label: 'Gói dịch vụ', Icon: Sparkles },
               { key: 'jobs', label: 'Tin tuyển dụng', Icon: BriefcaseBusiness },
               { key: 'candidates', label: 'Ứng viên', Icon: Users },
               { key: 'post', label: 'Đăng tin mới', Icon: FilePlus2 },
@@ -216,6 +217,24 @@ export default function EmployerDashboardPage() {
                 </form>
               </div>
             )}
+            
+            {section === 'package' && (
+              <div className="bg-white border border-gray-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">
+                <h1 className="text-2xl font-black text-gray-900">Gói dịch vụ hiện tại</h1>
+                <p className="text-xs text-gray-400 mt-1">Thông tin gói tuyển dụng bạn đang sử dụng.</p>
+                <div className="mt-6 border border-gray-200 rounded-2xl p-6 bg-slate-50 flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-800">Gói {myCompany?.packageType || 'Free'}</h2>
+                    <p className="text-sm text-slate-500 mt-1">Giới hạn tin đăng: <strong>{myCompany?.packageType === 'Free' ? 3 : (myCompany?.packageType === 'Pro' ? 20 : 'Không giới hạn')}</strong></p>
+                    <p className="text-sm text-slate-500 mt-1">Tin đã đăng: <strong>{stats?.activeJobs || postings.length || 0}</strong></p>
+                  </div>
+                  <button onClick={() => window.location.href='/pricing'} className="px-6 py-2.5 bg-blue-600 text-white text-sm font-bold rounded-xl hover:bg-blue-700 shadow-sm">
+                    Nâng cấp gói
+                  </button>
+                </div>
+              </div>
+            )}
+
             {/* 1. POST NEW JOB */}
             {section === 'post' && (
               <div className="bg-white border border-gray-200/80 rounded-3xl p-6 sm:p-8 shadow-sm">

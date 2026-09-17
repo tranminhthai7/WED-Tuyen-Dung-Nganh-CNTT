@@ -36,9 +36,12 @@ export default function JobCard({ job, compact = false }) {
               {String(job.logo||'').startsWith('http') ? <img src={job.logo} alt={job.company} className="w-full h-full object-cover" /> : <span className="text-blue-700">{job.logo || job.company?.charAt(0).toUpperCase() || 'J'}</span>}
             </div>
             <div className="min-w-0">
-              <Link to={`/jobs/${job.slug}`} className="block truncate font-bold text-gray-900 hover:text-blue-600 transition-colors text-base">
-                {job.title}
-              </Link>
+              <div className="flex items-center gap-2">
+                <Link to={`/jobs/${job.slug}`} className="block truncate font-bold text-gray-900 hover:text-blue-600 transition-colors text-base">
+                  {job.title}
+                </Link>
+                {job.isHot && <span className="px-1.5 py-0.5 bg-red-100 text-red-600 text-[10px] font-black rounded border border-red-200 animate-pulse">HOT</span>}
+              </div>
               <p className="mt-1 text-sm text-gray-500 font-medium">{job.company}</p>
             </div>
           </div>

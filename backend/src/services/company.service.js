@@ -153,4 +153,18 @@ const getCompanyBySlug = async (slug) => {
   return { ...c, jobs, jobCount: jobs.length };
 };
 
-module.exports = { createCompany, getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, listAdminJobs, getAdminJobById, moderateJob, listCompaniesPublic, getCompanyBySlug };
+const upgradePackage = async (ownerId, packageType) => {
+  if (!isDatabaseReady()) return { message: 'Đã nâng cấp gói thành công (demo)' };
+  const valid = ['Free', 'Pro', 'Enterprise'];
+  if (!valid.includes(packageType)) { const e = new Error('Gói không hợp lệ'); e.statusCode = 400; throw e; }
+  
+  const c = await Company.findOneAndUpdate({ ownerId }, { packageType }, { new: true });
+  if (packageType === 'Pro' || packageType === 'Enterprise') {
+    await Job.updateMany({ companyId: ownerId }, { isHot: true });
+  } else {
+    await Job.updateMany({ companyId: ownerId }, { isHot: false });
+  }
+  return { message: `Đã nâng cấp lên gói ${packageType}`, company: c };
+};
+
+module.exports = { createCompany, getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, listAdminJobs, getAdminJobById, moderateJob, listCompaniesPublic, getCompanyBySlug, upgradePackage };

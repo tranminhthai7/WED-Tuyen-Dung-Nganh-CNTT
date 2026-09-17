@@ -11,6 +11,7 @@ import EmployerDashboardPage from './pages/EmployerDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
 import CompaniesPage from './pages/CompaniesPage';
 import CompanyDetailPage from './pages/CompanyDetailPage';
+import PricingPage from './pages/PricingPage';
 import Footer from './components/Footer';
 import useAuthStore from './store/authStore';
 
@@ -43,6 +44,7 @@ function AppShell() {
           <Route path="/jobs/:slug" element={<JobDetailPage />} />
           <Route path="/companies" element={<CompaniesPage />} />
           <Route path="/companies/:slug" element={<CompanyDetailPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/candidate/profile" element={<ProtectedRoute allowedRoles={['candidate']}><ProfilePage /></ProtectedRoute>} />
           <Route path="/candidate/applications" element={<ProtectedRoute allowedRoles={['candidate']}><DashboardPage /></ProtectedRoute>} />
           <Route path="/employer/dashboard" element={<ProtectedRoute allowedRoles={['employer']}><EmployerDashboardPage /></ProtectedRoute>} />

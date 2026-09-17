@@ -117,12 +117,13 @@ const normalizeJob = (job, userSkills = null) => {
     matchingScore: matchResult.score,
     missingSkills: matchResult.missingSkills,
     matchedSkills: matchResult.matchedSkills,
+    isHot: job.isHot || false,
   };
 };
 
 const getJobs = async (userSkills = null) => {
   if (isDatabaseReady()) {
-    const jobs = await Job.find({ status: 'active' }).sort({ createdAt: -1 });
+    const jobs = await Job.find({ status: 'active' }).sort({ isHot: -1, createdAt: -1 });
     return jobs.map((job) => normalizeJob(job, userSkills));
   }
 
@@ -185,10 +186,16 @@ const createJob = async (jobData, employerId, employerName) => {
         companyName = comp.name;
         companyLogo = comp.logo || '';
         companyStatus = comp.isVerified ? 'verified' : 'pending';
-        // Chỉ cho active ngay nếu cty đã verified, ngược lại pending chờ Admin duyệt
         status = comp.isVerified ? 'active' : 'pending';
-        if (!comp.isVerified) {
-          // vẫn cho tạo nhưng báo rõ
+        
+        // Kiểm tra giới hạn tin theo gói
+        const packageType = comp.packageType || 'Free';
+        const limit = packageType === 'Free' ? 3 : (packageType === 'Pro' ? 20 : 9999);
+        const currentJobsCount = await Job.countDocuments({ companyId: employerId, status: { $ne: 'rejected' } });
+        if (currentJobsCount >= limit) {
+          const e = new Error(`Gói ${packageType} của bạn chỉ được đăng tối đa ${limit} tin. Vui lòng nâng cấp gói để đăng thêm tin mới.`);
+          e.statusCode = 403;
+          throw e;
         }
       } else if (comp && !comp.name) {
         const e = new Error('Vui lòng cập nhật Hồ sơ công ty (Tên công ty) trước khi đăng tin');
@@ -218,6 +225,7 @@ const createJob = async (jobData, employerId, employerName) => {
     level: level || 'Junior',
     quantity: quantity || 1,
     status,
+    isHot: companyStatus === 'verified' && isDatabaseReady() ? (await Company.findOne({ ownerId: employerId }).lean()).packageType === 'Pro' : false,
     applicants: 0,
   };
 
