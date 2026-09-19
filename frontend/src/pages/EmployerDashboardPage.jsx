@@ -14,6 +14,7 @@ import {
   updateMyCompany,
   uploadCompanyLogo,
   aiGenerateJD,
+  fetchMyTransactions,
 } from '../services/jobsApi';
 
 export default function EmployerDashboardPage() {
@@ -182,7 +183,8 @@ export default function EmployerDashboardPage() {
             {[
               { key: 'dashboard', label: 'Tổng quan', Icon: BarChart3 },
               { key: 'company', label: 'Hồ sơ công ty', Icon: BriefcaseBusiness },
-              { key: 'package', label: 'Gói dịch vụ', Icon: Sparkles },\n              { key: 'transactions', label: 'Lịch sử giao dịch', Icon: CreditCard },
+              { key: 'package', label: 'Gói dịch vụ', Icon: Sparkles },
+              { key: 'transactions', label: 'Lịch sử giao dịch', Icon: CreditCard },
               { key: 'jobs', label: 'Tin tuyển dụng', Icon: BriefcaseBusiness },
               { key: 'candidates', label: 'Ứng viên', Icon: Users },
               { key: 'post', label: 'Đăng tin mới', Icon: FilePlus2 },

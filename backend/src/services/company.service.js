@@ -155,7 +155,7 @@ const getCompanyBySlug = async (slug) => {
 
 const Transaction = require('../models/Transaction');
 
-const upgradePackage = async (ownerId, packageType, paymentMethod = 'manual', metadata = {}) => {
+const upgradePackage = async (ownerId, packageType, paymentMethod = 'manual', metadata = {}, enterpriseDetails = {}) => {
   if (!isDatabaseReady()) return { message: 'Đã nâng cấp gói thành công (demo)' };
   const valid = ['Free', 'Pro', 'Enterprise'];
   if (!valid.includes(packageType)) { const e = new Error('Gói không hợp lệ'); e.statusCode = 400; throw e; }
@@ -165,17 +165,26 @@ const upgradePackage = async (ownerId, packageType, paymentMethod = 'manual', me
 
   let packageExpiresAt = null;
   let amount = 0;
+  let maxJobPosts = 3;
 
-  if (packageType === 'Pro') {
+  if (packageType === 'Free') {
+    maxJobPosts = 3;
+  } else if (packageType === 'Pro') {
     amount = 1100000;
+    maxJobPosts = 20;
     packageExpiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
   } else if (packageType === 'Enterprise') {
-    amount = 0;
-    packageExpiresAt = new Date(Date.now() + 365 * 24 * 60 * 60 * 1000);
+    // Enterprise: giá, thời hạn, giới hạn tin đều do Admin nhập khi đàm phán
+    amount = Number(enterpriseDetails.amount) || 0;
+    const durationDays = Number(enterpriseDetails.durationDays) || 365;
+    maxJobPosts = Number(enterpriseDetails.maxJobPosts) || 999;
+    packageExpiresAt = new Date(Date.now() + durationDays * 24 * 60 * 60 * 1000);
   }
 
   c.packageType = packageType;
   c.packageExpiresAt = packageExpiresAt;
+  c.maxJobPosts = maxJobPosts;
+  c.contractNote = enterpriseDetails.contractNote || '';
   await c.save();
 
   if (packageType === 'Pro' || packageType === 'Enterprise') {
@@ -194,7 +203,7 @@ const upgradePackage = async (ownerId, packageType, paymentMethod = 'manual', me
     paymentMethod,
     status: 'success',
     paidAt: new Date(),
-    metadata,
+    metadata: { ...metadata, ...enterpriseDetails },
   });
 
   return { message: `Đã nâng cấp lên gói ${packageType}`, company: c, transaction: { txnId, amount, packageType, paymentMethod, paidAt: new Date() } };
@@ -208,4 +217,64 @@ const getMyTransactions = async (ownerId) => {
   return Transaction.find({ companyId: company._id }).sort({ createdAt: -1 }).lean();
 };
 
-module.exports = { createCompany, getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, listAdminJobs, getAdminJobById, moderateJob, listCompaniesPublic, getCompanyBySlug, upgradePackage, getMyTransactions };
+const ContactRequest = require('../models/ContactRequest');
+const { sendMail } = require('../utils/mail');
+
+const contactSales = async (ownerId, data) => {
+  if (!isDatabaseReady()) return { message: 'Đã gửi yêu cầu (demo)' };
+
+  const c = await Company.findOne({ ownerId });
+  if (!c) { const e = new Error('Không tìm thấy công ty'); e.statusCode = 404; throw e; }
+
+  const cr = await ContactRequest.create({
+    companyId: c._id,
+    companyName: c.name,
+    name: data.name,
+    phone: data.phone,
+    note: data.note,
+    status: 'pending'
+  });
+
+  try {
+    const adminEmail = process.env.ADMIN_EMAIL || 'admin@itmatch.vn';
+    await sendMail({
+      to: adminEmail,
+      subject: `[ITMatch] Yêu cầu tư vấn gói Enterprise từ công ty ${c.name}`,
+      html: `
+        <h3>Có khách hàng mới muốn tư vấn gói Doanh nghiệp:</h3>
+        <p><strong>Công ty:</strong> ${c.name}</p>
+        <p><strong>Tên người liên hệ:</strong> ${data.name}</p>
+        <p><strong>Số điện thoại:</strong> ${data.phone}</p>
+        <p><strong>Nhu cầu:</strong> ${data.note || 'Không có ghi chú'}</p>
+        <br/>
+        <p>Vui lòng đăng nhập trang Admin để xử lý.</p>
+      `
+    });
+  } catch (err) {
+    console.error('Lỗi khi gửi email contact sales:', err.message);
+  }
+
+  return { message: 'Đã gửi yêu cầu tư vấn thành công', request: cr };
+};
+
+const adminListContactRequests = async () => {
+  if (!isDatabaseReady()) return [];
+  return ContactRequest.find().sort({ createdAt: -1 }).populate('companyId', 'name email').lean();
+};
+
+const adminUpdateContactRequestStatus = async (id, status) => {
+  if (!isDatabaseReady()) return { message: 'Đã cập nhật (demo)' };
+  const cr = await ContactRequest.findByIdAndUpdate(id, { status }, { new: true });
+  if (!cr) { const e = new Error('Không tìm thấy yêu cầu'); e.statusCode = 404; throw e; }
+  return { message: 'Đã cập nhật trạng thái yêu cầu', request: cr };
+};
+
+const adminUpdateCompanyPackage = async (companyId, packageType, enterpriseDetails = {}) => {
+  if (!isDatabaseReady()) return { message: 'Đã cập nhật gói (demo)' };
+  const c = await Company.findById(companyId);
+  if (!c) { const e = new Error('Không tìm thấy công ty'); e.statusCode = 404; throw e; }
+
+  return upgradePackage(c.ownerId, packageType, 'manual', { note: 'Admin updated manually' }, enterpriseDetails);
+};
+
+module.exports = { createCompany, getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, listAdminJobs, getAdminJobById, moderateJob, listCompaniesPublic, getCompanyBySlug, upgradePackage, getMyTransactions, contactSales, adminListContactRequests, adminUpdateContactRequestStatus, adminUpdateCompanyPackage };

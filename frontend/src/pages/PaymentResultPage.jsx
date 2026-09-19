@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { vnpayReturn } from '../services/jobsApi';
-import Navbar from '../components/Navbar';
+import Header from '../components/Header';
 
 export default function PaymentResultPage() {
   const location = useLocation();
@@ -37,7 +37,7 @@ export default function PaymentResultPage() {
 
   return (
     <>
-      <Navbar />
+      <Header />
       <div className="min-h-[80vh] flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
           {status === 'loading' && (

@@ -1,8 +1,8 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useMemo } from 'react';
-import { ShieldCheck, Users, Briefcase, FileCheck, Check, X, Clock3, AlertTriangle, Sparkles, ArrowRight, RefreshCw, Search, ExternalLink, Filter, Eye, PartyPopper, Layers, TrendingUp } from 'lucide-react';
+import { ShieldCheck, Users, Briefcase, FileCheck, Check, X, Clock3, AlertTriangle, Sparkles, ArrowRight, RefreshCw, Search, ExternalLink, Filter, Eye, PartyPopper, Layers, TrendingUp, MessageSquare, ArrowUpCircle } from 'lucide-react';
 import Header from '../components/Header';
-import { fetchDashboardStats, fetchAdminCompanies, verifyCompany, fetchAdminJobs, moderateJob, fetchSkills, createSkill, deleteSkill } from '../services/jobsApi';
+import { fetchDashboardStats, fetchAdminCompanies, verifyCompany, fetchAdminJobs, moderateJob, fetchSkills, createSkill, deleteSkill, fetchContactRequests, updateContactRequestStatus, adminUpdateCompanyPackage } from '../services/jobsApi';
 
 export default function AdminDashboardPage() {
   const qc = useQueryClient();
@@ -16,7 +16,11 @@ export default function AdminDashboardPage() {
   const { data: companies = [], refetch: refetchCompanies } = useQuery({ queryKey: ['adminCompanies'], queryFn: fetchAdminCompanies });
   const { data: allAdminJobs = [], refetch: refetchAdminJobs } = useQuery({ queryKey: ['adminJobs'], queryFn: () => fetchAdminJobs() });
   const { data: skills = [] } = useQuery({ queryKey: ['adminSkills'], queryFn: fetchSkills, enabled: tab === 'skills' });
+  const { data: requests = [], refetch: refetchRequests } = useQuery({ queryKey: ['adminRequests'], queryFn: fetchContactRequests });
+
   const [newSkill, setNewSkill] = useState({ name: '', category: 'Other' });
+  const [enterpriseModal, setEnterpriseModal] = useState(null);
+  const [entForm, setEntForm] = useState({ amount: '', durationDays: '365', maxJobPosts: '999', contractNote: '' });
 
   const showToast = (m) => { setToast(m); setTimeout(()=>setToast(''), 2600); };
   const mVerify = useMutation({ mutationFn: ({ id, v }) => verifyCompany(id, v), onSuccess: (r) => { qc.invalidateQueries({ queryKey: ['adminCompanies'] }); refetchCompanies(); showToast(r.message||'Đã cập nhật'); } });
@@ -24,12 +28,16 @@ export default function AdminDashboardPage() {
   const mAddSkill = useMutation({ mutationFn: createSkill, onSuccess: () => { qc.invalidateQueries({ queryKey: ['adminSkills'] }); setNewSkill({ name: '', category: 'Other' }); } });
   const mDelSkill = useMutation({ mutationFn: deleteSkill, onSuccess: () => qc.invalidateQueries({ queryKey: ['adminSkills'] }) });
 
+  const mReqStatus = useMutation({ mutationFn: ({ id, s }) => updateContactRequestStatus(id, s), onSuccess: (r) => { qc.invalidateQueries({ queryKey: ['adminRequests'] }); refetchRequests(); showToast(r.message||'Đã xử lý yêu cầu'); } });
+  const mUpgrade = useMutation({ mutationFn: ({ id, p, ent }) => adminUpdateCompanyPackage(id, p, ent), onSuccess: (r) => { qc.invalidateQueries({ queryKey: ['adminCompanies'] }); refetchCompanies(); showToast(r.message||'Đã nâng cấp gói'); setEnterpriseModal(null); } });
+
   const pendingCompanies = companies.filter(c => !c.isVerified).length;
   const pendingJobs = allAdminJobs.filter(j=>j.status==='pending');
   const activeJobs = allAdminJobs.filter(j=>j.status==='active');
   const rejectedJobs = allAdminJobs.filter(j=>j.status==='rejected');
   const closedJobs = allAdminJobs.filter(j=>j.status==='closed');
-  const totalPending = pendingJobs.length + pendingCompanies;
+  const pendingRequests = requests.filter(r=>r.status==='pending').length;
+  const totalPending = pendingJobs.length + pendingCompanies + pendingRequests;
 
   const filteredJobs = useMemo(()=>{
     let list = allAdminJobs;
@@ -61,13 +69,14 @@ export default function AdminDashboardPage() {
               <span className={`inline-flex items-center gap-1.5 text-xs font-black px-3.5 py-2 rounded-full border backdrop-blur ${totalPending>0?'bg-amber-400 text-[#0f2a2e] border-amber-300 shadow-lg shadow-amber-500/20':'bg-emerald-400 text-[#0f2a2e] border-emerald-300 shadow-lg shadow-emerald-500/20'}`}>
                 {totalPending>0 ? <><Clock3 size={14}/> {totalPending} chờ xử lý</> : <><PartyPopper size={14}/> Không có việc tồn đọng</>}
               </span>
-              <button onClick={()=>{refetchStats();refetchAdminJobs();refetchCompanies();}} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white text-[#0f2a2e] rounded-full text-xs font-black hover:bg-teal-50 transition-colors shadow"><RefreshCw size={14} className={statsLoading?'animate-spin':''}/> Làm mới</button>
+              <button onClick={()=>{refetchStats();refetchAdminJobs();refetchCompanies();refetchRequests();}} className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-white text-[#0f2a2e] rounded-full text-xs font-black hover:bg-teal-50 transition-colors shadow"><RefreshCw size={14} className={statsLoading?'animate-spin':''}/> Làm mới</button>
             </div>
           </div>
           <div className="mt-6 flex flex-wrap gap-2">
             {[
               { k: 'overview', l: 'Tổng quan', icon: Layers },
-              { k: 'companies', l: `DN chờ duyệt`, badge: pendingCompanies, icon: ShieldCheck },
+              { k: 'companies', l: `Doanh nghiệp`, badge: pendingCompanies, icon: ShieldCheck },
+              { k: 'requests', l: `Yêu cầu tư vấn`, badge: pendingRequests, icon: MessageSquare },
               { k: 'jobs', l: `Quản lý tin`, badge: pendingJobs.length, icon: Briefcase },
               { k: 'skills', l: `Kỹ năng`, badge: skills.length, icon: Sparkles },
             ].map(t => (
@@ -108,18 +117,22 @@ export default function AdminDashboardPage() {
                 </div>
                 <span className="hidden sm:inline-flex items-center gap-1.5 text-[11px] font-black tracking-widest uppercase text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full"><span className="size-1.5 rounded-full bg-emerald-500 animate-pulse"/> Production-ready</span>
               </div>
-              <div className="px-6 pb-6 grid sm:grid-cols-3 gap-4">
-                <button onClick={()=>{setTab('jobs');setJobStatus('pending');}} className="group text-left p-4 rounded-2xl border flex items-center justify-between gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
-                  <div><p className="text-xs font-black tracking-widest uppercase text-amber-700">Tin pending</p><p className="text-[28px] font-black text-amber-900 mt-1 leading-none">{pendingJobs.length}</p><p className="text-[11px] font-bold text-amber-700/60 mt-1">Chưa hiện ở /jobs · bấm để duyệt</p></div>
-                  <span className="size-10 grid place-items-center rounded-full bg-white border border-amber-200 text-amber-700 shadow-sm group-hover:scale-110 transition-transform"><ArrowRight size={16}/></span>
+              <div className="px-6 pb-6 grid sm:grid-cols-4 gap-4">
+                <button onClick={()=>{setTab('jobs');setJobStatus('pending');}} className="col-span-1 group text-left p-4 rounded-2xl border flex flex-col justify-between gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all bg-gradient-to-br from-amber-50 to-orange-50 border-amber-200">
+                  <div><p className="text-xs font-black tracking-widest uppercase text-amber-700">Tin pending</p><p className="text-[28px] font-black text-amber-900 mt-1 leading-none">{pendingJobs.length}</p></div>
+                  <div className="flex items-center justify-between mt-2"><p className="text-[11px] font-bold text-amber-700/60">Chưa duyệt</p><span className="size-8 grid place-items-center rounded-full bg-white border border-amber-200 text-amber-700 shadow-sm group-hover:scale-110 transition-transform"><ArrowRight size={14}/></span></div>
                 </button>
-                <button onClick={()=>{setTab('jobs');setJobStatus('active');}} className="group text-left p-4 rounded-2xl border flex items-center justify-between gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
-                  <div><p className="text-xs font-black tracking-widest uppercase text-emerald-700">Đã duyệt · active</p><p className="text-[28px] font-black text-emerald-900 mt-1 leading-none">{activeJobs.length}</p><p className="text-[11px] font-bold text-emerald-700/60 mt-1">Đang hiện ở /jobs</p></div>
-                  <span className="size-10 grid place-items-center rounded-full bg-white border border-emerald-200 text-emerald-700 shadow-sm group-hover:scale-110 transition-transform"><ExternalLink size={16}/></span>
+                <button onClick={()=>{setTab('requests');}} className="col-span-1 group text-left p-4 rounded-2xl border flex flex-col justify-between gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all bg-gradient-to-br from-blue-50 to-indigo-50 border-blue-200">
+                  <div><p className="text-xs font-black tracking-widest uppercase text-blue-700">Y/C Tư vấn</p><p className="text-[28px] font-black text-blue-900 mt-1 leading-none">{pendingRequests}</p></div>
+                  <div className="flex items-center justify-between mt-2"><p className="text-[11px] font-bold text-blue-700/60">Cần liên hệ</p><span className="size-8 grid place-items-center rounded-full bg-white border border-blue-200 text-blue-700 shadow-sm group-hover:scale-110 transition-transform"><MessageSquare size={14}/></span></div>
                 </button>
-                <button onClick={()=>{setTab('jobs');setJobStatus('rejected');}} className="group text-left p-4 rounded-2xl border flex items-center justify-between gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all bg-slate-50 border-slate-200">
-                  <div><p className="text-xs font-black tracking-widest uppercase text-slate-600">Đã từ chối + Closed</p><p className="text-[28px] font-black text-slate-900 mt-1 leading-none">{rejectedJobs.length + closedJobs.length}</p><p className="text-[11px] font-bold text-slate-500 mt-1">{closedJobs.length} hết hạn · ẩn khỏi /jobs</p></div>
-                  <span className="size-10 grid place-items-center rounded-full bg-white border border-slate-200 text-slate-700 shadow-sm group-hover:scale-110 transition-transform"><X size={16}/></span>
+                <button onClick={()=>{setTab('jobs');setJobStatus('active');}} className="col-span-1 group text-left p-4 rounded-2xl border flex flex-col justify-between gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200">
+                  <div><p className="text-xs font-black tracking-widest uppercase text-emerald-700">Đã duyệt (active)</p><p className="text-[28px] font-black text-emerald-900 mt-1 leading-none">{activeJobs.length}</p></div>
+                  <div className="flex items-center justify-between mt-2"><p className="text-[11px] font-bold text-emerald-700/60">Đang hiện ở /jobs</p><span className="size-8 grid place-items-center rounded-full bg-white border border-emerald-200 text-emerald-700 shadow-sm group-hover:scale-110 transition-transform"><ExternalLink size={14}/></span></div>
+                </button>
+                <button onClick={()=>{setTab('jobs');setJobStatus('rejected');}} className="col-span-1 group text-left p-4 rounded-2xl border flex flex-col justify-between gap-3 hover:shadow-md hover:-translate-y-0.5 transition-all bg-slate-50 border-slate-200">
+                  <div><p className="text-xs font-black tracking-widest uppercase text-slate-600">Từ chối + Closed</p><p className="text-[28px] font-black text-slate-900 mt-1 leading-none">{rejectedJobs.length + closedJobs.length}</p></div>
+                  <div className="flex items-center justify-between mt-2"><p className="text-[11px] font-bold text-slate-500">Đã ẩn khỏi /jobs</p><span className="size-8 grid place-items-center rounded-full bg-white border border-slate-200 text-slate-700 shadow-sm group-hover:scale-110 transition-transform"><X size={14}/></span></div>
                 </button>
               </div>
             </div>
@@ -128,22 +141,64 @@ export default function AdminDashboardPage() {
 
         {tab === 'companies' && (
           <div className="bg-white border border-slate-200 rounded-[24px] p-6 shadow-sm">
-            <div className="flex items-center gap-2"><span className="size-8 grid place-items-center rounded-xl bg-teal-600 text-white"><ShieldCheck size={16}/></span><div><h2 className="font-black text-slate-900">Doanh nghiệp chờ duyệt</h2><p className="text-xs text-slate-500">Duyệt để hiển thị ở <a href="/companies" className="underline font-bold text-teal-600">/companies</a> · IT-AI đang pending là hợp lệ.</p></div></div>
+            <div className="flex items-center gap-2"><span className="size-8 grid place-items-center rounded-xl bg-teal-600 text-white"><ShieldCheck size={16}/></span><div><h2 className="font-black text-slate-900">Quản lý Doanh nghiệp</h2><p className="text-xs text-slate-500">Duyệt và cấu hình thủ công gói dịch vụ của doanh nghiệp.</p></div></div>
             {companies.length === 0 ? <p className="text-sm text-slate-400 mt-6">Chưa có DN nào.</p> : (
               <div className="mt-5 space-y-3">
                 {companies.map(c => (
-                  <div key={c._id || c.id} className={`flex items-center justify-between gap-3 p-4 border rounded-2xl transition-all hover:shadow-sm ${!c.isVerified?'bg-amber-50/50 border-amber-200':'bg-white border-slate-200'}`}>
+                  <div key={c._id || c.id} className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-4 border rounded-2xl transition-all hover:shadow-sm ${!c.isVerified?'bg-amber-50/50 border-amber-200':'bg-white border-slate-200'}`}>
                     <div className="flex items-center gap-3 min-w-0">
                       {c.logo ? <img src={c.logo} alt="" className="w-11 h-11 rounded-xl object-cover border-2 border-white shadow bg-white" /> : <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-slate-800 to-teal-700 border-2 border-white shadow flex items-center justify-center text-xs font-black text-white">{c.name?.[0]}</div>}
-                      <div className="min-w-0"><p className="text-sm font-black text-slate-900 truncate flex items-center gap-2">{c.name} <span className={`text-[11px] font-black px-2 py-0.5 rounded-full border ${c.isVerified?'bg-emerald-100 text-emerald-700 border-emerald-200':'bg-amber-100 text-amber-700 border-amber-200'}`}>{c.isVerified?'Đã duyệt':'Chờ duyệt'}</span></p><p className="text-xs text-slate-500 truncate">{c.ownerId?.email || ''} · {c.address || c.industry || ''}</p></div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-black text-slate-900 truncate flex items-center gap-2">
+                          {c.name}
+                          <span className={`text-[11px] font-black px-2 py-0.5 rounded-full border ${c.isVerified?'bg-emerald-100 text-emerald-700 border-emerald-200':'bg-amber-100 text-amber-700 border-amber-200'}`}>{c.isVerified?'Đã duyệt':'Chờ duyệt'}</span>
+                          <span className={`text-[10px] font-black px-1.5 py-0.5 rounded-full border ${c.packageType==='Enterprise'?'bg-violet-100 text-violet-700 border-violet-200':c.packageType==='Pro'?'bg-teal-100 text-teal-700 border-teal-200':'bg-slate-100 text-slate-600 border-slate-200'}`}>{c.packageType || 'Free'}</span>
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">{c.ownerId?.email || ''} · {c.address || c.industry || ''}</p>
+                      </div>
                     </div>
-                    <div className="flex gap-2 shrink-0">
-                      {!c.isVerified ? <button onClick={() => mVerify.mutate({ id: c._id, v: true })} className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full text-xs font-black inline-flex items-center gap-1 shadow"><Check size={14}/> Duyệt</button> : <button onClick={() => mVerify.mutate({ id: c._id, v: false })} className="px-4 py-2 bg-white border border-slate-300 rounded-full text-xs font-black hover:bg-slate-50">Hủy duyệt</button>}
+                    <div className="flex flex-wrap gap-2 shrink-0 border-t sm:border-t-0 pt-3 sm:pt-0">
+                      <div className="flex bg-slate-100 p-1 rounded-lg border border-slate-200">
+                        <button onClick={() => mUpgrade.mutate({ id: c._id, p: 'Free', ent: {} })} className={`px-2 py-1 text-[10px] font-bold rounded ${c.packageType==='Free'?'bg-white shadow text-slate-800':'text-slate-500'}`}>Free</button>
+                        <button onClick={() => mUpgrade.mutate({ id: c._id, p: 'Pro', ent: {} })} className={`px-2 py-1 text-[10px] font-bold rounded ${c.packageType==='Pro'?'bg-white shadow text-teal-600':'text-slate-500'}`}>Pro</button>
+                        <button onClick={() => { setEnterpriseModal(c); setEntForm({ amount: '', durationDays: '365', maxJobPosts: '999', contractNote: '' }); }} className={`px-2 py-1 text-[10px] font-bold rounded ${c.packageType==='Enterprise'?'bg-white shadow text-violet-600':'text-slate-500'}`}>Enterprise</button>
+                      </div>
+                      {!c.isVerified ? <button onClick={() => mVerify.mutate({ id: c._id, v: true })} className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-black inline-flex items-center gap-1 shadow"><Check size={14}/> Duyệt</button> : <button onClick={() => mVerify.mutate({ id: c._id, v: false })} className="px-3.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-black hover:bg-slate-50">Hủy duyệt</button>}
                     </div>
                   </div>
                 ))}
               </div>
             )}
+          </div>
+        )}
+
+        {tab === 'requests' && (
+          <div className="bg-white border border-slate-200 rounded-[24px] p-6 shadow-sm">
+            <div className="flex items-center gap-2"><span className="size-8 grid place-items-center rounded-xl bg-violet-600 text-white"><MessageSquare size={16}/></span><div><h2 className="font-black text-slate-900">Yêu cầu tư vấn gói Doanh nghiệp</h2><p className="text-xs text-slate-500">Khách hàng để lại thông tin cần liên hệ thủ công, sau đó cấp quyền bằng tay.</p></div></div>
+            {requests.length === 0 ? <p className="text-sm text-slate-400 mt-6">Chưa có yêu cầu nào.</p> : (
+              <div className="mt-5 grid md:grid-cols-2 gap-4">
+                {requests.map(r => (
+                  <div key={r._id} className={`p-4 border rounded-2xl ${r.status==='pending'?'bg-blue-50/50 border-blue-200 shadow-sm':'bg-slate-50 border-slate-200'}`}>
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <span className={`text-[10px] font-black px-2 py-0.5 rounded-full border ${r.status==='pending'?'bg-amber-100 text-amber-700 border-amber-200 animate-pulse':'bg-emerald-100 text-emerald-700 border-emerald-200'}`}>{r.status==='pending'?'Mới':'Đã xử lý'}</span>
+                        <p className="text-xs text-slate-500 mt-1.5">{new Date(r.createdAt).toLocaleString('vi-VN')}</p>
+                      </div>
+                      {r.status==='pending' && (
+                        <button onClick={() => mReqStatus.mutate({ id: r._id, s: 'completed' })} className="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-[11px] font-black flex items-center gap-1 shadow-sm"><Check size={12}/> Đánh dấu Đã xử lý</button>
+                      )}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-sm"><span className="text-slate-500">Tên KH:</span> <strong className="text-slate-900">{r.name}</strong></p>
+                      <p className="text-sm"><span className="text-slate-500">SĐT:</span> <a href={`tel:${r.phone}`} className="font-bold text-blue-600 underline">{r.phone}</a></p>
+                      <p className="text-sm"><span className="text-slate-500">Công ty:</span> <strong className="text-slate-900">{r.companyName}</strong></p>
+                      {r.note && <div className="mt-2 p-2 bg-white border border-slate-200 rounded-lg text-sm text-slate-700">{r.note}</div>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            <p className="text-[11px] text-slate-400 mt-6 text-center">Luồng thực tế: Khách điền form → Hệ thống gửi email cho Sale & lưu vào đây → Sale gọi điện chốt hợp đồng → Quay lại tab <strong>Doanh nghiệp</strong> để nâng cấp lên Enterprise.</p>
           </div>
         )}
 
@@ -247,6 +302,49 @@ export default function AdminDashboardPage() {
                   <button onClick={()=>setPreview(null)} className="px-5 py-2.5 bg-slate-900 text-white rounded-full text-sm font-black">Đóng</button>
                 </div>
               </div>
+            </div>
+          </div>
+        )}
+
+        {/* Enterprise Contract Modal */}
+        {enterpriseModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={()=>setEnterpriseModal(null)}>
+            <div onClick={e=>e.stopPropagation()} className="bg-white rounded-[24px] max-w-lg w-full border border-slate-200 shadow-2xl p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="size-10 grid place-items-center rounded-2xl bg-violet-100 text-violet-600"><ArrowUpCircle size={20}/></span>
+                <div>
+                  <h3 className="font-black text-slate-900">Nâng cấp Enterprise</h3>
+                  <p className="text-xs text-slate-500">Công ty: <strong>{enterpriseModal.name}</strong></p>
+                </div>
+                <button onClick={()=>setEnterpriseModal(null)} className="ml-auto size-9 grid place-items-center rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600"><X size={18}/></button>
+              </div>
+              <form onSubmit={e => { e.preventDefault(); mUpgrade.mutate({ id: enterpriseModal._id, p: 'Enterprise', ent: { amount: Number(entForm.amount), durationDays: Number(entForm.durationDays), maxJobPosts: Number(entForm.maxJobPosts), contractNote: entForm.contractNote } }); }} className="space-y-4">
+                <div>
+                  <label className="text-xs font-black text-slate-700 mb-1.5 block">Số tiền hợp đồng (VNĐ) *</label>
+                  <input required type="number" min="0" value={entForm.amount} onChange={e=>setEntForm({...entForm, amount: e.target.value})} placeholder="VD: 5000000" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-violet-500 text-sm" />
+                  <p className="text-[11px] text-slate-400 mt-1">Giá đã đàm phán với khách hàng</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-xs font-black text-slate-700 mb-1.5 block">Thời hạn (ngày)</label>
+                    <input type="number" min="1" value={entForm.durationDays} onChange={e=>setEntForm({...entForm, durationDays: e.target.value})} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-violet-500 text-sm" />
+                    <p className="text-[11px] text-slate-400 mt-1">365 = 1 năm, 180 = 6 tháng</p>
+                  </div>
+                  <div>
+                    <label className="text-xs font-black text-slate-700 mb-1.5 block">Giới hạn tin đăng</label>
+                    <input type="number" min="1" value={entForm.maxJobPosts} onChange={e=>setEntForm({...entForm, maxJobPosts: e.target.value})} className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-violet-500 text-sm" />
+                    <p className="text-[11px] text-slate-400 mt-1">999 = không giới hạn</p>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs font-black text-slate-700 mb-1.5 block">Ghi chú hợp đồng (tùy chọn)</label>
+                  <textarea value={entForm.contractNote} onChange={e=>setEntForm({...entForm, contractNote: e.target.value})} rows={2} placeholder="VD: Hợp đồng 6 tháng, ưu đãi 20%..." className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-violet-500 text-sm" />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button type="submit" disabled={mUpgrade.isPending} className="flex-1 bg-violet-600 hover:bg-violet-700 text-white font-black py-3 rounded-xl shadow-md transition-colors text-sm">{mUpgrade.isPending ? 'Đang xử lý...' : 'Xác nhận nâng cấp Enterprise'}</button>
+                  <button type="button" onClick={()=>setEnterpriseModal(null)} className="px-5 py-3 bg-slate-100 hover:bg-slate-200 rounded-xl text-sm font-black">Hủy</button>
+                </div>
+              </form>
             </div>
           </div>
         )}

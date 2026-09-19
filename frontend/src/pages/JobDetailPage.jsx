@@ -126,7 +126,11 @@ export default function JobDetailPage() {
           <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-6">
             <div className="flex items-start gap-4 min-w-0">
               <div className="grid size-14 shrink-0 place-items-center rounded-2xl text-xl font-black bg-blue-50 text-blue-700">
-                {job.logo || job.company?.charAt(0).toUpperCase() || 'J'}
+                {job.logo ? (
+                    <img src={job.logo} alt="Company Logo" className="w-full h-full object-cover rounded-2xl" />
+                  ) : (
+                    job.company?.charAt(0).toUpperCase() || 'J'
+                  )}
               </div>
               <div className="min-w-0">
                 <h1 className="text-xl sm:text-2xl font-black text-gray-900 tracking-tight leading-tight">

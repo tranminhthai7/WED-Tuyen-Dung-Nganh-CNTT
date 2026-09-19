@@ -7,9 +7,15 @@ const VNP_RETURN_URL = process.env.VNP_RETURN_URL || 'http://localhost:5173/empl
 
 const sortObject = (obj) => {
   const sorted = {};
-  const keys = Object.keys(obj).sort();
-  for (const key of keys) {
-    sorted[key] = encodeURIComponent(obj[key]).replace(/%20/g, '+');
+  const str = [];
+  for (const key in obj) {
+    if (obj.hasOwnProperty(key)) {
+      str.push(encodeURIComponent(key));
+    }
+  }
+  str.sort();
+  for (let key = 0; key < str.length; key++) {
+    sorted[str[key]] = encodeURIComponent(obj[str[key]]).replace(/%20/g, '+');
   }
   return sorted;
 };
@@ -46,13 +52,16 @@ const createVNPayUrl = (req, amount, orderInfo, returnUrl = VNP_RETURN_URL) => {
   };
 
   vnp_Params = sortObject(vnp_Params);
-  const signData = new URLSearchParams(vnp_Params).toString();
+
+  // Use Object.entries and join to avoid double encoding by URLSearchParams
+  const signData = Object.entries(vnp_Params).map(([key, val]) => `${key}=${val}`).join('&');
+
   const hmac = crypto.createHmac('sha512', secretKey);
   const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
   vnp_Params['vnp_SecureHash'] = signed;
 
-  vnpUrl += '?' + new URLSearchParams(vnp_Params).toString();
-  
+  vnpUrl += '?' + Object.entries(vnp_Params).map(([key, val]) => `${key}=${val}`).join('&');
+
   return { url: vnpUrl, orderId };
 };
 
@@ -62,7 +71,8 @@ const verifyVNPayReturn = (vnp_Params) => {
   delete vnp_Params['vnp_SecureHashType'];
 
   vnp_Params = sortObject(vnp_Params);
-  const signData = new URLSearchParams(vnp_Params).toString();
+  const signData = Object.entries(vnp_Params).map(([key, val]) => `${key}=${val}`).join('&');
+
   const hmac = crypto.createHmac('sha512', VNP_HASHSECRET);
   const signed = hmac.update(Buffer.from(signData, 'utf-8')).digest('hex');
 

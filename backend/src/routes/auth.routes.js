@@ -1,5 +1,5 @@
 const express = require('express');
-const { login, register, getProfile, updateProfile, uploadAvatar, uploadCv } = require('../controllers/auth.controller');
+const { login, register, getProfile, updateProfile, uploadAvatar, uploadCv, forgotPassword, resetPassword } = require('../controllers/auth.controller');
 const { authenticate } = require('../middlewares/auth.middleware');
 const { avatarUpload, cvUpload } = require('../middlewares/upload.middleware');
 
@@ -7,6 +7,8 @@ const router = express.Router();
 
 router.post('/register', register);
 router.post('/login', login);
+router.post('/forgot-password', forgotPassword);
+router.post('/reset-password', resetPassword);
 
 router.get('/profile', authenticate, getProfile);
 router.put('/profile', authenticate, updateProfile);

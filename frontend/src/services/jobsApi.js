@@ -152,3 +152,20 @@ export async function createPaymentUrl(packageType) {
 export async function vnpayReturn(queryString) {
   return apiRequest(`/api/companies/my/vnpay-return${queryString}`);
 }
+
+// Enterprise Contact Sales
+export async function contactSales(payload) {
+  return apiRequest('/api/companies/contact-sales', 'POST', payload);
+}
+
+// Admin Contact Requests & Packages
+export async function fetchContactRequests() {
+  const data = await apiRequest('/api/companies/admin/contact-requests');
+  return data.requests || [];
+}
+export async function updateContactRequestStatus(id, status) {
+  return apiRequest(`/api/companies/admin/contact-requests/${id}/status`, 'PATCH', { status });
+}
+export async function adminUpdateCompanyPackage(companyId, packageType, enterpriseDetails = {}) {
+  return apiRequest(`/api/companies/admin/companies/${companyId}/package`, 'PATCH', { packageType, ...enterpriseDetails });
+}

@@ -1,4 +1,4 @@
-const { loginUser, registerUser, getUserProfile, updateUserProfile } = require('../services/auth.service');
+const { loginUser, registerUser, getUserProfile, updateUserProfile, forgotPassword: forgotPasswordService, resetPassword: resetPasswordService } = require('../services/auth.service');
 const { hasKeys } = require('../config/cloudinary');
 
 const handleAuthError = (res, error) => {
@@ -76,6 +76,25 @@ const uploadCv = async (req, res) => {
   }
 };
 
+const forgotPassword = async (req, res) => {
+  try {
+    const result = await forgotPasswordService(req.body.email);
+    return res.status(200).json(result);
+  } catch (error) {
+    return handleAuthError(res, error);
+  }
+};
+
+const resetPasswordCtrl = async (req, res) => {
+  try {
+    const { email, token, newPassword } = req.body;
+    const result = await resetPasswordService(email, token, newPassword);
+    return res.status(200).json(result);
+  } catch (error) {
+    return handleAuthError(res, error);
+  }
+};
+
 module.exports = {
   register,
   login,
@@ -83,4 +102,6 @@ module.exports = {
   updateProfile,
   uploadAvatar,
   uploadCv,
+  forgotPassword,
+  resetPassword: resetPasswordCtrl,
 };

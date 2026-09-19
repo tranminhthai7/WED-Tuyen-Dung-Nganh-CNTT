@@ -1,16 +1,26 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Check, Sparkles, Zap, Building2, Crown, ArrowRight, X, CreditCard, QrCode, Smartphone } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import useAuthStore from '../store/authStore';
 import Header from '../components/Header';
-import { upgradePackage } from '../services/jobsApi';
+import { upgradePackage, createPaymentUrl, fetchMyCompany, contactSales } from '../services/jobsApi';
+import { useQuery } from '@tanstack/react-query';
 
 export default function PricingPage() {
   const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState('');
-  
+
+  // Fetch current company data to know the active package
+  const { data: myCompany } = useQuery({
+    queryKey: ['myCompany'],
+    queryFn: fetchMyCompany,
+    enabled: isAuthenticated && user?.role === 'employer'
+  });
+
+  const currentPackage = myCompany?.packageType || 'Free';
+
   // Modal states
   const [showPayment, setShowPayment] = useState(false);
   const [showContact, setShowContact] = useState(false);
@@ -26,7 +36,7 @@ export default function PricingPage() {
       icon: Building2,
       color: 'blue',
       features: ['Đăng tối đa 3 tin tuyển dụng', 'Xem danh sách ứng viên', 'Tin hiển thị tiêu chuẩn', 'Hỗ trợ email'],
-      cta: 'Đang sử dụng',
+      cta: currentPackage === 'Free' ? 'Đang sử dụng' : 'Gói mặc định',
     },
     {
       id: 'Pro',
@@ -38,7 +48,7 @@ export default function PricingPage() {
       color: 'teal',
       popular: true,
       features: ['Đăng tối đa 20 tin tuyển dụng', 'Gắn nhãn HOT nổi bật', 'Tin ghim lên đầu danh sách', 'Ưu tiên hiển thị với AI', 'Hỗ trợ trực tiếp'],
-      cta: 'Nâng cấp ngay',
+      cta: currentPackage === 'Pro' ? 'Đang sử dụng' : 'Nâng cấp ngay',
     },
     {
       id: 'Enterprise',
@@ -48,13 +58,14 @@ export default function PricingPage() {
       icon: Crown,
       color: 'violet',
       features: ['Đăng tin không giới hạn', 'Tất cả đặc quyền bản Pro', 'Xem CV ẩn của ứng viên', 'Tuyển dụng cùng AI', 'Quản lý nhiều tài khoản con'],
-      cta: 'Liên hệ tư vấn',
+      cta: currentPackage === 'Enterprise' ? 'Đang sử dụng' : 'Liên hệ tư vấn',
     }
   ];
 
   const handleUpgradeClick = (planId) => {
     if (!isAuthenticated) return navigate('/auth?role=employer');
     if (user.role !== 'employer') return alert('Chỉ nhà tuyển dụng mới có thể nâng cấp gói');
+    if (planId === currentPackage) return;
     
     if (planId === 'Enterprise') {
       setShowContact(true);
@@ -69,30 +80,50 @@ export default function PricingPage() {
   const processPayment = async () => {
     setPaymentStep(2); // Loading
     
-    // Simulate network & bank processing delay
-    setTimeout(async () => {
-      try {
-        const res = await upgradePackage('Pro');
-        setPaymentStep(3); // Success
-        setTimeout(() => {
-          setShowPayment(false);
-          navigate('/employer/dashboard');
-        }, 3000);
-      } catch (e) {
-        alert(e.message);
-        setPaymentStep(1);
+    try {
+      if (selectedMethod === 'vnpay') {
+        const res = await createPaymentUrl('Pro');
+        if (res.paymentUrl) {
+          window.location.href = res.paymentUrl;
+          return;
+        }
       }
-    }, 2000);
+
+      // Simulate network & bank processing delay for other methods
+      setTimeout(async () => {
+        try {
+          const res = await upgradePackage('Pro');
+          setPaymentStep(3); // Success
+          setTimeout(() => {
+            setShowPayment(false);
+            navigate('/employer/dashboard');
+          }, 3000);
+        } catch (e) {
+          alert(e.message);
+          setPaymentStep(1);
+        }
+      }, 2000);
+    } catch (e) {
+      alert(e.message);
+      setPaymentStep(1);
+    }
   };
 
-  const handleContactSubmit = (e) => {
+  const [contactForm, setContactForm] = useState({ name: '', phone: '', note: '' });
+
+  const handleContactSubmit = async (e) => {
     e.preventDefault();
     setLoading('contact');
-    setTimeout(() => {
-      setLoading('');
+    try {
+      await contactSales(contactForm);
       setShowContact(false);
-      alert('Yêu cầu đã được gửi! Chuyên viên tư vấn sẽ liên hệ với bạn trong 30 phút nữa.');
-    }, 1500);
+      alert('Yêu cầu đã được gửi! Chuyên viên tư vấn sẽ liên hệ với bạn trong thời gian sớm nhất.');
+      setContactForm({ name: '', phone: '', note: '' });
+    } catch (err) {
+      alert(err.message || 'Có lỗi xảy ra, vui lòng thử lại');
+    } finally {
+      setLoading('');
+    }
   };
 
   return (
@@ -134,11 +165,11 @@ export default function PricingPage() {
 
               <button 
                 onClick={() => handleUpgradeClick(plan.id)}
-                disabled={loading === plan.id || plan.id === 'Free'}
-                className={`w-full py-3.5 rounded-xl font-bold text-sm transition flex justify-center items-center gap-2 ${plan.popular ? 'bg-teal-600 hover:bg-teal-700 text-white shadow-md' : plan.id === 'Free' ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'bg-slate-900 hover:bg-black text-white'}`}
+                disabled={loading === plan.id || plan.id === currentPackage}
+                className={`w-full py-3.5 rounded-xl font-bold text-sm transition flex justify-center items-center gap-2 ${plan.popular ? 'bg-teal-600 hover:bg-teal-700 text-white shadow-md disabled:bg-teal-600/50 disabled:cursor-not-allowed' : plan.id === currentPackage ? 'bg-slate-100 text-slate-500 cursor-not-allowed' : 'bg-slate-900 hover:bg-black text-white'}`}
               >
                 {loading === plan.id ? 'Đang xử lý...' : plan.cta} 
-                {plan.id !== 'Free' && <ArrowRight size={16} />}
+                {plan.id !== currentPackage && plan.id !== 'Enterprise' && <ArrowRight size={16} />}
               </button>
 
               <div className="mt-8 space-y-4">
@@ -309,15 +340,15 @@ export default function PricingPage() {
               <form onSubmit={handleContactSubmit} className="space-y-4">
                 <div>
                   <label className="text-xs font-bold text-slate-700 mb-1.5 block">Họ và tên</label>
-                  <input required type="text" placeholder="Nguyễn Văn A" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 text-sm" />
+                  <input required value={contactForm.name} onChange={e => setContactForm({...contactForm, name: e.target.value})} type="text" placeholder="Nguyễn Văn A" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 text-sm" />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-700 mb-1.5 block">Số điện thoại</label>
-                  <input required type="tel" placeholder="0901234567" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 text-sm" />
+                  <input required value={contactForm.phone} onChange={e => setContactForm({...contactForm, phone: e.target.value})} type="tel" placeholder="0901234567" className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 text-sm" />
                 </div>
                 <div>
                   <label className="text-xs font-bold text-slate-700 mb-1.5 block">Ghi chú thêm (Tùy chọn)</label>
-                  <textarea rows={3} placeholder="Nhu cầu tuyển dụng của bạn..." className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 text-sm"></textarea>
+                  <textarea value={contactForm.note} onChange={e => setContactForm({...contactForm, note: e.target.value})} rows={3} placeholder="Nhu cầu tuyển dụng của bạn..." className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 text-sm"></textarea>
                 </div>
                 <button type="submit" disabled={loading === 'contact'} className="w-full bg-violet-600 hover:bg-violet-700 text-white font-bold py-3.5 rounded-xl shadow-md transition-colors mt-2">
                   {loading === 'contact' ? 'Đang gửi...' : 'Gửi yêu cầu'}

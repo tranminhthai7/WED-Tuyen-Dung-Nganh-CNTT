@@ -221,10 +221,108 @@ const updateUserProfile = async (userId, data) => {
   };
 };
 
+const crypto = require('crypto');
+const { sendMail } = require('../utils/mail');
+
+const forgotPassword = async (email) => {
+  if (!email) {
+    const error = new Error('Email là bắt buộc');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+
+  if (!isDatabaseReady()) {
+    return { message: 'Link đặt lại mật khẩu đã được gửi đến email của bạn (demo)' };
+  }
+
+  const user = await User.findOne({ email: normalizedEmail });
+  if (!user) {
+    // Không tiết lộ email có tồn tại hay không (bảo mật)
+    return { message: 'Nếu email tồn tại trong hệ thống, chúng tôi đã gửi link đặt lại mật khẩu' };
+  }
+
+  // Tạo token ngẫu nhiên 6 chữ số (OTP style — dễ nhập trên mobile)
+  const resetToken = crypto.randomInt(100000, 999999).toString();
+  const resetExpires = new Date(Date.now() + 15 * 60 * 1000); // 15 phút
+
+  user.resetPasswordToken = resetToken;
+  user.resetPasswordExpires = resetExpires;
+  await user.save();
+
+  // Gửi email
+  try {
+    await sendMail({
+      to: user.email,
+      subject: '[ITMatch] Mã xác nhận đặt lại mật khẩu',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 32px; background: #f8fffe; border-radius: 16px; border: 1px solid #e2e8f0;">
+          <div style="text-align: center; margin-bottom: 24px;">
+            <h2 style="color: #0f2a2e; margin: 0;">🔑 Đặt lại mật khẩu</h2>
+            <p style="color: #64748b; font-size: 14px; margin-top: 8px;">Bạn vừa yêu cầu đặt lại mật khẩu tài khoản ITMatch</p>
+          </div>
+          <div style="background: #0f2a2e; color: white; text-align: center; padding: 24px; border-radius: 12px; margin: 16px 0;">
+            <p style="font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin: 0 0 8px 0; opacity: 0.8;">Mã xác nhận của bạn</p>
+            <p style="font-size: 36px; font-weight: 900; letter-spacing: 8px; margin: 0;">${resetToken}</p>
+          </div>
+          <p style="color: #64748b; font-size: 13px; text-align: center;">Mã có hiệu lực trong <strong>15 phút</strong>. Nếu bạn không yêu cầu đặt lại mật khẩu, hãy bỏ qua email này.</p>
+        </div>
+      `
+    });
+  } catch (err) {
+    console.error('Lỗi gửi email reset password:', err.message);
+  }
+
+  return { message: 'Mã xác nhận đã được gửi đến email của bạn' };
+};
+
+const resetPassword = async (email, token, newPassword) => {
+  if (!email || !token || !newPassword) {
+    const error = new Error('Thiếu thông tin bắt buộc');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (newPassword.length < 6) {
+    const error = new Error('Mật khẩu phải có ít nhất 6 ký tự');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const normalizedEmail = normalizeEmail(email);
+
+  if (!isDatabaseReady()) {
+    return { message: 'Đặt lại mật khẩu thành công (demo)' };
+  }
+
+  const user = await User.findOne({
+    email: normalizedEmail,
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: new Date() }, // Chưa hết hạn
+  });
+
+  if (!user) {
+    const error = new Error('Mã xác nhận không hợp lệ hoặc đã hết hạn');
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Đặt mật khẩu mới
+  user.password = await bcrypt.hash(newPassword, 10);
+  user.resetPasswordToken = null;
+  user.resetPasswordExpires = null;
+  await user.save();
+
+  return { message: 'Đặt lại mật khẩu thành công! Bạn có thể đăng nhập với mật khẩu mới.' };
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   updateUserProfile,
+  forgotPassword,
+  resetPassword,
   demoUsers, // export to be used in database seeds or other services
 };

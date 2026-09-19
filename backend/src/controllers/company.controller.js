@@ -1,4 +1,4 @@
-const { getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, listAdminJobs, getAdminJobById, moderateJob, listCompaniesPublic, getCompanyBySlug, upgradePackage: upgradePackageService, getMyTransactions: getMyTransactionsService } = require('../services/company.service');
+const { getMyCompany, updateMyCompany, uploadLogo, listCompanies, verifyCompany, listPendingJobs, listAdminJobs, getAdminJobById, moderateJob, listCompaniesPublic, getCompanyBySlug, upgradePackage: upgradePackageService, getMyTransactions: getMyTransactionsService, contactSales: contactSalesService, adminListContactRequests: adminListContactRequestsService, adminUpdateContactRequestStatus: adminUpdateContactRequestStatusService, adminUpdateCompanyPackage: adminUpdateCompanyPackageService } = require('../services/company.service');
 
 const getCompany = async (req, res) => {
   try { const c = await getMyCompany(req.user.id); return res.json({ company: c }); } catch (e) { return res.status(500).json({ message: e.message }); }
@@ -64,7 +64,6 @@ const createPaymentUrl = async (req, res) => {
 
     const orderInfo = 'Thanh toan goi ' + packageType;
     const { url, orderId } = createVNPayUrl(req, amount, orderInfo);
-    
     return res.json({ paymentUrl: url });
   } catch (e) {
     return res.status(500).json({ message: e.message });
@@ -91,4 +90,34 @@ const vnpayReturn = async (req, res) => {
   }
 };
 
-module.exports = { getCompany, updateCompany, uploadCompanyLogo, adminListCompanies, adminVerifyCompany, adminListPendingJobs, adminListJobs, adminGetJob, adminModerateJob, listPublicCompanies, getPublicCompany, upgradePackage, getMyTransactions, createPaymentUrl, vnpayReturn };
+const contactSales = async (req, res) => {
+  try {
+    const r = await contactSalesService(req.user.id, req.body);
+    return res.json(r);
+  } catch (e) { return res.status(e.statusCode || 500).json({ message: e.message }); }
+};
+
+const adminListContactRequests = async (req, res) => {
+  try {
+    const list = await adminListContactRequestsService();
+    return res.json({ requests: list });
+  } catch (e) { return res.status(e.statusCode || 500).json({ message: e.message }); }
+};
+
+const adminUpdateContactRequestStatus = async (req, res) => {
+  try {
+    const r = await adminUpdateContactRequestStatusService(req.params.id, req.body.status);
+    return res.json(r);
+  } catch (e) { return res.status(e.statusCode || 500).json({ message: e.message }); }
+};
+
+const adminUpdateCompanyPackage = async (req, res) => {
+  try {
+    const { packageType, amount, durationDays, maxJobPosts, contractNote } = req.body;
+    const enterpriseDetails = { amount, durationDays, maxJobPosts, contractNote };
+    const r = await adminUpdateCompanyPackageService(req.params.id, packageType, enterpriseDetails);
+    return res.json(r);
+  } catch (e) { return res.status(e.statusCode || 500).json({ message: e.message }); }
+};
+
+module.exports = { getCompany, updateCompany, uploadCompanyLogo, adminListCompanies, adminVerifyCompany, adminListPendingJobs, adminListJobs, adminGetJob, adminModerateJob, listPublicCompanies, getPublicCompany, upgradePackage, getMyTransactions, createPaymentUrl, vnpayReturn, contactSales, adminListContactRequests, adminUpdateContactRequestStatus, adminUpdateCompanyPackage };

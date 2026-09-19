@@ -57,3 +57,9 @@ export function uploadCv(file) {
   const fd = new FormData(); fd.append('cv', file);
   return apiRequest('/api/auth/upload/cv', 'POST', fd, true);
 }
+export function forgotPassword(email) {
+  return apiRequest('/api/auth/forgot-password', 'POST', { email });
+}
+export function resetPasswordApi(email, token, newPassword) {
+  return apiRequest('/api/auth/reset-password', 'POST', { email, token, newPassword });
+}

@@ -70,6 +70,14 @@ const companySchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
+    maxJobPosts: {
+      type: Number,
+      default: 3, // Free = 3, Pro = 20, Enterprise = custom
+    },
+    contractNote: {
+      type: String,
+      default: '',
+    },
     isVerified: {
       type: Boolean,
       default: false,
